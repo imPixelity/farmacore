@@ -6,8 +6,10 @@ use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
 use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
+use App\Http\Controllers\Inventory\ExpiryMonitorController;
 use App\Http\Controllers\Inventory\GoodsReceiptController;
 use App\Http\Controllers\Inventory\StockController;
+use App\Http\Controllers\Inventory\StockPolicyController;
 use App\Http\Controllers\Md\DiscountRuleController;
 use App\Http\Controllers\Md\DoctorController;
 use App\Http\Controllers\Md\HealthServiceController;
@@ -147,9 +149,21 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/stock', [StockController::class, 'index'])
             ->middleware('can:inventory.stock.view')
             ->name('stock.index');
+        Route::get('/stock-policies', [StockPolicyController::class, 'index'])
+            ->middleware('can:inventory.stock.manage')
+            ->name('stock-policies.index');
+        Route::put('/stock-policies', [StockPolicyController::class, 'update'])
+            ->middleware('can:inventory.stock.manage')
+            ->name('stock-policies.update');
+        Route::get('/expiry', [ExpiryMonitorController::class, 'index'])
+            ->middleware('can:inventory.stock.view')
+            ->name('expiry.index');
         Route::get('/stock/{item}', [StockController::class, 'show'])
             ->middleware('can:inventory.stock.view')
             ->name('stock.show');
+        Route::put('/stock/{item}/policy', [StockController::class, 'updatePolicy'])
+            ->middleware('can:inventory.stock.manage')
+            ->name('stock.policy.update');
     });
 
     Route::prefix('accounting')->name('accounting.')->group(function (): void {

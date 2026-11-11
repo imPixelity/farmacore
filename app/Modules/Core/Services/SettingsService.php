@@ -53,8 +53,8 @@ class SettingsService
         'usage_average_months' => [
             'label' => 'Periode rata-rata pemakaian (bulan)',
             'type' => 'number',
-            'default' => null,
-            'help' => 'Dibiarkan kosong sampai kebijakan stok ditetapkan.',
+            'default' => 3,
+            'help' => 'Jumlah bulan yang digunakan untuk menghitung rata-rata pemakaian.',
         ],
         'pharmacy_receipt_identity' => [
             'label' => 'Identitas apotek pada struk',

@@ -2,6 +2,8 @@
 
 namespace App\Modules\Inventory\Services;
 
+use App\Events\Inventory\StockDecreased;
+use App\Modules\Inventory\Exceptions\ExpiredBatchNotSellableException;
 use App\Modules\Inventory\Exceptions\InsufficientStockException;
 use App\Modules\Inventory\Models\ItemBatch;
 use App\Modules\Inventory\Models\StockMovement;
@@ -84,10 +86,17 @@ class StockService
             throw new InvalidArgumentException('ID referensi mutasi stok harus bernilai positif.');
         }
 
-        return DB::transaction(function () use ($itemBatch, $quantity, $type, $reason, $direction, $refType, $refId): StockMovement {
+        $movement = DB::transaction(function () use ($itemBatch, $quantity, $type, $reason, $direction, $refType, $refId): StockMovement {
             $lockedBatch = ItemBatch::query()
                 ->lockForUpdate()
                 ->findOrFail($itemBatch->getKey());
+
+            if ($direction === 'out'
+                && in_array($type, ['sale', 'dispensed', 'used'], true)
+                && $lockedBatch->expiry_date->lt(today())) {
+                throw new ExpiredBatchNotSellableException((int) $lockedBatch->getKey());
+            }
+
             $currentQuantity = bcadd((string) $lockedBatch->qty_on_hand, '0', 3);
             $newQuantity = $direction === 'in'
                 ? bcadd($currentQuantity, $quantity, 3)
@@ -131,6 +140,12 @@ class StockService
                 self::$postingStock = $previousPostingState;
             }
         }, attempts: 5);
+
+        if ($direction === 'out') {
+            StockDecreased::dispatch($itemBatch);
+        }
+
+        return $movement;
     }
 
     private function normalizeQuantity(string $quantity): string

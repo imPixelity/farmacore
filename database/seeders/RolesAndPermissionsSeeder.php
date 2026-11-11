@@ -78,6 +78,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'inventory.receipt.view',
             'inventory.receipt.manage',
             'inventory.receipt.approve_expiry',
+            'inventory.stock.manage',
             'inventory.opname.manage',
             'inventory.opname.approve',
             'purchasing.po.manage',

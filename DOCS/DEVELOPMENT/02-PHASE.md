@@ -318,25 +318,26 @@
 
 ### Phase 10 — Kebijakan Stok, ROP, Buffer & Kedaluwarsa
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-11 · **Selesai:** 2026-11-11
 **Dependency:** Phase 9
 
 **Checklist:**
-- [ ] Migrasi `stock_policies`.
-- [ ] Implementasi `StockPolicyService` + rumus min/buffer/ROP.
-- [ ] Job `RecalculateStockPolicy`.
-- [ ] Notifikasi `ReorderPointReached` dan `BatchNearExpiry`.
-- [ ] Layar `ExpiryMonitor` + filter rentang ED.
-- [ ] Tandai batch kedaluwarsa tidak dapat dijual.
+- [x] Migration additive `stock_policies` serta kolom klasifikasi, override minimum, hasil hitung, dan waktu hitung pada `items`.
+- [x] `StockPolicyService`: rata-rata penggunaan, stok minimum, buffer, ROP, kekurangan buffer, dan override manual per barang.
+- [x] Job `RecalculateStockPolicy` terjadwal harian; job pemeriksaan ROP per jam dan ED harian.
+- [x] Notifikasi `ReorderPointReached` sesudah mutasi stok dan pemeriksaan berkala; `BatchNearExpiry` mengikuti ambang setting; deduplikasi memakai layanan notifikasi yang ada.
+- [x] Halaman pengaturan kebijakan klasifikasi dan `ExpiryMonitor` dengan filter rentang ED.
+- [x] Batch kedaluwarsa ditandai dan penurunan bertipe penjualan/pemakaian ditolak melalui `StockService`.
 
 **Acceptance criteria:**
-- Rumus berjalan dan dapat di-override manual.
-- Notifikasi ROP muncul saat stok <= ROP.
-- Ambang ED dapat diatur.
-- Filter ED menampilkan data yang diminta.
+- [x] Formula dihitung dan stok minimum dapat di-override per barang.
+- [x] Notifikasi ROP dikirim ketika stok tersedia <= ROP.
+- [x] Ambang peringatan ED dapat diatur pada pengaturan aplikasi.
+- [x] Filter ED menampilkan nama/kode barang, batch, stok, dan tanggal ED.
+- [x] Batch lewat ED tidak dapat digunakan untuk transaksi penjualan.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `tests/Feature/Inventory/StockPolicyTest.php` (10 test/35 assertion) dan suite penuh (91 test/612 assertion) lulus; Pint dan `npm run build` lulus. Migration berjalan pada MariaDB 11.8.8; tabel, FK, unique movement class, kolom item, dan indeks diverifikasi. Route inventory (13 route), jadwal (recalculate harian 01:00, ROP per jam, ED harian 06:00), `migrate:status`, serta `git diff --check` lulus. Pest melaporkan empat warning tanpa detail.
+**Catatan/blocker:** Rumus dan parameter stok dalam master masih usulan; nilai hari minimum/faktor keselamatan tidak diberi default dan baru dihitung setelah ditetapkan apoteker. `usage_average_months` mengikuti default 3 bulan di master. Karena item belum memiliki supplier pilihan, lead time diambil dari supplier pada penerimaan terkonfirmasi terakhir untuk item; buffer tetap kosong jika data tersebut atau riwayat penggunaan belum ada. Ambang ED juga tetap nonaktif sampai diatur. Scheduler dan queue worker harus berjalan agar job berkala diproses. Phase 10 di-commit; berhenti sebelum Phase 11 sesuai alur per-phase.
 
 ---
 
@@ -796,6 +797,7 @@
 | 11-11-2026 | Agent | 8 | Phase 8 selesai: migrasi batch dan mutasi, `StockService` sebagai single writer dengan lock/transaksi, larangan saldo negatif dan ledger mutasi append-only, serta halaman stok per barang/satuan dan detail batch/ED. Skema dan CHECK diverifikasi pada MariaDB 11.8.8; 10 test/49 assertion terfokus dan suite 73 test/493 assertion lulus, Pint, build, route, dan diff check terverifikasi. Pest melaporkan tiga warning tanpa detail. Commit Phase 8 dibuat; berhenti sebelum Phase 9 sesuai alur per-phase. |
 | 11-11-2026 | Agent | 9 | Memulai Phase 9 setelah Phase 8 Done; scope faktur, konversi ke satuan dasar, validasi ED, diskon, PPN, konfirmasi stok/keuangan, dan immutability penerimaan terkonfirmasi ditinjau. |
 | 11-11-2026 | Agent | 9 | Phase 9 selesai: draft penerimaan, peringatan faktur duplikat, persetujuan ED, alokasi diskon + PPN, konfirmasi atomik stok/HNA/harga/utang atau kas/pajak, audit dan immutable confirmed receipt. 8 test terfokus dan suite 81 test/577 assertion, migration/schema MariaDB, route, Pint, build, dan diff check diverifikasi. Pest memberi empat warning tanpa detail. Commit Phase 9 dibuat; berhenti sebelum Phase 10 sesuai aturan per-phase. |
+| 11-11-2026 | Agent | 10 | Phase 10 selesai: kebijakan stok configurable, perhitungan min/buffer/ROP dan override, job berkala serta notifikasi ROP/ED, monitor/filter kedaluwarsa, dan blok penjualan batch expired. 10 test terfokus/35 assertion dan suite 91 test/612 assertion lulus; migration/schema MariaDB, 13 route, jadwal, Pint, build, dan diff check terverifikasi. Formula parameter tetap mengikuti keputusan apoteker; commit Phase 10 dibuat dan agent berhenti sebelum Phase 11. |
 
 ---
 

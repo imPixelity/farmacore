@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Inventory\Models\ItemBatch;
+use App\Modules\Inventory\Services\StockPolicyService;
 use App\Modules\Inventory\Services\StockService;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\ItemUnit;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class StockController extends Controller
@@ -61,7 +64,7 @@ class StockController extends Controller
         return view('inventory.stock.index', ['items' => $items]);
     }
 
-    public function show(Item $item, StockService $stockService): View
+    public function show(Item $item, StockService $stockService, StockPolicyService $policies): View
     {
         Gate::authorize('inventory.stock.view');
 
@@ -78,7 +81,27 @@ class StockController extends Controller
             'batches' => $batches,
             'stockTotal' => bcadd((string) $item->batches()->sum('qty_on_hand'), '0', 3),
             'availableTotal' => $stockService->available($item),
+            'stockPolicy' => $policies->snapshot($item),
         ]);
+    }
+
+    public function updatePolicy(Request $request, Item $item, StockPolicyService $policies): RedirectResponse
+    {
+        Gate::authorize('inventory.stock.manage');
+
+        $validated = $request->validate([
+            'movement_class' => ['nullable', Rule::in(StockPolicyService::MOVEMENT_CLASSES)],
+            'min_stock_override' => ['nullable', 'numeric', 'decimal:0,3', 'min:0', 'max:999999999999.999'],
+        ]);
+
+        $policies->updateItemPolicy(
+            $item,
+            $validated['movement_class'] ?? null,
+            isset($validated['min_stock_override']) ? (string) $validated['min_stock_override'] : null,
+        );
+
+        return redirect()->route('inventory.stock.show', $item)
+            ->with('success', 'Kebijakan stok barang berhasil diperbarui.');
     }
 
     private function formatQuantity(string $quantity): string

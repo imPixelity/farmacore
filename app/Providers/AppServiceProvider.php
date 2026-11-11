@@ -2,10 +2,13 @@
 
 namespace App\Providers;
 
+use App\Events\Inventory\StockDecreased;
+use App\Listeners\Inventory\SendReorderPointReached;
 use App\Modules\Core\Services\SettingsService;
 use App\Modules\Core\ViewComposers\NotificationBellComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +30,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $settings = $this->app->make(SettingsService::class);
+
+        Event::listen(StockDecreased::class, SendReorderPointReached::class);
 
         RateLimiter::for('login', function (Request $request) use ($settings): Limit {
             $username = Str::transliterate(Str::lower($request->string('username')->toString()));

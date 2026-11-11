@@ -11,7 +11,13 @@
                 <h2 class="font-bold text-slate-900">Stok per barang</h2>
                 <p class="mt-1 text-sm text-slate-500">Jumlah disimpan dalam satuan dasar dan ditampilkan juga menurut konversi barang.</p>
             </div>
-            <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Baca saja · saldo berasal dari mutasi</span>
+            <div class="flex flex-wrap items-center gap-2">
+                <a href="{{ route('inventory.expiry.index') }}" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Monitor ED</a>
+                @can('inventory.stock.manage')
+                    <a href="{{ route('inventory.stock-policies.index') }}" class="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Kebijakan stok</a>
+                @endcan
+                <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">Baca saja · saldo berasal dari mutasi</span>
+            </div>
         </div>
 
         <form method="GET" action="{{ route('inventory.stock.index') }}" class="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-end sm:px-6">

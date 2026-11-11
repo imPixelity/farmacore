@@ -27,6 +27,49 @@
             </dl>
         </section>
 
+        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/2 sm:p-6">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 class="font-bold text-slate-900">Kebijakan dan rekomendasi stok</h2>
+                    <p class="mt-1 text-sm text-slate-500">Klasifikasi: {{ $item->movement_class ? ucfirst($item->movement_class).' moving' : 'belum ditetapkan' }} · Supplier/lead time terakhir: {{ $stockPolicy['lead_time_days'] ?? 'belum tersedia' }} hari</p>
+                </div>
+                @can('inventory.stock.manage')
+                    <a href="{{ route('inventory.stock-policies.index') }}" class="text-sm font-semibold text-emerald-700 hover:text-emerald-900">Atur parameter klasifikasi</a>
+                @endcan
+            </div>
+            <dl class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Rata-rata pemakaian / bulan</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['average_monthly_usage'] ?? '—' }}</dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Stok minimum / ROP</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['min_stock'] ?? '—' }} {{ $item->baseUnit->name }}</dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Buffer stock</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['buffer_stock'] ?? '—' }} {{ $item->baseUnit->name }}</dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kekurangan buffer</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['kurang_buffer'] ?? '—' }} {{ $item->baseUnit->name }}</dd></div>
+            </dl>
+            @if ($stockPolicy['average_monthly_usage'] === null)
+                <p class="mt-4 text-sm text-amber-800">Belum ada riwayat pemakaian. Tetapkan stok minimum manual atau tunggu transaksi pemakaian tercatat.</p>
+            @endif
+            @can('inventory.stock.manage')
+                <form method="POST" action="{{ route('inventory.stock.policy.update', $item) }}" class="mt-5 grid gap-3 border-t border-slate-100 pt-5 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                    @csrf
+                    @method('PUT')
+                    <label class="grid gap-1.5 text-sm font-semibold text-slate-700">
+                        Klasifikasi pergerakan
+                        <select name="movement_class" class="rounded-xl border-slate-300 font-normal focus:border-emerald-600 focus:ring-emerald-600">
+                            <option value="">Belum ditetapkan</option>
+                            @foreach (['fast' => 'Fast moving', 'medium' => 'Medium moving', 'slow' => 'Slow moving'] as $value => $label)
+                                <option value="{{ $value }}" @selected(old('movement_class', $item->movement_class) === $value)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('movement_class')<span class="font-normal text-rose-700">{{ $message }}</span>@enderror
+                    </label>
+                    <label class="grid gap-1.5 text-sm font-semibold text-slate-700">
+                        Override stok minimum ({{ $item->baseUnit->name }})
+                        <input type="number" name="min_stock_override" min="0" step="0.001" value="{{ old('min_stock_override', $item->min_stock_override) }}" class="rounded-xl border-slate-300 font-normal focus:border-emerald-600 focus:ring-emerald-600">
+                        @error('min_stock_override')<span class="font-normal text-rose-700">{{ $message }}</span>@enderror
+                    </label>
+                    <button class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Simpan</button>
+                </form>
+            @endcan
+        </section>
+
         <section class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/2">
             <div class="border-b border-slate-100 px-5 py-4 sm:px-6">
                 <h2 class="font-bold text-slate-900">Batch barang</h2>
