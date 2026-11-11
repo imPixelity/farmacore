@@ -116,6 +116,7 @@
                     @endcan
                     @can('purchasing.po.manage')
                         <a href="{{ route('purchasing.purchase-orders.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">B</span>Pembelian</a>
+                        <a href="{{ route('purchasing.supplier-evaluations.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">E</span>Evaluasi supplier</a>
                     @endcan
                     @foreach ([['Penjualan', 'pos.sale.view'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
                         @can($permission)

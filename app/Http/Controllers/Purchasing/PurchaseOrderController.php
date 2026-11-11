@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\Md\Models\Supplier;
 use App\Modules\Purchasing\Models\PurchaseOrder;
 use App\Modules\Purchasing\Services\PurchaseOrderService;
+use App\Modules\Purchasing\Services\ReceiptMatchingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -13,6 +14,15 @@ use Illuminate\View\View;
 
 class PurchaseOrderController extends Controller
 {
+    public function supplierEvaluations(ReceiptMatchingService $matching): View
+    {
+        Gate::authorize('purchasing.po.manage');
+        $suppliers = Supplier::query()->where('is_active', true)->orderBy('name')->get();
+        $evaluations = $suppliers->map(fn (Supplier $supplier): array => ['supplier' => $supplier, 'metrics' => $matching->supplierMetrics($supplier)]);
+
+        return view('purchasing.supplier-evaluations.index', ['evaluations' => $evaluations]);
+    }
+
     public function index(Request $request, PurchaseOrderService $service): View
     {
         Gate::authorize('purchasing.po.manage');
@@ -25,7 +35,7 @@ class PurchaseOrderController extends Controller
     {
         Gate::authorize('purchasing.po.manage');
 
-        return view('purchasing.purchase-orders.form', ['order' => null, 'suppliers' => Supplier::query()->active()->orderBy('name')->get(['id', 'name']), 'items' => $service->recommendations()]);
+        return view('purchasing.purchase-orders.form', ['order' => null, 'suppliers' => Supplier::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']), 'items' => $service->recommendations()]);
     }
 
     public function store(Request $request, PurchaseOrderService $service): RedirectResponse
@@ -51,7 +61,7 @@ class PurchaseOrderController extends Controller
         $recommended = $service->recommendations();
         $selected = $order->items->map(fn ($line) => $line->item)->filter();
 
-        return view('purchasing.purchase-orders.form', ['order' => $order, 'suppliers' => Supplier::query()->active()->orderBy('name')->get(['id', 'name']), 'items' => $recommended->merge($selected)->unique('id')->values()]);
+        return view('purchasing.purchase-orders.form', ['order' => $order, 'suppliers' => Supplier::query()->where('is_active', true)->orderBy('name')->get(['id', 'name']), 'items' => $recommended->merge($selected)->unique('id')->values()]);
     }
 
     public function update(Request $request, PurchaseOrder $purchaseOrder, PurchaseOrderService $service): RedirectResponse

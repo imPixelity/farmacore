@@ -19,6 +19,7 @@ class ConfirmGoodsReceiptRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'confirm_matching' => ['nullable', 'boolean'],
             'cash_bank_account_id' => [
                 'nullable',
                 'integer',

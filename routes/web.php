@@ -168,6 +168,7 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
     });
 
     Route::prefix('purchasing')->name('purchasing.')->group(function (): void {
+        Route::get('/supplier-evaluations', [PurchaseOrderController::class, 'supplierEvaluations'])->middleware('can:purchasing.po.manage')->name('supplier-evaluations.index');
         Route::get('/purchase-orders', [PurchaseOrderController::class, 'index'])->middleware('can:purchasing.po.manage')->name('purchase-orders.index');
         Route::get('/purchase-orders/create', [PurchaseOrderController::class, 'create'])->middleware('can:purchasing.po.manage')->name('purchase-orders.create');
         Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->middleware('can:purchasing.po.manage')->name('purchase-orders.store');

@@ -4,6 +4,7 @@ namespace App\Modules\Purchasing\Models;
 
 use App\Models\User;
 use App\Modules\Core\Traits\Auditable;
+use App\Modules\Inventory\Models\GoodsReceipt;
 use App\Modules\Md\Models\Supplier;
 use Database\Factories\PurchaseOrderFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -54,6 +55,11 @@ class PurchaseOrder extends Model
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);
+    }
+
+    public function goodsReceipts(): HasMany
+    {
+        return $this->hasMany(GoodsReceipt::class);
     }
 
     public function creator(): BelongsTo

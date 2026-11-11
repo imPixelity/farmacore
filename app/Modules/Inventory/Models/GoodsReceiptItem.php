@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Core\Traits\Auditable;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\Unit;
+use App\Modules\Purchasing\Models\PurchaseOrderItem;
 use Database\Factories\GoodsReceiptItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -16,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use LogicException;
 
 #[Fillable([
-    'goods_receipt_id', 'item_id', 'unit_id', 'qty_received', 'qty_base', 'batch_no', 'expiry_date',
-    'unit_price', 'discount_amount', 'line_total', 'match_status', 'approved_by', 'created_by', 'updated_by',
+    'goods_receipt_id', 'purchase_order_item_id', 'item_id', 'unit_id', 'qty_received', 'qty_base', 'batch_no', 'expiry_date',
+    'unit_price', 'discount_amount', 'line_total', 'match_status', 'is_return_candidate', 'approved_by', 'created_by', 'updated_by',
 ])]
 #[UseFactory(GoodsReceiptItemFactory::class)]
 class GoodsReceiptItem extends Model
@@ -35,6 +36,7 @@ class GoodsReceiptItem extends Model
             'unit_price' => 'decimal:2',
             'discount_amount' => 'decimal:2',
             'line_total' => 'decimal:2',
+            'is_return_candidate' => 'boolean',
         ];
     }
 
@@ -56,6 +58,11 @@ class GoodsReceiptItem extends Model
     public function receipt(): BelongsTo
     {
         return $this->belongsTo(GoodsReceipt::class, 'goods_receipt_id');
+    }
+
+    public function purchaseOrderItem(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrderItem::class);
     }
 
     public function item(): BelongsTo

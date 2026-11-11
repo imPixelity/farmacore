@@ -14,6 +14,7 @@ use App\Modules\Md\Models\Supplier;
 use App\Modules\Md\Services\PricingService;
 use App\Modules\Md\Services\TaxService;
 use App\Modules\Purchasing\Models\Payable;
+use App\Modules\Purchasing\Services\ReceiptMatchingService;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
@@ -33,6 +34,7 @@ class GoodsReceiptService
         private PricingService $pricingService,
         private TaxService $taxService,
         private FinancialPostingService $financialPostingService,
+        private ReceiptMatchingService $receiptMatchingService,
     ) {}
 
     public function hasDuplicateInvoice(int $supplierId, string $invoiceNo, ?int $exceptReceiptId = null): bool
@@ -64,6 +66,7 @@ class GoodsReceiptService
             $receipt->fill([
                 'receipt_no' => 'GR-'.Str::ulid(),
                 'supplier_id' => $supplier->id,
+                'purchase_order_id' => $data['purchase_order_id'] ?? null,
                 'invoice_no' => trim((string) $data['invoice_no']),
                 'invoice_date' => $invoiceDate->toDateString(),
                 'due_date' => $dueDate,
@@ -111,6 +114,7 @@ class GoodsReceiptService
 
             $receipt->fill([
                 'supplier_id' => $supplier->id,
+                'purchase_order_id' => $data['purchase_order_id'] ?? null,
                 'invoice_no' => trim((string) $data['invoice_no']),
                 'invoice_date' => $invoiceDate->toDateString(),
                 'due_date' => $dueDate,
@@ -132,9 +136,9 @@ class GoodsReceiptService
         }, attempts: 5);
     }
 
-    public function confirm(GoodsReceipt $goodsReceipt, ?int $cashBankAccountId = null): GoodsReceipt
+    public function confirm(GoodsReceipt $goodsReceipt, ?int $cashBankAccountId = null, bool $confirmMatching = false): GoodsReceipt
     {
-        return DB::transaction(function () use ($goodsReceipt, $cashBankAccountId): GoodsReceipt {
+        return DB::transaction(function () use ($goodsReceipt, $cashBankAccountId, $confirmMatching): GoodsReceipt {
             $receipt = GoodsReceipt::query()
                 ->with(['items.item'])
                 ->lockForUpdate()
@@ -151,6 +155,9 @@ class GoodsReceiptService
             if ($receipt->items->isEmpty()) {
                 throw ValidationException::withMessages(['lines' => 'Penerimaan harus memiliki minimal satu baris barang.']);
             }
+
+            $this->receiptMatchingService->matchAndApply($receipt, $confirmMatching);
+            $receipt->load(['items.item']);
 
             $lines = $receipt->items->map(fn (GoodsReceiptItem $item): array => [
                 'receipt_item' => $item,
@@ -302,6 +309,7 @@ class GoodsReceiptService
                     'updated_by' => Auth::id(),
                 ])->save();
             });
+            $this->receiptMatchingService->updateSupplierLeadTime($receipt->supplier_id);
 
             return $receipt->fresh(['supplier', 'items.item', 'payable']);
         }, attempts: 5);
@@ -566,6 +574,7 @@ class GoodsReceiptService
         $receiptItem = new GoodsReceiptItem;
         $receiptItem->fill([
             'goods_receipt_id' => $receipt->id,
+            'purchase_order_item_id' => $line['purchase_order_item_id'] ?? null,
             'item_id' => $line['item_id'],
             'unit_id' => $line['unit_id'],
             'qty_received' => $line['qty_received'],
@@ -576,6 +585,7 @@ class GoodsReceiptService
             'discount_amount' => $line['discount_amount'],
             'line_total' => $line['line_total'],
             'match_status' => $line['match_status'],
+            'is_return_candidate' => $line['is_return_candidate'] ?? false,
             'approved_by' => $line['approved_by'],
             'created_by' => Auth::id(),
             'updated_by' => Auth::id(),

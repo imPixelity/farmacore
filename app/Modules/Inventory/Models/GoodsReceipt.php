@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Modules\Core\Traits\Auditable;
 use App\Modules\Md\Models\Supplier;
 use App\Modules\Purchasing\Models\Payable;
+use App\Modules\Purchasing\Models\PurchaseOrder;
 use Database\Factories\GoodsReceiptFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use LogicException;
 
 #[Fillable([
-    'receipt_no', 'supplier_id', 'invoice_no', 'invoice_date', 'due_date', 'payment_method',
+    'receipt_no', 'supplier_id', 'purchase_order_id', 'invoice_no', 'invoice_date', 'due_date', 'payment_method',
     'discount_amount', 'total_before_tax', 'tax_amount', 'total_after_tax', 'matching_status',
     'status', 'confirmed_by', 'confirmed_at', 'created_by', 'updated_by',
 ])]
@@ -85,6 +86,11 @@ class GoodsReceipt extends Model
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function purchaseOrder(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class);
     }
 
     public function items(): HasMany

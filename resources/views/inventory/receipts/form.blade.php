@@ -37,6 +37,16 @@
                     @error('supplier_id')<span class="mt-1 block text-xs text-rose-700">{{ $message }}</span>@enderror
                 </label>
                 <label>
+                    <span class="mb-1.5 block text-xs font-semibold text-slate-600">PO terkait (opsional)</span>
+                    <select name="purchase_order_id" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        <option value="">Tanpa PO</option>
+                        @foreach ($purchaseOrders as $purchaseOrder)
+                            <option value="{{ $purchaseOrder->id }}" @selected((string) old('purchase_order_id', $receipt?->purchase_order_id) === (string) $purchaseOrder->id)>{{ $purchaseOrder->po_no }} · {{ $purchaseOrder->supplier->name }} ({{ str_replace('_', ' ', $purchaseOrder->status) }})</option>
+                        @endforeach
+                    </select>
+                    @error('purchase_order_id')<span class="mt-1 block text-xs text-rose-700">{{ $message }}</span>@enderror
+                </label>
+                <label>
                     <span class="mb-1.5 block text-xs font-semibold text-slate-600">Nomor faktur</span>
                     <input name="invoice_no" type="text" maxlength="50" value="{{ old('invoice_no', $receipt?->invoice_no) }}" required class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
                     @error('invoice_no')<span class="mt-1 block text-xs text-rose-700">{{ $message }}</span>@enderror

@@ -10,6 +10,8 @@ use App\Modules\Inventory\Models\GoodsReceipt;
 use App\Modules\Inventory\Services\GoodsReceiptService;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\Supplier;
+use App\Modules\Purchasing\Models\PurchaseOrder;
+use App\Modules\Purchasing\Services\ReceiptMatchingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
@@ -61,7 +63,7 @@ class GoodsReceiptController extends Controller
             ->with('status', 'Draft penerimaan berhasil disimpan. Stok belum berubah.');
     }
 
-    public function show(GoodsReceipt $goodsReceipt): View
+    public function show(GoodsReceipt $goodsReceipt, ReceiptMatchingService $matchingService): View
     {
         Gate::authorize('inventory.receipt.view');
 
@@ -75,6 +77,9 @@ class GoodsReceiptController extends Controller
             'payable',
             'confirmer:id,name',
         ]);
+        $matching = $goodsReceipt->status === 'draft'
+            ? $matchingService->preview($goodsReceipt)
+            : ['warnings' => [], 'status' => $goodsReceipt->matching_status, 'lines' => []];
         $cashBankAccounts = $goodsReceipt->payment_method === 'tunai'
             ? CashBankAccount::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'type', 'current_balance'])
             : collect();
@@ -82,6 +87,7 @@ class GoodsReceiptController extends Controller
         return view('inventory.receipts.show', [
             'receipt' => $goodsReceipt,
             'cashBankAccounts' => $cashBankAccounts,
+            'matching' => $matching,
         ]);
     }
 
@@ -136,10 +142,12 @@ class GoodsReceiptController extends Controller
         GoodsReceipt $goodsReceipt,
         GoodsReceiptService $goodsReceiptService,
     ): RedirectResponse {
-        $cashBankAccountId = $request->validated()['cash_bank_account_id'] ?? null;
+        $validated = $request->validated();
+        $cashBankAccountId = $validated['cash_bank_account_id'] ?? null;
         $receipt = $goodsReceiptService->confirm(
             $goodsReceipt,
             $cashBankAccountId === null ? null : (int) $cashBankAccountId,
+            (bool) ($validated['confirm_matching'] ?? false),
         );
 
         return redirect()->route('inventory.receipts.show', $receipt)
@@ -148,9 +156,10 @@ class GoodsReceiptController extends Controller
 
     private function formView(?GoodsReceipt $receipt, bool $duplicateInvoice): View
     {
-        $suppliers = Supplier::query()->active()->orderBy('name')->get(['id', 'name', 'payment_term_days']);
+        $suppliers = Supplier::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'payment_term_days']);
+        $purchaseOrders = PurchaseOrder::query()->with('supplier:id,name')->whereIn('status', ['sent', 'partially_received'])->orderByDesc('order_date')->get(['id', 'po_no', 'supplier_id', 'status']);
         $items = Item::query()
-            ->active()
+            ->where('is_active', true)
             ->with(['itemUnits.unit:id,name'])
             ->orderBy('name')
             ->get(['id', 'code', 'name', 'base_unit_id', 'is_taxable']);
@@ -176,6 +185,7 @@ class GoodsReceiptController extends Controller
             'items' => $items,
             'lines' => $lines,
             'duplicateInvoice' => $duplicateInvoice,
+            'purchaseOrders' => $purchaseOrders,
         ]);
     }
 }

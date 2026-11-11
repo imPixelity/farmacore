@@ -19,10 +19,18 @@
             <dl class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Tanggal faktur</dt><dd class="mt-1 font-bold text-slate-900">{{ $receipt->invoice_date->format('d-m-Y') }}</dd></div>
                 <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Pembayaran</dt><dd class="mt-1 font-bold capitalize text-slate-900">{{ $receipt->payment_method }}{{ $receipt->due_date ? ' · tempo '.$receipt->due_date->format('d-m-Y') : '' }}</dd></div>
-                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status pencocokan</dt><dd class="mt-1 font-bold text-slate-900">Tanpa PO</dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status pencocokan</dt><dd class="mt-1 font-bold capitalize text-slate-900">{{ str_replace('_', ' ', $receipt->matching_status) }}</dd></div>
                 <div class="rounded-xl bg-emerald-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Dikonfirmasi</dt><dd class="mt-1 font-bold text-emerald-900">{{ $receipt->confirmed_at?->format('d-m-Y H:i') ?? 'Belum dikonfirmasi' }}{{ $receipt->confirmer ? ' · '.$receipt->confirmer->name : '' }}</dd></div>
             </dl>
         </section>
+
+        @if (($matching['warnings'] ?? []) !== [])
+            <div role="alert" class="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                <p class="font-semibold">Peringatan pencocokan PO</p>
+                <ul class="mt-2 list-inside list-disc">@foreach ($matching['warnings'] as $warning)<li>{{ $warning }}</li>@endforeach</ul>
+                <p class="mt-2">Konfirmasi eksplisit diperlukan sebelum penerimaan dengan qty lebih atau harga berbeda diposting.</p>
+            </div>
+        @endif
 
         @if ($errors->any())
             <div role="alert" class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">
@@ -102,6 +110,9 @@
                                     @endforeach
                                 </select>
                             </label>
+                        @endif
+                        @if (($matching['warnings'] ?? []) !== [])
+                            <label class="flex items-center gap-2 text-xs font-semibold text-amber-800"><input type="checkbox" name="confirm_matching" value="1" required class="rounded border-amber-400 text-amber-700 focus:ring-amber-500">Saya sudah memeriksa perbedaan</label>
                         @endif
                         <button class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Konfirmasi penerimaan</button>
                     </form>

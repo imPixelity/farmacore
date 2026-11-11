@@ -23,6 +23,7 @@ class StoreGoodsReceiptRequest extends FormRequest
     {
         return [
             'supplier_id' => ['required', 'integer', Rule::exists('suppliers', 'id')->where('is_active', true)],
+            'purchase_order_id' => ['nullable', 'integer', Rule::exists('purchase_orders', 'id')->whereIn('status', ['sent', 'partially_received'])],
             'invoice_no' => ['required', 'string', 'max:50'],
             'invoice_date' => ['required', 'date_format:Y-m-d'],
             'due_date' => ['nullable', 'date_format:Y-m-d'],
@@ -30,7 +31,8 @@ class StoreGoodsReceiptRequest extends FormRequest
             'discount_amount' => ['required', 'regex:/^\d+(?:\.\d{1,2})?$/', 'numeric', 'min:0', 'max:9999999999999.99'],
             'confirm_duplicate' => ['nullable', 'boolean'],
             'lines' => ['required', 'array', 'min:1', 'max:100'],
-            'lines.*' => ['required', 'array:item_id,item_unit_id,qty_received,batch_no,expiry_date,unit_price,discount_amount,approve_expiry'],
+            'lines.*' => ['required', 'array:item_id,item_unit_id,qty_received,batch_no,expiry_date,unit_price,discount_amount,approve_expiry,purchase_order_item_id'],
+            'lines.*.purchase_order_item_id' => ['nullable', 'integer', Rule::exists('purchase_order_items', 'id')],
             'lines.*.item_id' => ['required', 'integer', Rule::exists('items', 'id')],
             'lines.*.item_unit_id' => ['required', 'integer', Rule::exists('item_units', 'id')],
             'lines.*.qty_received' => ['required', 'regex:/^\d+(?:\.\d{1,3})?$/', 'numeric', 'gt:0', 'max:999999999999.999'],

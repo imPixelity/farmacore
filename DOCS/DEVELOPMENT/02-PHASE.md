@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 11 — Done (berhenti; Phase 12 belum dimulai) |
+| Status proyek | Phase 12 — Done (berhenti; Phase 13 belum dimulai) |
 
 ---
 
@@ -47,7 +47,7 @@
 | 9 | Penerimaan Barang | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Draft, peringatan faktur duplikat, validasi/approval ED, diskon dan PPN, konfirmasi atomik stok/HNA/harga/payable/kas/pajak, audit, serta immutability terverifikasi. |
 | 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Kebijakan, ROP, buffer, notifikasi, monitor ED, dan blok batch kedaluwarsa terverifikasi. |
 | 11 | Perencanaan Pembelian & Purchase Order | PUR | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Rekomendasi ROP, draft PO, estimasi total, transisi kirim, immutability, audit, UI, migrasi, dan authorization terverifikasi. |
-| 12 | Pencocokan Penerimaan & Evaluasi Supplier | PUR | ⬜ Not started | 0% | — | — | — |
+| 12 | Pencocokan Penerimaan & Evaluasi Supplier | PUR | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Matching penerimaan-PO, konfirmasi perbedaan, kandidat retur, metrik supplier, dan riwayat harga terverifikasi. |
 | 13 | Utang Supplier & Pembayaran | PUR | ⬜ Not started | 0% | — | — | — |
 | 14 | Stock Opname, Mutasi & Write-off | INV | ⬜ Not started | 0% | — | — | — |
 | 15 | Retur Pembelian | INV | ⬜ Not started | 0% | — | — | — |
@@ -366,25 +366,25 @@
 
 ### Phase 12 — Pencocokan Penerimaan & Evaluasi Supplier
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-11 · **Selesai:** 2026-11-11
 **Dependency:** Phase 9, Phase 11
 
 **Checklist:**
-- [ ] Implementasi `ReceiptMatchingService`.
-- [ ] Isi `match_status` per baris + status header.
-- [ ] Peringatan qty lebih/harga beda + konfirmasi.
-- [ ] Penandaan kandidat retur.
-- [ ] Metrik lead time, ketepatan, kesesuaian, riwayat harga.
-- [ ] Update `suppliers.lead_time_days`.
+- [x] Implementasi `ReceiptMatchingService`.
+- [x] Isi `match_status` per baris + status header.
+- [x] Peringatan qty lebih/harga beda + konfirmasi.
+- [x] Penandaan kandidat retur.
+- [x] Metrik lead time, ketepatan, kesesuaian, riwayat harga.
+- [x] Update `suppliers.lead_time_days`.
 
 **Acceptance criteria:**
-- `match_status` benar untuk setiap skenario.
-- `qty_received` dan status PO diperbarui.
-- Baris tidak sesuai ditandai kandidat retur.
-- Metrik dihitung dari data nyata.
+- [x] `match_status` benar untuk skenario sesuai, lebih, kurang, harga berbeda, dan tidak dipesan.
+- [x] `qty_received` dan status PO diperbarui setelah konfirmasi.
+- [x] Baris tidak sesuai ditandai kandidat retur.
+- [x] Metrik dihitung dari data PO/penerimaan terkonfirmasi dan riwayat harga ditampilkan.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `database/migrations/2026_11_11_101650_add_receipt_matching_to_purchase_orders_and_receipts.php`, `app/Modules/Purchasing/Services/ReceiptMatchingService.php`, integrasi `GoodsReceiptService`, `tests/Feature/Purchasing/ReceiptMatchingTest.php` (3 test/11 assertion), `tests/Feature/Inventory/GoodsReceiptTest.php` (8 test/84 assertion), suite penuh (98 test/640 assertion), migration MariaDB, 8 route Purchasing, Pint, build, dan `git diff --check` lulus.
+**Catatan/blocker:** Penerimaan tanpa PO tetap didukung. Status PO `received` menjadi dasar matching; status `completed`/penutupan paksa tetap menjadi scope lanjutan sesuai Phase 13+.
 
 ---
 
@@ -799,6 +799,7 @@
 | 11-11-2026 | Agent | 9 | Phase 9 selesai: draft penerimaan, peringatan faktur duplikat, persetujuan ED, alokasi diskon + PPN, konfirmasi atomik stok/HNA/harga/utang atau kas/pajak, audit dan immutable confirmed receipt. 8 test terfokus dan suite 81 test/577 assertion, migration/schema MariaDB, route, Pint, build, dan diff check diverifikasi. Pest memberi empat warning tanpa detail. Commit Phase 9 dibuat; berhenti sebelum Phase 10 sesuai aturan per-phase. |
 | 11-11-2026 | Agent | 10 | Phase 10 selesai: kebijakan stok configurable, perhitungan min/buffer/ROP dan override, job berkala serta notifikasi ROP/ED, monitor/filter kedaluwarsa, dan blok penjualan batch expired. 10 test terfokus/35 assertion dan suite 91 test/612 assertion lulus; migration/schema MariaDB, 13 route, jadwal, Pint, build, dan diff check terverifikasi. Formula parameter tetap mengikuti keputusan apoteker; commit Phase 10 dibuat dan agent berhenti sebelum Phase 11. |
 | 11-11-2026 | Agent | 11 | Phase 11 selesai: perencanaan pembelian berbasis ROP, rekomendasi jumlah dengan konversi satuan, PO draft dan estimasi total, pengiriman immutable, audit perubahan status, permission, UI, dan migration selesai. 4 test terfokus/17 assertion dan suite 95 test/629 assertion lulus; migration MariaDB, 7 route, Pint, build, dan diff check terverifikasi. Berhenti sebelum Phase 12 sesuai dependency. |
+| 11-11-2026 | Agent | 12 | Phase 12 selesai: integrasi PO ke penerimaan, ReceiptMatchingService dengan status per baris/header, warning qty/harga dan konfirmasi eksplisit, kandidat retur, akumulasi qty/status PO, evaluasi supplier, update lead time, riwayat harga, UI, migration, dan authorization. 3 test matching/11 assertion, 8 test penerimaan/84 assertion, suite 98 test/640 assertion lulus; migration MariaDB, 8 route, Pint, build, dan diff check terverifikasi. Berhenti sebelum Phase 13 sesuai dependency. |
 
 ---
 
