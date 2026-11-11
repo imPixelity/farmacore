@@ -227,6 +227,9 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::post('/prescriptions', [PrescriptionController::class, 'store'])->middleware('can:rx.prescription.manage')->name('prescriptions.store');
         Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show'])->middleware('can:rx.prescription.manage')->name('prescriptions.show');
         Route::post('/prescriptions/{prescription}/transition', [PrescriptionController::class, 'transition'])->middleware('can:rx.screening.perform')->name('prescriptions.transition');
+        Route::get('/patient-history', [PrescriptionController::class, 'patientHistoryIndex'])->middleware('can:rx.patient_history.view')->name('patient-history.index');
+        Route::get('/patient-history/{patient}', [PrescriptionController::class, 'patientHistory'])->middleware('can:rx.patient_history.view')->name('patient-history.show');
+        Route::get('/staff-activity', [PrescriptionController::class, 'staffActivity'])->middleware('can:rx.patient_history.view')->name('staff-activity.index');
     });
 
     Route::prefix('purchasing')->name('purchasing.')->group(function (): void {

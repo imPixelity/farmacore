@@ -523,24 +523,31 @@
 
 ### Phase 17 — Riwayat Pasien & Aktivitas Tenaga Farmasi
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 16
 
 **Checklist:**
-- [ ] Implementasi `PatientHistoryService`.
-- [ ] Linimasa pasien: resep, pembelian, layanan, konseling.
-- [ ] Riwayat aktivitas tenaga farmasi + filter.
-- [ ] Permission `rx.patient_history.view`.
-- [ ] Audit pembukaan riwayat pasien.
+- [x] Implementasi `PatientHistoryService`.
+- [x] Linimasa pasien: resep, pembelian, layanan, konseling.
+- [x] Riwayat aktivitas tenaga farmasi + filter.
+- [x] Permission `rx.patient_history.view`.
+- [x] Audit pembukaan riwayat pasien.
 
 **Acceptance criteria:**
-- Linimasa menggabungkan seluruh sumber data.
+- Linimasa menggabungkan seluruh sumber yang tersedia pada phase ini.
 - Riwayat aktivitas dapat difilter.
 - Akses tanpa permission ditolak.
 - Pembukaan riwayat tercatat di audit.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Rx/Services/PatientHistoryService.php`
+- `app/Http/Controllers/Rx/PrescriptionController.php`
+- `tests/Feature/PatientHistoryTest.php`
+- `php artisan test --compact` — 112 tests passed, 721 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan:** Sumber POS, layanan pemeriksaan, dan konseling belum tersedia karena berada pada phase berikutnya; timeline saat ini menggabungkan resep, obat resep, screening, peracikan, dan penyerahan.
 
 ---
 

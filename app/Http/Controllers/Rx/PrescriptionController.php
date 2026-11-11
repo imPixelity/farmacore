@@ -9,6 +9,7 @@ use App\Modules\Md\Models\Doctor;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\Patient;
 use App\Modules\Rx\Models\Prescription;
+use App\Modules\Rx\Services\PatientHistoryService;
 use App\Modules\Rx\Services\PrescriptionWorkflowService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,5 +56,46 @@ class PrescriptionController extends Controller
         $workflow->transition($prescription, $request->validated('target'), $request->validated());
 
         return back()->with('success', 'Tahap pelayanan resep berhasil diperbarui.');
+    }
+
+    public function patientHistoryIndex(Request $request): View
+    {
+        Gate::authorize('rx.patient_history.view');
+        $search = trim($request->string('search')->toString());
+        $patients = Patient::query()
+            ->active()
+            ->when($search !== '', function ($query) use ($search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->whereLike('name', "%{$search}%")->orWhereLike('code', "%{$search}%");
+                });
+            })
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('rx.patient-history.index', ['patients' => $patients]);
+    }
+
+    public function patientHistory(Patient $patient, PatientHistoryService $history): View
+    {
+        Gate::authorize('rx.patient_history.view');
+
+        return view('rx.patient-history.show', $history->forPatient($patient));
+    }
+
+    public function staffActivity(Request $request, PatientHistoryService $history): View
+    {
+        Gate::authorize('rx.patient_history.view');
+        $validated = $request->validate([
+            'staff_id' => ['nullable', 'integer', 'exists:pharmacy_staff,id'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date', 'after_or_equal:from'],
+        ]);
+
+        return view('rx.staff-activity.index', $history->staffActivity(
+            isset($validated['staff_id']) ? (int) $validated['staff_id'] : null,
+            $validated['from'] ?? null,
+            $validated['to'] ?? null,
+        ));
     }
 }

@@ -4,6 +4,7 @@ namespace App\Modules\Md\Models;
 
 use App\Models\User;
 use App\Modules\Core\Traits\Auditable;
+use App\Modules\Rx\Models\Prescription;
 use Database\Factories\PatientFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable(['code', 'name', 'identity_no', 'phone', 'address', 'birth_date', 'is_active', 'created_by', 'updated_by'])]
 #[Hidden(['identity_no', 'phone', 'address', 'birth_date'])]
@@ -66,6 +68,11 @@ class Patient extends Model
     public function maskedBirthDate(): ?string
     {
         return $this->birth_date?->format('Y-**-**');
+    }
+
+    public function prescriptions(): HasMany
+    {
+        return $this->hasMany(Prescription::class);
     }
 
     public function creator(): BelongsTo
