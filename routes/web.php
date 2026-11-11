@@ -9,6 +9,7 @@ use App\Http\Controllers\Core\UserController;
 use App\Http\Controllers\Inventory\ExpiryMonitorController;
 use App\Http\Controllers\Inventory\GoodsReceiptController;
 use App\Http\Controllers\Inventory\StockController;
+use App\Http\Controllers\Inventory\StockOpnameController;
 use App\Http\Controllers\Inventory\StockPolicyController;
 use App\Http\Controllers\Md\DiscountRuleController;
 use App\Http\Controllers\Md\DoctorController;
@@ -151,6 +152,37 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/stock', [StockController::class, 'index'])
             ->middleware('can:inventory.stock.view')
             ->name('stock.index');
+        Route::get('/opnames', [StockOpnameController::class, 'index'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('opnames.index');
+        Route::post('/opnames', [StockOpnameController::class, 'store'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('opnames.store');
+        Route::get('/opnames/{stockOpname}', [StockOpnameController::class, 'show'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('opnames.show');
+        Route::put('/opnames/{stockOpname}', [StockOpnameController::class, 'update'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('opnames.update');
+        Route::post('/opnames/{stockOpname}/submit', [StockOpnameController::class, 'submit'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('opnames.submit');
+        Route::post('/opnames/{stockOpname}/approve', [StockOpnameController::class, 'approve'])
+            ->middleware('can:inventory.opname.approve')
+            ->name('opnames.approve');
+        Route::post('/opnames/{stockOpname}/reject', [StockOpnameController::class, 'reject'])
+            ->middleware('can:inventory.opname.approve')
+            ->name('opnames.reject');
+        Route::get('/write-offs/create', [StockOpnameController::class, 'writeOffCreate'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('write-offs.create');
+        Route::post('/write-offs', [StockOpnameController::class, 'writeOffStore'])
+            ->middleware('can:inventory.opname.manage')
+            ->name('write-offs.store');
+        Route::post('/write-offs/{stockWriteOff}/approve', [StockOpnameController::class, 'writeOffApprove'])
+            ->middleware('can:inventory.opname.approve')
+            ->name('write-offs.approve');
+
         Route::get('/stock-policies', [StockPolicyController::class, 'index'])
             ->middleware('can:inventory.stock.manage')
             ->name('stock-policies.index');

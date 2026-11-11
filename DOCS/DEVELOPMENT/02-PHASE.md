@@ -423,16 +423,16 @@
 
 ### Phase 14 — Stock Opname, Mutasi & Write-off
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 8, Phase 9
 
 **Checklist:**
-- [ ] Migrasi `stock_opnames`, `stock_opname_items`, `stock_write_offs`.
-- [ ] Pembuatan opname + snapshot stok sistem.
-- [ ] Input fisik + perhitungan selisih.
-- [ ] Submit/approve/reject + mutasi `opname_adjust`.
-- [ ] Write-off barang rusak/ED + `loss_amount`.
-- [ ] Riwayat opname + filter.
+- [x] Migrasi `stock_opnames`, `stock_opname_items`, `stock_write_offs`.
+- [x] Pembuatan opname + snapshot stok sistem.
+- [x] Input fisik + perhitungan selisih.
+- [x] Submit/approve/reject + mutasi `opname_adjust`.
+- [x] Write-off barang rusak/ED + `loss_amount`.
+- [x] Riwayat opname + filter.
 
 **Acceptance criteria:**
 - Snapshot dan selisih benar.
@@ -440,8 +440,18 @@
 - Pelaksana/penyetuju/tanggal tercatat.
 - Write-off mengurangi stok dan mencatat kerugian.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Inventory/Services/StockOpnameService.php`
+- `app/Modules/Inventory/Models/StockOpname.php`
+- `app/Modules/Inventory/Models/StockOpnameItem.php`
+- `app/Modules/Inventory/Models/StockWriteOff.php`
+- `database/migrations/2026_11_11_215620_create_stock_opname_and_write_off_tables.php`
+- `tests/Feature/StockOpnameTest.php`
+- `php artisan test --compact` — 104 tests passed, 679 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan/blocker:** Verifikasi `php artisan migrate` terhadap MySQL lokal tetap menunggu service MySQL 127.0.0.1:3306 aktif; suite SQLite melewati migrasi baru.
 
 ---
 
