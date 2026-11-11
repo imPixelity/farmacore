@@ -106,12 +106,12 @@
 - [x] Tulis README setup dan perintah umum.
 
 **Acceptance criteria:**
-- [x] Route aplikasi merespons sukses pada feature test dan asset berhasil dibuild.
+- [x] `php artisan serve` merespons HTTP 200 dan asset berhasil dibuild.
 - [x] Koneksi MySQL berhasil dan migrasi dasar berjalan.
 - [x] Struktur modul dan layout dasar tersedia.
 - [x] Test suite dasar berjalan hijau.
 
-**Evidence:** Laravel Framework 13.42.0; koneksi MySQL ke database `farmacore`; `php artisan migrate --no-interaction` menjalankan tiga migrasi dasar; `php artisan migrate:status` menunjukkan seluruh migrasi berstatus Ran; `php artisan test --compact` (2 test lulus); `npm run build` sukses; `vendor/bin/pint --dirty --format agent` lulus.
+**Evidence:** Laravel Framework 13.42.0; `php artisan serve` smoke test HTTP 200; koneksi MySQL ke database `farmacore`; `php artisan migrate --no-interaction` menjalankan tiga migrasi dasar; `php artisan migrate:status` menunjukkan seluruh migrasi berstatus Ran; `php artisan test --compact` (2 test lulus); `npm run build` sukses; `vendor/bin/pint --dirty --format agent` lulus.
 **Catatan/blocker:** Tidak ada. Database lokal `farmacore` dibuat untuk setup pengembangan setelah diketahui belum tersedia.
 
 ---
