@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 1 selesai; Phase 2 berikutnya |
+| Status proyek | Phase 2 — Done (berhenti pada batas phase; Phase 3 belum dimulai) |
 
 ---
 
@@ -37,7 +37,7 @@
 | # | Phase | Modul | Status | Progress | Mulai | Selesai | Catatan |
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
 | 1 | Fondasi Proyek & Tooling | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Acceptance criteria terpenuhi; scaffold, build, test, dan migrasi MySQL dasar terverifikasi. |
-| 2 | Auth, Pengguna & RBAC | CORE | ⬜ Not started | 0% | — | — | — |
+| 2 | Auth, Pengguna & RBAC | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Login/session, user CRUD, role/permission, bootstrap apoteker, test dan migrasi terverifikasi. |
 | 3 | Audit, Pengaturan & Infrastruktur Notifikasi | CORE | ⬜ Not started | 0% | — | — | — |
 | 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ⬜ Not started | 0% | — | — | — |
 | 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ⬜ Not started | 0% | — | — | — |
@@ -118,25 +118,26 @@
 
 ### Phase 2 — Auth, Pengguna & RBAC
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 1
 
 **Checklist:**
-- [ ] Implementasi login/logout, hash password, dan regenerasi sesi.
-- [ ] Implementasi `failed_attempts`, `locked_until`, dan rate limiting.
-- [ ] Implementasi middleware timeout sesi.
-- [ ] CRUD pengguna + nonaktifkan akun.
-- [ ] Seeder 5 peran dan permission awal.
-- [ ] Terapkan Policy/Gate dan menu berbasis permission.
+- [x] Implementasi login/logout, hash password, dan regenerasi sesi.
+- [x] Implementasi `failed_attempts`, lockout 5 kali selama 15 menit, pencatatan `login_failed`, dan rate limiting per IP+username.
+- [x] Implementasi middleware timeout sesi idle 30 menit dan pemutusan sesi akun nonaktif.
+- [x] CRUD pengguna dengan validasi, role assignment, dan nonaktifkan/aktifkan akun.
+- [x] Seeder lima peran dan 33 permission awal berdasarkan matriks usulan SRS.
+- [x] Terapkan Policy/Gate dan menu berbasis permission.
+- [x] Tambahkan command interaktif untuk membuat apoteker pertama tanpa kredensial bawaan.
 
 **Acceptance criteria:**
-- Login valid/salah berperilaku sesuai aturan dan tercatat.
-- Akun terkunci setelah batas percobaan.
-- Sesi berakhir otomatis setelah tidak aktif.
-- Pengguna tanpa permission mendapat 403 dan menu terkait tersembunyi.
+- [x] Login valid/salah berperilaku sesuai aturan; kegagalan tercatat dan password disimpan sebagai hash.
+- [x] Akun terkunci setelah lima percobaan gagal dan dapat masuk kembali setelah masa lockout.
+- [x] Sesi berakhir otomatis setelah 30 menit tidak aktif.
+- [x] Pengguna tanpa permission mendapat 403 dan tautan menu terkait tidak dirender.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `php artisan test --compact` (16 test, 110 assertion lulus); test `AuthAndUserManagementTest` mencakup login, lockout, throttle, idle/akun nonaktif, CRUD, RBAC, dan provisioning akun awal; `vendor/bin/pint --dirty --format agent` lulus; `php artisan migrate --no-interaction` dan `migrate:status` menunjukkan migrasi Phase 2 Ran pada MySQL; `php artisan db:seed --no-interaction` berhasil (5 role dengan 33/6/6/8/10 permission); `php artisan route:list --except-vendor` menampilkan 10 route; `npm run build` berhasil.
+**Catatan/blocker:** Tidak ada blocker. Matriks peran dan permission mengikuti usulan SRS §5.5 dan tetap menunggu konfirmasi apotek.
 
 ---
 
@@ -772,6 +773,8 @@
 | 11-11-2026 | Setup awal | — | Dokumen `01-MASTER-DOC.md` dan `02-PHASE.md` dibuat berdasarkan URS, SRS, dan SDD. Seluruh 28 phase berstatus Not started. |
 | 11-11-2026 | Agent | 1 | Scaffold Laravel 13, Livewire 4, Tailwind, layout dasar, skeleton modul, README, dan test/tooling. Phase 1 awalnya Blocked karena database MySQL `farmacore` belum tersedia. |
 | 11-11-2026 | Agent | 1 | Membuat database lokal `farmacore`, menjalankan dan memverifikasi seluruh migrasi dasar MySQL, mengulang test suite (2 lulus), serta memastikan build aset berhasil. Seluruh acceptance criteria Phase 1 terpenuhi; status Done. |
+| 11-11-2026 | Agent | 2 | Memulai Phase 2 setelah Phase 1 Done; scope dan ketentuan auth, user management, dan RBAC ditinjau. |
+| 11-11-2026 | Agent | 2 | Menyelesaikan autentikasi, lockout/rate limit, timeout sesi, user CRUD, seeder lima role/33 permission, Policy/Gate, menu permission, dan bootstrap apoteker interaktif; 16 test lulus, migrasi MySQL dan build terverifikasi. Phase 2 Done; berhenti sebelum Phase 3. |
 
 ---
 

@@ -38,15 +38,23 @@
                         <span class="grid size-8 place-items-center rounded-lg bg-white text-emerald-700">⌂</span>
                         Ringkasan
                     </a>
+                    @can('viewAny', App\Models\User::class)
+                        <a href="{{ route('users.index') }}" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">U</span>
+                            Pengguna
+                        </a>
+                    @endcan
                     <p class="mb-3 mt-8 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Modul</p>
-                    @foreach (['Penjualan', 'Persediaan', 'Pembelian', 'Data master', 'Resep & layanan', 'Laporan'] as $module)
-                        <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true">
-                            <span class="flex items-center gap-3">
-                                <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-400">·</span>
-                                {{ $module }}
-                            </span>
-                            <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Segera</span>
-                        </button>
+                    @foreach ([['Penjualan', 'pos.sale.view'], ['Persediaan', 'inventory.stock.view'], ['Pembelian', 'purchasing.po.manage'], ['Data master', 'md.item.view'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
+                        @can($permission)
+                            <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true">
+                                <span class="flex items-center gap-3">
+                                    <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-400">·</span>
+                                    {{ $module }}
+                                </span>
+                                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Segera</span>
+                            </button>
+                        @endcan
                     @endforeach
                 </nav>
 
@@ -74,10 +82,16 @@
                             <h1 class="mt-1 text-lg font-bold tracking-tight text-slate-950">@yield('page-heading', 'Ringkasan')</h1>
                         </div>
                     </div>
-                    <div class="hidden items-center gap-3 sm:flex">
-                        <span class="size-2 rounded-full bg-emerald-500"></span>
-                        <span class="text-sm font-medium text-slate-600">Lingkungan pengembangan</span>
-                        <span class="grid size-10 place-items-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-800">FC</span>
+                    <div class="flex items-center gap-3">
+                        @auth
+                            <span class="hidden text-sm font-medium text-slate-600 sm:inline">{{ auth()->user()->name }}</span>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50">Keluar</button>
+                            </form>
+                        @else
+                            <a href="{{ route('login') }}" class="rounded-xl bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Masuk</a>
+                        @endauth
                     </div>
                 </header>
 
