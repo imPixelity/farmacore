@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Md\ItemRequest;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\ItemCategory;
+use App\Modules\Md\Models\TaxRule;
 use App\Modules\Md\Models\Unit;
 use App\Modules\Md\Services\MasterDataService;
 use Illuminate\Http\RedirectResponse;
@@ -84,6 +85,7 @@ class ItemController extends Controller
             'item' => $item,
             'categories' => ItemCategory::query()->active()->orderBy('type')->orderBy('name')->get(),
             'units' => Unit::query()->active()->orderBy('name')->get(),
+            'taxRules' => TaxRule::query()->get()->keyBy('item_type'),
         ];
     }
 }

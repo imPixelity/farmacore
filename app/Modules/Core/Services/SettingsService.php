@@ -47,8 +47,8 @@ class SettingsService
         'price_rounding_step' => [
             'label' => 'Langkah pembulatan harga',
             'type' => 'number',
-            'default' => null,
-            'help' => 'Dibiarkan kosong sampai kebijakan harga ditetapkan.',
+            'default' => 1,
+            'help' => 'Harga jual dibulatkan ke kelipatan nilai ini; default Rp 1.',
         ],
         'usage_average_months' => [
             'label' => 'Periode rata-rata pemakaian (bulan)',

@@ -5,13 +5,16 @@ use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
 use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
+use App\Http\Controllers\Md\DiscountRuleController;
 use App\Http\Controllers\Md\DoctorController;
 use App\Http\Controllers\Md\HealthServiceController;
 use App\Http\Controllers\Md\ItemCategoryController;
 use App\Http\Controllers\Md\ItemController;
 use App\Http\Controllers\Md\PatientController;
 use App\Http\Controllers\Md\PharmacyStaffController;
+use App\Http\Controllers\Md\PricingController;
 use App\Http\Controllers\Md\SupplierController;
+use App\Http\Controllers\Md\TaxController;
 use App\Http\Controllers\Md\UnitController;
 use App\Http\Middleware\EnsureActiveSession;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +100,22 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/health-services/{healthService}/edit', [HealthServiceController::class, 'edit'])->middleware('can:md.item.manage')->name('health-services.edit');
         Route::put('/health-services/{healthService}', [HealthServiceController::class, 'update'])->middleware('can:md.item.manage')->name('health-services.update');
         Route::patch('/health-services/{healthService}/status', [HealthServiceController::class, 'updateStatus'])->middleware('can:md.item.manage')->name('health-services.status');
+
+        Route::get('/prices', [PricingController::class, 'index'])->middleware('can:md.price.manage')->name('prices.index');
+        Route::get('/margins', [PricingController::class, 'margins'])->middleware('can:md.price.manage')->name('margins.index');
+        Route::post('/margins', [PricingController::class, 'storeMargin'])->middleware('can:md.price.manage')->name('margins.store');
+
+        Route::get('/taxes', [TaxController::class, 'index'])->middleware('can:md.price.manage')->name('taxes.index');
+        Route::post('/taxes/rates', [TaxController::class, 'storeSetting'])->middleware('can:md.price.manage')->name('taxes.rates.store');
+        Route::post('/taxes/rules', [TaxController::class, 'storeRule'])->middleware('can:md.price.manage')->name('taxes.rules.store');
+        Route::put('/taxes/rules/{taxRule}', [TaxController::class, 'updateRule'])->middleware('can:md.price.manage')->name('taxes.rules.update');
+
+        Route::get('/discounts', [DiscountRuleController::class, 'index'])->middleware('can:md.price.manage')->name('discounts.index');
+        Route::get('/discounts/create', [DiscountRuleController::class, 'create'])->middleware('can:md.price.manage')->name('discounts.create');
+        Route::post('/discounts', [DiscountRuleController::class, 'store'])->middleware('can:md.price.manage')->name('discounts.store');
+        Route::get('/discounts/{discountRule}/edit', [DiscountRuleController::class, 'edit'])->middleware('can:md.price.manage')->name('discounts.edit');
+        Route::put('/discounts/{discountRule}', [DiscountRuleController::class, 'update'])->middleware('can:md.price.manage')->name('discounts.update');
+        Route::patch('/discounts/{discountRule}/status', [DiscountRuleController::class, 'updateStatus'])->middleware('can:md.price.manage')->name('discounts.status');
     });
 
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])

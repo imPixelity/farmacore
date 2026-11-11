@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 5 — In progress (jangan mulai Phase 6 sebelum Phase 5 selesai) |
+| Status proyek | Phase 6 — Done (berhenti di sini; tunggu instruksi sebelum Phase 7) |
 
 ---
 
@@ -41,7 +41,7 @@
 | 3 | Audit, Pengaturan & Infrastruktur Notifikasi | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Audit, settings ter-cache dan dinamis, serta notifikasi deduplikasi terverifikasi. |
 | 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | CRUD/master item, konversi, validasi barcode, audit, authorization, UI, migrasi MySQL dan test terverifikasi. |
 | 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Seluruh master, masking/otorisasi pasien, relasi akun tenaga farmasi, audit, migrasi MySQL, test dan build terverifikasi. |
-| 6 | Harga, Margin, Diskon & Pajak | MD | ⬜ Not started | 0% | — | — | — |
+| 6 | Harga, Margin, Diskon & Pajak | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | PricingService, histori harga, margin berprioritas, tarif/default PPN, TaxService, DiscountService, UI, otorisasi, audit, migrasi MySQL, 54 test, Pint, build dan diff check terverifikasi. Nilai margin/tarif belum diasumsikan; HNA diperbarui pada Phase 9. |
 | 7 | Kas/Bank & Financial Posting | ACC | ⬜ Not started | 0% | — | — | — |
 | 8 | Stok per Batch & StockService | INV | ⬜ Not started | 0% | — | — | — |
 | 9 | Penerimaan Barang | INV | ⬜ Not started | 0% | — | — | — |
@@ -215,25 +215,32 @@
 
 ### Phase 6 — Harga, Margin, Diskon & Pajak
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 4
 
 **Checklist:**
-- [ ] Migrasi `item_prices`, `margin_settings`, `tax_settings`, `tax_rules`, `discount_rules`.
-- [ ] Implementasi `PricingService` (BR-01) + pembulatan.
-- [ ] Riwayat harga (`is_current`).
-- [ ] Prioritas margin: barang → kategori → global.
-- [ ] Implementasi `DiscountService`.
-- [ ] `TaxService` dasar untuk `tax_records`.
+- [x] Migrasi `item_prices`, `margin_settings`, `tax_settings`, `tax_rules`, `discount_rules`, dan `tax_records`; `items.hna_base` tersedia.
+- [x] Implementasi `PricingService` (BR-01) + pembulatan sesuai pengaturan.
+- [x] Riwayat harga (`is_current`) dengan satu harga current per barang/jenis penjualan.
+- [x] Prioritas margin: barang → kategori → global.
+- [x] Implementasi `DiscountService`; diskon terbesar diterapkan tanpa menumpuk aturan pada baris yang sama.
+- [x] `TaxService` dasar untuk pencatatan PPN masukan/keluaran pada `tax_records`.
 
 **Acceptance criteria:**
-- Harga beli setelah PPN dan harga jual benar per satuan terkecil.
-- Perubahan margin/HNA membuat baris harga baru.
-- Diskon terbesar dipilih; aturan tidak ditumpuk.
-- Status PPN default per jenis barang dapat diubah.
+- [x] Harga beli setelah PPN dan harga jual dihitung benar per satuan terkecil.
+- [x] Perubahan margin/HNA menghasilkan baris histori harga baru.
+- [x] Diskon terbesar dipilih; aturan tidak ditumpuk.
+- [x] Status PPN default per jenis barang dapat diubah.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- Migration MySQL: `2026_11_11_072617_create_pricing_tax_discount_tables` dan `2026_11_11_072618_add_hna_base_to_items_table` — keduanya berstatus Ran; verifikasi schema mengonfirmasi enam tabel harga/pajak/diskon dan `items.hna_base`.
+- `tests/Feature/PricingAndDiscountTest.php`: 8 test / 52 assertions; suite penuh: 54 test / 392 assertions.
+- `vendor/bin/pint --dirty --format agent`, `npm run build`, `git diff --check`, dan `php artisan migrate:status --no-interaction` lulus.
+- Route CRUD harga, margin, pajak, dan diskon terlindungi permission `md.price.manage`; tes otorisasi dan audit tersedia.
+
+**Catatan/blocker:**
+- Tidak ada nilai tarif PPN atau margin bisnis yang diasumsikan/di-seed; apoteker mengonfigurasinya. Default status PPN per tipe barang juga diatur melalui layar pajak.
+- `hna_base` awal bernilai 0 dan belum ada form input HNA. HNA akan diperbarui oleh alur penerimaan barang Phase 9; harga baru terbentuk saat HNA, margin, dan tarif yang diperlukan tersedia. Bukan blocker untuk phase ini.
 
 ---
 
@@ -781,6 +788,8 @@
 | 11-11-2026 | Agent | 4 | Menyelesaikan kategori, satuan, barang, konversi langsung ke unit dasar, barcode dan pencarian; seluruh perubahan diaudit, akses dibatasi permission, hard-delete tidak disediakan. Migrasi MySQL berhasil; suite test, Pint, build, dan pemeriksaan diff lulus. Phase 4 Done; berhenti sebelum Phase 5. |
 | 11-11-2026 | Agent | 5 | Memulai Phase 5 setelah Phase 4 Done; scope master mitra, tenaga farmasi, dan privasi data pasien ditinjau. |
 | 11-11-2026 | Agent | 5 | Menyelesaikan supplier/PBF, pasien, dokter, tenaga farmasi, dan layanan pemeriksaan; data sensitif pasien dimasking dan audit meredaksi nilai sensitif, akses serta pencarian identitas dibatasi permission. Migrasi MySQL, 46 test/340 assertion, Pint, build, route, dan diff check terverifikasi. Phase 5 Done; berhenti sebelum Phase 6. |
+| 11-11-2026 | Agent | 6 | Memulai Phase 6 setelah Phase 5 Done; formula BR-01, pengaturan pajak, prioritas margin, dan kebijakan pemilihan diskon ditinjau. |
+| 11-11-2026 | Agent | 6 | Phase 6 selesai: histori harga BR-01, margin berprioritas, aturan diskon, pengaturan/default PPN, dan pencatatan `tax_records` diimplementasikan. Migrasi MySQL, schema, 54 test/392 assertion, Pint, build, route, dan diff check terverifikasi. Tarif/margin tidak diasumsikan; HNA ditangani pada Phase 9. Berhenti sebelum Phase 7 sesuai alur per-phase. |
 
 ---
 

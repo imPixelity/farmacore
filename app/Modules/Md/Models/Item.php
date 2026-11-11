@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'code', 'item_type', 'name', 'dosage_form', 'strength_volume', 'category_id',
-    'base_unit_id', 'order_unit_id', 'barcode', 'is_taxable', 'is_active', 'created_by', 'updated_by',
+    'base_unit_id', 'order_unit_id', 'barcode', 'is_taxable', 'hna_base', 'is_active', 'created_by', 'updated_by',
 ])]
 #[UseFactory(ItemFactory::class)]
 class Item extends Model
@@ -28,6 +28,7 @@ class Item extends Model
     {
         return [
             'is_taxable' => 'boolean',
+            'hna_base' => 'decimal:4',
             'is_active' => 'boolean',
         ];
     }
@@ -51,6 +52,11 @@ class Item extends Model
     public function orderUnit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'order_unit_id');
+    }
+
+    public function prices(): HasMany
+    {
+        return $this->hasMany(ItemPrice::class);
     }
 
     public function itemUnits(): HasMany

@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class MasterDataService
 {
+    public function __construct(private PricingService $pricingService) {}
+
     /** @param array<string, mixed> $data */
     public function saveCategory(array $data, ?ItemCategory $category = null): ItemCategory
     {
@@ -190,6 +192,8 @@ class MasterDataService
             foreach ($existingConversions as $conversion) {
                 $conversion->delete();
             }
+
+            $this->pricingService->recalculateItem($item);
 
             return $item->load(['category', 'baseUnit', 'orderUnit', 'itemUnits.unit']);
         });
