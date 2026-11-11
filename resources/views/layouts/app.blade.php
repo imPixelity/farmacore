@@ -134,11 +134,12 @@
                         <a href="{{ route('rx.patient-history.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">H</span>Riwayat pasien</a>
                         <a href="{{ route('rx.staff-activity.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">A</span>Aktivitas farmasi</a>
                     @endcan
-                    @foreach ([['Penjualan', 'pos.sale.view'], ['Laporan', 'report.view.sales']] as [$module, $permission])
-                        @can($permission)
-                            <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true"><span class="flex items-center gap-3"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-400">·</span>{{ $module }}</span><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Segera</span></button>
-                        @endcan
-                    @endforeach
+                    @can('pos.sale.view')
+                        <a href="{{ route('pos.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">J</span>Penjualan</a>
+                    @endcan
+                    @can('report.view.sales')
+                        <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true"><span class="flex items-center gap-3"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-400">·</span>Laporan</span><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Segera</span></button>
+                    @endcan
                 </nav>
 
                 <div class="border-t border-slate-100 p-5">

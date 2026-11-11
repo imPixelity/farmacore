@@ -553,17 +553,17 @@
 
 ### Phase 18 — Keranjang, Harga & Diskon POS
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 6, Phase 8, Phase 16
 
 **Checklist:**
-- [ ] Komponen `PosScreen` + state keranjang.
-- [ ] Pilih jenis penjualan, termasuk memuat resep terverifikasi.
-- [ ] Input barcode + pencarian nama/kategori.
-- [ ] Cek stok tersedia saat menambah item.
-- [ ] Harga per jenis penjualan.
-- [ ] Diskon otomatis + total real-time.
-- [ ] Pintasan keyboard dasar.
+- [x] Komponen `PosScreen` + state keranjang.
+- [x] Pilih jenis penjualan, termasuk memuat resep terverifikasi.
+- [x] Input barcode + pencarian nama/kategori.
+- [x] Cek stok tersedia saat menambah item.
+- [x] Harga per jenis penjualan.
+- [x] Diskon otomatis + total real-time.
+- [x] Pintasan keyboard dasar.
 
 **Acceptance criteria:**
 - Pencarian/barcode < 2 detik.
@@ -571,8 +571,19 @@
 - Stok kurang menolak item.
 - Total dan diskon dihitung ulang otomatis.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Pos/Services/PosCartService.php`
+- `app/Livewire/Pos/PosScreen.php`
+- `resources/views/livewire/pos/pos-screen.blade.php`
+- `routes/web.php` (`pos.index`)
+- `tests/Feature/PosCartTest.php`
+- `php artisan test --compact tests/Feature/PosCartTest.php` — 5 tests passed, 19 assertions
+- `php artisan test --compact` — 117 tests passed, 740 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+- `php artisan route:list --path=pos --except-vendor` — route `pos.index` terdaftar
+
+**Catatan:** Cart sengaja bersifat state komponen dan belum membuat transaksi persisten. Checkout, alokasi FEFO, pembayaran, dan posting finansial tetap menjadi scope Phase 19.
 
 ---
 

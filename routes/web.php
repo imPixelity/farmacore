@@ -36,6 +36,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void {
     Route::get('/', fn () => view('welcome'))->name('home');
+    Route::get('/pos', fn () => view('pos.index'))->middleware('can:pos.sale.view')->name('pos.index');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
