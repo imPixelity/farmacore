@@ -49,6 +49,7 @@ class UserController extends Controller
         DB::transaction(function () use ($validated): void {
             $user = User::query()->create(Arr::only($validated, ['username', 'name', 'email', 'password']));
             $user->syncRoles($validated['role']);
+            $user->recordRoleChange([], [$validated['role']]);
         });
 
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil dibuat.');
@@ -77,6 +78,7 @@ class UserController extends Controller
         ]);
 
         DB::transaction(function () use ($validated, $user): void {
+            $oldRoles = $user->getRoleNames()->sort()->values()->all();
             $user->fill(Arr::only($validated, ['username', 'name', 'email']));
 
             if (filled($validated['password'] ?? null)) {
@@ -85,6 +87,7 @@ class UserController extends Controller
 
             $user->save();
             $user->syncRoles($validated['role']);
+            $user->recordRoleChange($oldRoles, [$validated['role']]);
         });
 
         return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui.');

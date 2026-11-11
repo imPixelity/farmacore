@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 2 — Done (berhenti pada batas phase; Phase 3 belum dimulai) |
+| Status proyek | Phase 3 — Done (berhenti pada batas phase; Phase 4 belum dimulai) |
 
 ---
 
@@ -38,7 +38,7 @@
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
 | 1 | Fondasi Proyek & Tooling | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Acceptance criteria terpenuhi; scaffold, build, test, dan migrasi MySQL dasar terverifikasi. |
 | 2 | Auth, Pengguna & RBAC | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Login/session, user CRUD, role/permission, bootstrap apoteker, test dan migrasi terverifikasi. |
-| 3 | Audit, Pengaturan & Infrastruktur Notifikasi | CORE | ⬜ Not started | 0% | — | — | — |
+| 3 | Audit, Pengaturan & Infrastruktur Notifikasi | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Audit, settings ter-cache dan dinamis, serta notifikasi deduplikasi terverifikasi. |
 | 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ⬜ Not started | 0% | — | — | — |
 | 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ⬜ Not started | 0% | — | — | — |
 | 6 | Harga, Margin, Diskon & Pajak | MD | ⬜ Not started | 0% | — | — | — |
@@ -143,24 +143,25 @@
 
 ### Phase 3 — Audit, Pengaturan & Infrastruktur Notifikasi
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 2
 
 **Checklist:**
-- [ ] Migrasi `audit_logs` + trait `Auditable` pada model penting.
-- [ ] Viewer audit log (read-only, filter).
-- [ ] Migrasi `app_settings` + `SettingsService` dengan cache.
-- [ ] `NotificationService` + tabel notifikasi + deduplikasi.
-- [ ] Lonceng notifikasi dan kerangka dasbor.
+- [x] Migrasi `audit_logs` + trait `Auditable` pada `User` dan `AppSetting`; perubahan role juga tercatat.
+- [x] Viewer audit log read-only dengan filter event, aktor, jenis data, dan rentang tanggal.
+- [x] Migrasi `app_settings` + `SettingsService` dengan cache dan invalidasi; login lockout/rate limit serta timeout sesi memakai nilai pengaturan.
+- [x] `NotificationService` + tabel notifikasi dengan deduplikasi per penerima, tipe, entitas, dan hari.
+- [x] Lonceng notifikasi, aksi tandai dibaca yang dibatasi ke pemilik, serta ringkasan notifikasi di dasbor.
 
 **Acceptance criteria:**
-- Perubahan model penting menulis audit dengan pengguna dan waktu.
-- Tidak ada route update/delete untuk audit log.
-- Pengaturan dapat dibaca/ditulis dan ter-cache.
-- Notifikasi tersimpan, dapat ditandai dibaca, dan tidak duplikat.
+- [x] Create/update/delete model tercatat dengan aktor/waktu; password dan token tidak masuk audit.
+- [x] Audit log hanya memiliki route GET; update/delete ditolak.
+- [x] Pengaturan dapat dibaca/ditulis, ter-cache, dan cache dibersihkan setelah perubahan.
+- [x] Notifikasi tersimpan, dapat ditandai dibaca oleh pemilik, dan pengiriman duplikat pada hari yang sama dicegah.
+- [x] Ringkasan jumlah belum dibaca dan notifikasi terbaru tampil di dasbor.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `2026_11_11_061438_create_core_foundation_tables` berjalan pada MySQL dan `migrate:status` berstatus Ran; `db:seed` berhasil dua kali tanpa menggandakan tiga setting default (36 permission untuk apoteker, role lain tetap sesuai matriks); `php artisan route:list --except-vendor` menampilkan route audit GET saja; `php artisan test --compact` (26 test, 175 assertion lulus), termasuk `CoreAuditAndSettingsTest`, `NotificationCenterTest`, dan regresi `AuthAndUserManagementTest`; `vendor/bin/pint --dirty --format agent`, `npm run build`, dan `git diff --check` lulus.
+**Catatan/blocker:** Tidak ada blocker. Matriks role tetap mengikuti usulan SRS §5.5 dan masih menunggu konfirmasi apotek.
 
 ---
 
@@ -775,6 +776,7 @@
 | 11-11-2026 | Agent | 1 | Membuat database lokal `farmacore`, menjalankan dan memverifikasi seluruh migrasi dasar MySQL, mengulang test suite (2 lulus), serta memastikan build aset berhasil. Seluruh acceptance criteria Phase 1 terpenuhi; status Done. |
 | 11-11-2026 | Agent | 2 | Memulai Phase 2 setelah Phase 1 Done; scope dan ketentuan auth, user management, dan RBAC ditinjau. |
 | 11-11-2026 | Agent | 2 | Menyelesaikan autentikasi, lockout/rate limit, timeout sesi, user CRUD, seeder lima role/33 permission, Policy/Gate, menu permission, dan bootstrap apoteker interaktif; 16 test lulus, migrasi MySQL dan build terverifikasi. Phase 2 Done; berhenti sebelum Phase 3. |
+| 11-11-2026 | Agent | 3 | Menyelesaikan audit append-only (termasuk role), viewer filter, settings ter-cache/dinamis, dan notifikasi dengan deduplikasi serta read state per-user; 26 test/175 assertion lulus, migrasi dan seeder MySQL, Pint, serta build terverifikasi. Phase 3 Done; berhenti sebelum Phase 4. |
 
 ---
 

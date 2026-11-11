@@ -9,9 +9,14 @@ use Illuminate\Support\Facades\Log;
 
 class AuthService
 {
+    public function __construct(private SettingsService $settings) {}
+
     public function attempt(string $username, string $password, ?string $ipAddress): ?User
     {
-        return DB::transaction(function () use ($username, $password, $ipAddress): ?User {
+        $maxAttempts = (int) $this->settings->get('login_max_attempts', 5);
+        $lockoutMinutes = (int) $this->settings->get('login_lockout_minutes', 15);
+
+        return DB::transaction(function () use ($username, $password, $ipAddress, $maxAttempts, $lockoutMinutes): ?User {
             $user = User::query()
                 ->where('username', $username)
                 ->lockForUpdate()
@@ -31,8 +36,8 @@ class AuthService
             if (! Hash::check($password, $user->password)) {
                 $user->failed_attempts++;
 
-                if ($user->failed_attempts >= 5) {
-                    $user->locked_until = now()->addMinutes(15);
+                if ($user->failed_attempts >= $maxAttempts) {
+                    $user->locked_until = now()->addMinutes($lockoutMinutes);
                 }
 
                 $user->save();

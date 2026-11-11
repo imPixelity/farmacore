@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Modules\Core\Services\SettingsService;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -9,6 +10,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureActiveSession
 {
+    public function __construct(private SettingsService $settings) {}
+
     /**
      * Handle an incoming request.
      *
@@ -19,7 +22,9 @@ class EnsureActiveSession
         $user = $request->user();
         $lastActivityAt = $request->session()->get('last_activity_at');
 
-        if (! $user->is_active || ($lastActivityAt !== null && now()->timestamp - (int) $lastActivityAt >= 1800)) {
+        $sessionTimeoutMinutes = (int) $this->settings->get('session_timeout_minutes', 30);
+
+        if (! $user->is_active || ($lastActivityAt !== null && now()->timestamp - (int) $lastActivityAt >= $sessionTimeoutMinutes * 60)) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();

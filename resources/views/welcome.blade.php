@@ -82,4 +82,33 @@
             </p>
         </aside>
     </section>
+
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="notifications-heading">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+                <p class="text-sm font-medium text-emerald-700">Pusat notifikasi</p>
+                <h2 id="notifications-heading" class="mt-1 text-lg font-bold tracking-tight text-slate-950">Ringkasan notifikasi</h2>
+            </div>
+            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">{{ $notificationSummary['unreadCount'] }} belum dibaca</span>
+        </div>
+        <ul class="mt-4 divide-y divide-slate-100">
+            @forelse ($notificationSummary['items'] as $notification)
+                <li class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                    <div>
+                        <p class="text-sm font-medium text-slate-800">{{ data_get($notification->data, 'message', 'Notifikasi baru') }}</p>
+                        <p class="mt-1 text-xs text-slate-500">{{ $notification->created_at->diffForHumans() }}</p>
+                    </div>
+                    @if (! $notification->read_at)
+                        <form method="POST" action="{{ route('notifications.read', $notification->id) }}">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950">Tandai dibaca</button>
+                        </form>
+                    @endif
+                </li>
+            @empty
+                <li class="py-3 text-sm text-slate-500">Belum ada notifikasi.</li>
+            @endforelse
+        </ul>
+    </section>
 @endsection

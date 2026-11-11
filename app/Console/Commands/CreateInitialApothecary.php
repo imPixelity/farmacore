@@ -60,6 +60,7 @@ class CreateInitialApothecary extends Command
             ]);
 
             $user->assignRole($role);
+            $user->recordRoleChange([], [$role->name]);
         });
 
         $this->info('Akun apoteker awal berhasil dibuat.');

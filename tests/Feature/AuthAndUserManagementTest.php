@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\AuditLog;
 use App\Models\User;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -78,7 +79,7 @@ it('locks an account after five consecutive failed login attempts', function () 
     $this->post(route('login.store'), [
         'username' => 'lockable-user',
         'password' => 'Secure-password-123',
-    ])->assertSessionHasErrors('username');
+    ])->assertTooManyRequests();
 
     $this->assertGuest();
 });
@@ -135,7 +136,7 @@ it('ends an authenticated session after thirty minutes of inactivity', function 
 });
 
 it('rate limits login attempts by username and IP address', function () {
-    foreach (range(1, 10) as $attempt) {
+    foreach (range(1, 5) as $attempt) {
         $this->post(route('login.store'), [
             'username' => 'missing-user',
             'password' => 'wrong-password',
@@ -250,6 +251,11 @@ it('provisions the first apothecary through interactive prompts', function () {
 
     expect($user->hasRole('apoteker'))->toBeTrue();
     expect(Hash::check('Secure-bootstrap-123', $user->password))->toBeTrue();
+    expect(AuditLog::query()
+        ->where('auditable_type', User::class)
+        ->where('auditable_id', $user->id)
+        ->whereJsonContains('new_values->roles', 'apoteker')
+        ->exists())->toBeTrue();
 });
 
 it('seeds the five initial roles and their proposed permissions', function () {

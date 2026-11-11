@@ -44,6 +44,18 @@
                             Pengguna
                         </a>
                     @endcan
+                    @can('core.audit.view')
+                        <a href="{{ route('audit-logs.index') }}" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">A</span>
+                            Audit log
+                        </a>
+                    @endcan
+                    @can('core.settings.view')
+                        <a href="{{ route('settings.index') }}" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">⚙</span>
+                            Pengaturan
+                        </a>
+                    @endcan
                     <p class="mb-3 mt-8 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Modul</p>
                     @foreach ([['Penjualan', 'pos.sale.view'], ['Persediaan', 'inventory.stock.view'], ['Pembelian', 'purchasing.po.manage'], ['Data master', 'md.item.view'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
                         @can($permission)
@@ -84,6 +96,38 @@
                     </div>
                     <div class="flex items-center gap-3">
                         @auth
+                            <details class="relative">
+                                <summary class="flex cursor-pointer list-none items-center gap-2 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50" aria-label="Notifikasi">
+                                    <span aria-hidden="true">🔔</span>
+                                    <span class="hidden sm:inline">Notifikasi</span>
+                                    @if ($notificationSummary['unreadCount'] > 0)
+                                        <span class="grid min-w-5 place-items-center rounded-full bg-rose-600 px-1.5 py-0.5 text-[10px] font-bold text-white">{{ $notificationSummary['unreadCount'] }}</span>
+                                    @endif
+                                </summary>
+                                <div class="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-slate-200 bg-white p-3 shadow-xl">
+                                    <div class="flex items-center justify-between px-2 py-1">
+                                        <p class="text-sm font-bold text-slate-900">Notifikasi terbaru</p>
+                                        <span class="text-xs text-slate-500">{{ $notificationSummary['unreadCount'] }} belum dibaca</span>
+                                    </div>
+                                    <div class="mt-2 grid gap-2">
+                                        @forelse ($notificationSummary['items'] as $notification)
+                                            <div class="rounded-xl {{ $notification->read_at ? 'bg-slate-50' : 'bg-emerald-50' }} p-3">
+                                                <p class="text-sm text-slate-800">{{ data_get($notification->data, 'message', 'Notifikasi baru') }}</p>
+                                                <p class="mt-1 text-xs text-slate-500">{{ $notification->created_at->diffForHumans() }}</p>
+                                                @if (! $notification->read_at)
+                                                    <form method="POST" action="{{ route('notifications.read', $notification->id) }}" class="mt-2">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button type="submit" class="text-xs font-semibold text-emerald-800 hover:text-emerald-950">Tandai dibaca</button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                        @empty
+                                            <p class="px-2 py-4 text-sm text-slate-500">Belum ada notifikasi.</p>
+                                        @endforelse
+                                    </div>
+                                </div>
+                            </details>
                             <span class="hidden text-sm font-medium text-slate-600 sm:inline">{{ auth()->user()->name }}</span>
                             <form method="POST" action="{{ route('logout') }}">
                                 @csrf
