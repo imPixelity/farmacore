@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 9 — Done (berhenti; Phase 10 belum dimulai) |
+| Status proyek | Phase 11 — Done (berhenti; Phase 12 belum dimulai) |
 
 ---
 
@@ -45,8 +45,8 @@
 | 7 | Kas/Bank & Financial Posting | ACC | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Ledger kas/bank, kategori, posting tunggal, form pengeluaran, reversal, dan guard saldo negatif selesai; migrasi MySQL, test, Pint, dan build terverifikasi. |
 | 8 | Stok per Batch & StockService | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Stok batch dan ledger append-only diposting melalui StockService dengan row lock; CHECK non-negatif, agregasi unit, rincian batch/ED, otorisasi, migrasi, test, dan build terverifikasi. |
 | 9 | Penerimaan Barang | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Draft, peringatan faktur duplikat, validasi/approval ED, diskon dan PPN, konfirmasi atomik stok/HNA/harga/payable/kas/pajak, audit, serta immutability terverifikasi. |
-| 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ⬜ Not started | 0% | — | — | — |
-| 11 | Perencanaan Pembelian & Purchase Order | PUR | ⬜ Not started | 0% | — | — | — |
+| 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Kebijakan, ROP, buffer, notifikasi, monitor ED, dan blok batch kedaluwarsa terverifikasi. |
+| 11 | Perencanaan Pembelian & Purchase Order | PUR | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Rekomendasi ROP, draft PO, estimasi total, transisi kirim, immutability, audit, UI, migrasi, dan authorization terverifikasi. |
 | 12 | Pencocokan Penerimaan & Evaluasi Supplier | PUR | ⬜ Not started | 0% | — | — | — |
 | 13 | Utang Supplier & Pembayaran | PUR | ⬜ Not started | 0% | — | — | — |
 | 14 | Stock Opname, Mutasi & Write-off | INV | ⬜ Not started | 0% | — | — | — |
@@ -343,24 +343,24 @@
 
 ### Phase 11 — Perencanaan Pembelian & Purchase Order
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-11 · **Selesai:** 2026-11-11
 **Dependency:** Phase 10
 
 **Checklist:**
-- [ ] Migrasi `purchase_orders` + `purchase_order_items`.
-- [ ] Layar perencanaan + rekomendasi jumlah.
-- [ ] Form PO + estimasi total.
-- [ ] Transisi status PO + `sent_at`.
-- [ ] Audit perubahan status.
+- [x] Migrasi `purchase_orders` + `purchase_order_items`.
+- [x] Layar perencanaan + rekomendasi jumlah.
+- [x] Form PO + estimasi total.
+- [x] Transisi status PO + `sent_at`.
+- [x] Audit perubahan status.
 
 **Acceptance criteria:**
-- Barang <= ROP tampil dengan rekomendasi.
-- Rekomendasi dapat diubah sebelum PO dibuat.
-- Status PO mengikuti alur yang ditentukan.
-- PO terkirim tidak dapat diedit.
+- [x] Barang <= ROP tampil dengan rekomendasi.
+- [x] Rekomendasi dapat diubah sebelum PO dibuat.
+- [x] Status PO mengikuti alur draft → sent; status penerimaan lanjutan disiapkan untuk Phase 12.
+- [x] PO terkirim tidak dapat diedit.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `database/migrations/2026_11_11_094025_create_purchase_order_tables.php`, `app/Modules/Purchasing/Services/PurchaseOrderService.php`, `app/Http/Controllers/Purchasing/PurchaseOrderController.php`, `tests/Feature/PurchaseOrderTest.php` (4 test/17 assertion), suite penuh (95 test/629 assertion), migration MariaDB, 7 route purchasing, Pint, build, dan `git diff --check` lulus.
+**Catatan/blocker:** Status `partially_received`, `received`, `completed`, dan `cancelled` tersedia pada skema untuk alur matching Phase 12; Phase 11 hanya mengizinkan transisi draft → sent sesuai dependency dan scope master.
 
 ---
 
@@ -798,6 +798,7 @@
 | 11-11-2026 | Agent | 9 | Memulai Phase 9 setelah Phase 8 Done; scope faktur, konversi ke satuan dasar, validasi ED, diskon, PPN, konfirmasi stok/keuangan, dan immutability penerimaan terkonfirmasi ditinjau. |
 | 11-11-2026 | Agent | 9 | Phase 9 selesai: draft penerimaan, peringatan faktur duplikat, persetujuan ED, alokasi diskon + PPN, konfirmasi atomik stok/HNA/harga/utang atau kas/pajak, audit dan immutable confirmed receipt. 8 test terfokus dan suite 81 test/577 assertion, migration/schema MariaDB, route, Pint, build, dan diff check diverifikasi. Pest memberi empat warning tanpa detail. Commit Phase 9 dibuat; berhenti sebelum Phase 10 sesuai aturan per-phase. |
 | 11-11-2026 | Agent | 10 | Phase 10 selesai: kebijakan stok configurable, perhitungan min/buffer/ROP dan override, job berkala serta notifikasi ROP/ED, monitor/filter kedaluwarsa, dan blok penjualan batch expired. 10 test terfokus/35 assertion dan suite 91 test/612 assertion lulus; migration/schema MariaDB, 13 route, jadwal, Pint, build, dan diff check terverifikasi. Formula parameter tetap mengikuti keputusan apoteker; commit Phase 10 dibuat dan agent berhenti sebelum Phase 11. |
+| 11-11-2026 | Agent | 11 | Phase 11 selesai: perencanaan pembelian berbasis ROP, rekomendasi jumlah dengan konversi satuan, PO draft dan estimasi total, pengiriman immutable, audit perubahan status, permission, UI, dan migration selesai. 4 test terfokus/17 assertion dan suite 95 test/629 assertion lulus; migration MariaDB, 7 route, Pint, build, dan diff check terverifikasi. Berhenti sebelum Phase 12 sesuai dependency. |
 
 ---
 

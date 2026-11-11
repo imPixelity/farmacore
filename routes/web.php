@@ -21,6 +21,7 @@ use App\Http\Controllers\Md\PricingController;
 use App\Http\Controllers\Md\SupplierController;
 use App\Http\Controllers\Md\TaxController;
 use App\Http\Controllers\Md\UnitController;
+use App\Http\Controllers\Purchasing\PurchaseOrderController;
 use App\Http\Middleware\EnsureActiveSession;
 use Illuminate\Support\Facades\Route;
 
@@ -164,6 +165,16 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::put('/stock/{item}/policy', [StockController::class, 'updatePolicy'])
             ->middleware('can:inventory.stock.manage')
             ->name('stock.policy.update');
+    });
+
+    Route::prefix('purchasing')->name('purchasing.')->group(function (): void {
+        Route::get('/purchase-orders', [PurchaseOrderController::class, 'index'])->middleware('can:purchasing.po.manage')->name('purchase-orders.index');
+        Route::get('/purchase-orders/create', [PurchaseOrderController::class, 'create'])->middleware('can:purchasing.po.manage')->name('purchase-orders.create');
+        Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->middleware('can:purchasing.po.manage')->name('purchase-orders.store');
+        Route::get('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'show'])->middleware('can:purchasing.po.manage')->name('purchase-orders.show');
+        Route::get('/purchase-orders/{purchaseOrder}/edit', [PurchaseOrderController::class, 'edit'])->middleware('can:purchasing.po.manage')->name('purchase-orders.edit');
+        Route::put('/purchase-orders/{purchaseOrder}', [PurchaseOrderController::class, 'update'])->middleware('can:purchasing.po.manage')->name('purchase-orders.update');
+        Route::post('/purchase-orders/{purchaseOrder}/send', [PurchaseOrderController::class, 'send'])->middleware('can:purchasing.po.manage')->name('purchase-orders.send');
     });
 
     Route::prefix('accounting')->name('accounting.')->group(function (): void {
