@@ -57,7 +57,23 @@
                         </a>
                     @endcan
                     <p class="mb-3 mt-8 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Modul</p>
-                    @foreach ([['Penjualan', 'pos.sale.view'], ['Persediaan', 'inventory.stock.view'], ['Pembelian', 'purchasing.po.manage'], ['Data master', 'md.item.view'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
+                    @can('md.item.view')
+                        <a href="{{ route('md.items.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">M</span>
+                            Barang
+                        </a>
+                    @endcan
+                    @can('md.item.manage')
+                        <a href="{{ route('md.categories.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">K</span>
+                            Kategori
+                        </a>
+                        <a href="{{ route('md.units.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">S</span>
+                            Satuan
+                        </a>
+                    @endcan
+                    @foreach ([['Penjualan', 'pos.sale.view'], ['Persediaan', 'inventory.stock.view'], ['Pembelian', 'purchasing.po.manage'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
                         @can($permission)
                             <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true">
                                 <span class="flex items-center gap-3">

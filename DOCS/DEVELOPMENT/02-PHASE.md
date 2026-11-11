@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 3 — Done (berhenti pada batas phase; Phase 4 belum dimulai) |
+| Status proyek | Phase 4 Done; Phase 5 belum dimulai |
 
 ---
 
@@ -39,7 +39,7 @@
 | 1 | Fondasi Proyek & Tooling | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Acceptance criteria terpenuhi; scaffold, build, test, dan migrasi MySQL dasar terverifikasi. |
 | 2 | Auth, Pengguna & RBAC | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Login/session, user CRUD, role/permission, bootstrap apoteker, test dan migrasi terverifikasi. |
 | 3 | Audit, Pengaturan & Infrastruktur Notifikasi | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Audit, settings ter-cache dan dinamis, serta notifikasi deduplikasi terverifikasi. |
-| 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ⬜ Not started | 0% | — | — | — |
+| 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | CRUD/master item, konversi, validasi barcode, audit, authorization, UI, migrasi MySQL dan test terverifikasi. |
 | 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ⬜ Not started | 0% | — | — | — |
 | 6 | Harga, Margin, Diskon & Pajak | MD | ⬜ Not started | 0% | — | — | — |
 | 7 | Kas/Bank & Financial Posting | ACC | ⬜ Not started | 0% | — | — | — |
@@ -167,25 +167,25 @@
 
 ### Phase 4 — Barang, Kategori, Satuan, Konversi, Barcode
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 3
 
 **Checklist:**
-- [ ] Migrasi `item_categories`, `units`, `items`, `item_units`.
-- [ ] CRUD kategori dan satuan.
-- [ ] Form barang + validasi field wajib.
-- [ ] Editor konversi satuan (`factor_to_base`).
-- [ ] Validasi barcode unik + pencarian.
-- [ ] Nonaktifkan barang yang sudah dipakai transaksi.
+- [x] Migrasi `item_categories`, `units`, `items`, `item_units` dengan unique index, foreign key RESTRICT, dan field audit.
+- [x] CRUD kategori dan satuan tanpa hard-delete; master yang masih direferensikan tidak dapat dinonaktifkan.
+- [x] Form barang + validasi field wajib, tipe kategori, satuan aktif, dan otorisasi `md.item.manage`.
+- [x] Editor konversi langsung ke satuan dasar; faktor dasar server-side selalu `1`, faktor lainnya harus positif.
+- [x] Validasi barcode unik + pencarian nama/kode/barcode serta filter kategori/status.
+- [x] Barang dapat dinonaktifkan; tidak ada route hapus item.
 
 **Acceptance criteria:**
-- Barcode duplikat dan konversi <= 0 ditolak.
-- Satuan terkecil otomatis `factor_to_base = 1`.
-- Barang terpakai tidak dapat dihapus.
-- Perubahan master tercatat di audit.
+- [x] Barcode duplikat dan konversi <= 0 ditolak.
+- [x] Satuan terkecil otomatis `factor_to_base = 1`.
+- [x] Barang terpakai tidak dapat dihapus; tidak ada route DELETE dan status item dikelola dengan nonaktif.
+- [x] Perubahan master tercatat di audit.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `2026_11_11_064021_create_item_master_tables.php` berhasil dijalankan pada MySQL `farmacore`; `php artisan migrate:status` menunjukkan migrasi berstatus Ran; `tests/Feature/MasterDataTest.php` mencakup authorization, create/update item dan konversi, duplikasi kode/barcode, faktor nol/negatif, pencarian/filter, master CRUD, audit, pencegahan nonaktif data yang dirujuk, dan tidak adanya route hapus; `php artisan test --compact` (36 test lulus); `vendor/bin/pint --dirty --format agent` lulus; `npm run build` sukses; `git diff --check` bersih.
+**Catatan/blocker:** Default `is_taxable` dari tax rules belum diterapkan karena tax rules berada di Phase 6 dan definisinya belum tersedia. Untuk Phase 4 nilai pajak dapat ditentukan oleh apoteker; integrasi default ditunda ke Phase 6. Pemetaan kategori sementara: `obat` ke kategori `obat`, `alkes`/`non_obat` ke kategori `non_obat`.
 
 ---
 
@@ -777,6 +777,8 @@
 | 11-11-2026 | Agent | 2 | Memulai Phase 2 setelah Phase 1 Done; scope dan ketentuan auth, user management, dan RBAC ditinjau. |
 | 11-11-2026 | Agent | 2 | Menyelesaikan autentikasi, lockout/rate limit, timeout sesi, user CRUD, seeder lima role/33 permission, Policy/Gate, menu permission, dan bootstrap apoteker interaktif; 16 test lulus, migrasi MySQL dan build terverifikasi. Phase 2 Done; berhenti sebelum Phase 3. |
 | 11-11-2026 | Agent | 3 | Menyelesaikan audit append-only (termasuk role), viewer filter, settings ter-cache/dinamis, dan notifikasi dengan deduplikasi serta read state per-user; 26 test/175 assertion lulus, migrasi dan seeder MySQL, Pint, serta build terverifikasi. Phase 3 Done; berhenti sebelum Phase 4. |
+| 11-11-2026 | Agent | 4 | Memulai Phase 4 setelah Phase 3 Done; kebutuhan master data, skema, dan struktur modul ditinjau. |
+| 11-11-2026 | Agent | 4 | Menyelesaikan kategori, satuan, barang, konversi langsung ke unit dasar, barcode dan pencarian; seluruh perubahan diaudit, akses dibatasi permission, hard-delete tidak disediakan. Migrasi MySQL berhasil; suite test, Pint, build, dan pemeriksaan diff lulus. Phase 4 Done; berhenti sebelum Phase 5. |
 
 ---
 
