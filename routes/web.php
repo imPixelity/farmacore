@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Accounting\CashBankController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
@@ -116,6 +117,20 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/discounts/{discountRule}/edit', [DiscountRuleController::class, 'edit'])->middleware('can:md.price.manage')->name('discounts.edit');
         Route::put('/discounts/{discountRule}', [DiscountRuleController::class, 'update'])->middleware('can:md.price.manage')->name('discounts.update');
         Route::patch('/discounts/{discountRule}/status', [DiscountRuleController::class, 'updateStatus'])->middleware('can:md.price.manage')->name('discounts.status');
+    });
+
+    Route::prefix('accounting')->name('accounting.')->group(function (): void {
+        Route::get('/', [CashBankController::class, 'index'])
+            ->middleware('can:accounting.cash.view')
+            ->name('index');
+
+        Route::middleware('can:accounting.cash.manage')->group(function (): void {
+            Route::post('/accounts', [CashBankController::class, 'storeAccount'])->name('accounts.store');
+            Route::post('/categories', [CashBankController::class, 'storeCategory'])->name('categories.store');
+            Route::post('/expenses', [CashBankController::class, 'storeExpense'])->name('expenses.store');
+            Route::patch('/transactions/{financialTransaction}/reverse', [CashBankController::class, 'reverse'])
+                ->name('transactions.reverse');
+        });
     });
 
     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])

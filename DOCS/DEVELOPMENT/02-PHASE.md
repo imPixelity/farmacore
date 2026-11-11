@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 6 — Done (berhenti di sini; tunggu instruksi sebelum Phase 7) |
+| Status proyek | Phase 7 — Done (berhenti di sini; tunggu instruksi sebelum Phase 8) |
 
 ---
 
@@ -42,7 +42,7 @@
 | 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | CRUD/master item, konversi, validasi barcode, audit, authorization, UI, migrasi MySQL dan test terverifikasi. |
 | 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Seluruh master, masking/otorisasi pasien, relasi akun tenaga farmasi, audit, migrasi MySQL, test dan build terverifikasi. |
 | 6 | Harga, Margin, Diskon & Pajak | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | PricingService, histori harga, margin berprioritas, tarif/default PPN, TaxService, DiscountService, UI, otorisasi, audit, migrasi MySQL, 54 test, Pint, build dan diff check terverifikasi. Nilai margin/tarif belum diasumsikan; HNA diperbarui pada Phase 9. |
-| 7 | Kas/Bank & Financial Posting | ACC | ⬜ Not started | 0% | — | — | — |
+| 7 | Kas/Bank & Financial Posting | ACC | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Ledger kas/bank, kategori, posting tunggal, form pengeluaran, reversal, dan guard saldo negatif selesai; migrasi MySQL, test, Pint, dan build terverifikasi. |
 | 8 | Stok per Batch & StockService | INV | ⬜ Not started | 0% | — | — | — |
 | 9 | Penerimaan Barang | INV | ⬜ Not started | 0% | — | — | — |
 | 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ⬜ Not started | 0% | — | — | — |
@@ -246,24 +246,24 @@
 
 ### Phase 7 — Kas/Bank & Financial Posting
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 3
 
 **Checklist:**
-- [ ] Migrasi `cash_bank_accounts`, `transaction_categories`, `financial_transactions`.
-- [ ] Implementasi `FinancialPostingService` (single writer).
-- [ ] Form transaksi keuangan manual + kategori/keterangan wajib.
-- [ ] Transaksi lawan (`reverses_id`).
-- [ ] Guard saldo negatif + permission khusus.
+- [x] Migrasi `cash_bank_accounts`, `transaction_categories`, `financial_transactions`.
+- [x] Implementasi `FinancialPostingService` sebagai single writer dengan transaksi database, row lock, dan retry.
+- [x] Form akun kas/bank, kategori, dan transaksi pengeluaran manual dengan kategori/keterangan wajib.
+- [x] Transaksi lawan (`reverses_id`) dengan alasan reversal; transaksi sumber ditandai reversed tanpa mengubah/menghapus nilai ledger.
+- [x] Guard saldo negatif dengan permission khusus `accounting.cash.allow_negative`.
 
 **Acceptance criteria:**
-- Hanya `FinancialPostingService` yang menulis saldo/transaksi.
-- Saldo diperbarui dengan penguncian baris.
-- Tidak ada update/delete nilai transaksi.
-- Saldo negatif ditolak kecuali berwenang.
+- [x] Hanya `FinancialPostingService` yang menulis saldo/transaksi; model ledger menolak perubahan selain transisi reversal yang sah dan melarang penghapusan.
+- [x] Saldo diperbarui dengan penguncian baris di dalam transaksi database.
+- [x] Tidak ada update/delete nilai transaksi; koreksi melalui transaksi lawan.
+- [x] Saldo negatif ditolak kecuali pengguna memiliki permission khusus.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `2026_11_11_074548_create_financial_accounting_tables.php` berstatus Ran pada MySQL `farmacore`; `TransactionCategorySeeder` menyiapkan 12 kategori sistem. `FinancialPostingService` dan route `/accounting` memakai permission `accounting.cash.view/manage`; `tests/Feature/FinancialPostingTest.php` (9 test/52 assertions) dan suite penuh (63 test/444 assertions) lulus; `vendor/bin/pint --dirty --format agent`, `npm run build`, `git diff --check`, serta `php artisan migrate:status --no-interaction` lulus.
+**Catatan/blocker:** Akun baru dimulai dengan saldo awal yang dicatat di `opening_balance`; tidak ada saldo awal yang diasumsikan atau di-seed. Pest melaporkan satu warning tanpa detail pada test terfokus dan suite penuh; tidak ada test yang gagal.
 
 ---
 
@@ -790,6 +790,7 @@
 | 11-11-2026 | Agent | 5 | Menyelesaikan supplier/PBF, pasien, dokter, tenaga farmasi, dan layanan pemeriksaan; data sensitif pasien dimasking dan audit meredaksi nilai sensitif, akses serta pencarian identitas dibatasi permission. Migrasi MySQL, 46 test/340 assertion, Pint, build, route, dan diff check terverifikasi. Phase 5 Done; berhenti sebelum Phase 6. |
 | 11-11-2026 | Agent | 6 | Memulai Phase 6 setelah Phase 5 Done; formula BR-01, pengaturan pajak, prioritas margin, dan kebijakan pemilihan diskon ditinjau. |
 | 11-11-2026 | Agent | 6 | Phase 6 selesai: histori harga BR-01, margin berprioritas, aturan diskon, pengaturan/default PPN, dan pencatatan `tax_records` diimplementasikan. Migrasi MySQL, schema, 54 test/392 assertion, Pint, build, route, dan diff check terverifikasi. Tarif/margin tidak diasumsikan; HNA ditangani pada Phase 9. Berhenti sebelum Phase 7 sesuai alur per-phase. |
+| 11-11-2026 | Agent | 7 | Phase 7 selesai: skema akun kas/bank, kategori dan ledger; `FinancialPostingService` sebagai single writer dengan row lock dan transaksi; form pengeluaran manual; reversal append-only; serta guard saldo negatif berbasis permission. Migrasi MySQL, 9 test/52 assertion terfokus, suite penuh 63 test/444 assertion, Pint, build, route, dan diff check terverifikasi. Pest masih melaporkan satu warning tanpa detail. Commit Phase 7 dibuat; berhenti sebelum Phase 8 sesuai alur per-phase. |
 
 ---
 
