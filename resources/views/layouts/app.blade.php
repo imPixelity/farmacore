@@ -114,6 +114,9 @@
                     @can('inventory.opname.manage')
                         <a href="{{ route('inventory.opnames.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">O</span>Stock opname</a>
                     @endcan
+                    @can('inventory.purchase_return.manage')
+                        <a href="{{ route('inventory.purchase-returns.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">R</span>Retur pembelian</a>
+                    @endcan
                     @can('inventory.receipt.view')
                         <a href="{{ route('inventory.receipts.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">P</span>Penerimaan barang</a>
                     @endcan

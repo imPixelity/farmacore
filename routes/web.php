@@ -8,6 +8,7 @@ use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
 use App\Http\Controllers\Inventory\ExpiryMonitorController;
 use App\Http\Controllers\Inventory\GoodsReceiptController;
+use App\Http\Controllers\Inventory\PurchaseReturnController;
 use App\Http\Controllers\Inventory\StockController;
 use App\Http\Controllers\Inventory\StockOpnameController;
 use App\Http\Controllers\Inventory\StockPolicyController;
@@ -152,6 +153,25 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/stock', [StockController::class, 'index'])
             ->middleware('can:inventory.stock.view')
             ->name('stock.index');
+        Route::get('/purchase-returns', [PurchaseReturnController::class, 'index'])
+            ->middleware('can:inventory.purchase_return.manage')
+            ->name('purchase-returns.index');
+        Route::get('/purchase-returns/create', [PurchaseReturnController::class, 'create'])
+            ->middleware('can:inventory.purchase_return.manage')
+            ->name('purchase-returns.create');
+        Route::post('/purchase-returns', [PurchaseReturnController::class, 'store'])
+            ->middleware('can:inventory.purchase_return.manage')
+            ->name('purchase-returns.store');
+        Route::get('/purchase-returns/{purchaseReturn}', [PurchaseReturnController::class, 'show'])
+            ->middleware('can:inventory.purchase_return.manage')
+            ->name('purchase-returns.show');
+        Route::post('/purchase-returns/{purchaseReturn}/confirm', [PurchaseReturnController::class, 'confirm'])
+            ->middleware('can:inventory.purchase_return.approve')
+            ->name('purchase-returns.confirm');
+        Route::post('/purchase-returns/{purchaseReturn}/cancel', [PurchaseReturnController::class, 'cancel'])
+            ->middleware('can:inventory.purchase_return.manage')
+            ->name('purchase-returns.cancel');
+
         Route::get('/opnames', [StockOpnameController::class, 'index'])
             ->middleware('can:inventory.opname.manage')
             ->name('opnames.index');

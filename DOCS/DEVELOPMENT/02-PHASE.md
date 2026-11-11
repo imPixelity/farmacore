@@ -457,16 +457,16 @@
 
 ### Phase 15 — Retur Pembelian
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 9, Phase 13
 
 **Checklist:**
-- [ ] Migrasi `purchase_returns` + `purchase_return_items`.
-- [ ] Pilih penerimaan asal + baris/batch.
-- [ ] Validasi kumulatif qty retur.
-- [ ] Alasan retur wajib.
-- [ ] Konfirmasi mengurangi stok + mutasi.
-- [ ] Penyesuaian utang sesuai keputusan TBD #9.
+- [x] Migrasi `purchase_returns` + `purchase_return_items`.
+- [x] Pilih penerimaan asal + baris/batch.
+- [x] Validasi kumulatif qty retur.
+- [x] Alasan retur wajib.
+- [x] Konfirmasi mengurangi stok + mutasi.
+- [x] Penyesuaian utang sesuai keputusan TBD #9.
 
 **Acceptance criteria:**
 - Qty retur <= dibeli dan <= stok batch.
@@ -474,8 +474,17 @@
 - Stok berkurang setelah konfirmasi.
 - Perlakuan utang tercatat dan diaudit.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Inventory/Services/PurchaseReturnService.php`
+- `app/Modules/Inventory/Models/PurchaseReturn.php`
+- `app/Modules/Inventory/Models/PurchaseReturnItem.php`
+- `database/migrations/2026_11_11_220318_create_purchase_return_tables.php`
+- `tests/Feature/PurchaseReturnTest.php`
+- `php artisan test --compact` — 106 tests passed, 693 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan:** Default TBD #9 diterapkan: retur memotong sisa payable; nilai yang melebihi sisa dicatat sebagai `supplier_credit_amount`.
 
 ---
 
