@@ -490,17 +490,17 @@
 
 ### Phase 16 — Pencatatan Resep & Alur Pelayanan
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 5
 
 **Checklist:**
-- [ ] Migrasi `prescriptions`, `prescription_items`, `prescription_screenings`, `prescription_compoundings`, `prescription_dispenses`.
-- [ ] Form input resep + kelompok resep.
-- [ ] `PrescriptionWorkflowService` + guard transisi.
-- [ ] Screening checklist + hasil.
-- [ ] Peracikan + hasil racikan.
-- [ ] Penyerahan + penerima.
-- [ ] Penanggung jawab otomatis dari akun login.
+- [x] Migrasi `prescriptions`, `prescription_items`, `prescription_screenings`, `prescription_compoundings`, `prescription_dispenses`.
+- [x] Form input resep + kelompok resep.
+- [x] `PrescriptionWorkflowService` + guard transisi.
+- [x] Screening checklist + hasil.
+- [x] Peracikan + hasil racikan.
+- [x] Penyerahan + penerima.
+- [x] Penanggung jawab otomatis dari akun login.
 
 **Acceptance criteria:**
 - Status resep mengikuti alur dan menolak tahap yang dilompati.
@@ -508,8 +508,16 @@
 - Setiap tahap mencatat staff, tanggal, waktu.
 - Racikan mencatat hasil dan peracik.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Rx/Services/PrescriptionWorkflowService.php`
+- `app/Modules/Rx/Models/Prescription.php`
+- `database/migrations/2026_11_11_224041_create_prescription_workflow_tables.php`
+- `tests/Feature/PrescriptionWorkflowTest.php`
+- `php artisan test --compact` — 109 tests passed, 710 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan:** Perubahan stok tidak dilakukan oleh modul RX; penyerahan hanya mencatat proses dan tetap menunggu transaksi POS sesuai SDD.
 
 ---
 

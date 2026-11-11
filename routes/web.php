@@ -25,6 +25,7 @@ use App\Http\Controllers\Md\TaxController;
 use App\Http\Controllers\Md\UnitController;
 use App\Http\Controllers\Purchasing\PayableController;
 use App\Http\Controllers\Purchasing\PurchaseOrderController;
+use App\Http\Controllers\Rx\PrescriptionController;
 use App\Http\Middleware\EnsureActiveSession;
 use Illuminate\Support\Facades\Route;
 
@@ -218,6 +219,14 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::put('/stock/{item}/policy', [StockController::class, 'updatePolicy'])
             ->middleware('can:inventory.stock.manage')
             ->name('stock.policy.update');
+    });
+
+    Route::prefix('rx')->name('rx.')->group(function (): void {
+        Route::get('/prescriptions', [PrescriptionController::class, 'index'])->middleware('can:rx.prescription.manage')->name('prescriptions.index');
+        Route::get('/prescriptions/create', [PrescriptionController::class, 'create'])->middleware('can:rx.prescription.manage')->name('prescriptions.create');
+        Route::post('/prescriptions', [PrescriptionController::class, 'store'])->middleware('can:rx.prescription.manage')->name('prescriptions.store');
+        Route::get('/prescriptions/{prescription}', [PrescriptionController::class, 'show'])->middleware('can:rx.prescription.manage')->name('prescriptions.show');
+        Route::post('/prescriptions/{prescription}/transition', [PrescriptionController::class, 'transition'])->middleware('can:rx.screening.perform')->name('prescriptions.transition');
     });
 
     Route::prefix('purchasing')->name('purchasing.')->group(function (): void {
