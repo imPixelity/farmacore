@@ -118,6 +118,9 @@
                         <a href="{{ route('purchasing.purchase-orders.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">B</span>Pembelian</a>
                         <a href="{{ route('purchasing.supplier-evaluations.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">E</span>Evaluasi supplier</a>
                     @endcan
+                    @can('purchasing.payable.view')
+                        <a href="{{ route('purchasing.payables.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">U</span>Utang supplier</a>
+                    @endcan
                     @foreach ([['Penjualan', 'pos.sale.view'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
                         @can($permission)
                             <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true"><span class="flex items-center gap-3"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-400">·</span>{{ $module }}</span><span class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-medium text-slate-500">Segera</span></button>

@@ -21,6 +21,7 @@ use App\Http\Controllers\Md\PricingController;
 use App\Http\Controllers\Md\SupplierController;
 use App\Http\Controllers\Md\TaxController;
 use App\Http\Controllers\Md\UnitController;
+use App\Http\Controllers\Purchasing\PayableController;
 use App\Http\Controllers\Purchasing\PurchaseOrderController;
 use App\Http\Middleware\EnsureActiveSession;
 use Illuminate\Support\Facades\Route;
@@ -168,6 +169,9 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
     });
 
     Route::prefix('purchasing')->name('purchasing.')->group(function (): void {
+        Route::get('/payables', [PayableController::class, 'index'])->middleware('can:purchasing.payable.view')->name('payables.index');
+        Route::get('/payables/{payable}', [PayableController::class, 'show'])->middleware('can:purchasing.payable.view')->name('payables.show');
+        Route::post('/payables/{payable}/payments', [PayableController::class, 'pay'])->middleware('can:purchasing.payable.pay')->name('payables.pay');
         Route::get('/supplier-evaluations', [PurchaseOrderController::class, 'supplierEvaluations'])->middleware('can:purchasing.po.manage')->name('supplier-evaluations.index');
         Route::get('/purchase-orders', [PurchaseOrderController::class, 'index'])->middleware('can:purchasing.po.manage')->name('purchase-orders.index');
         Route::get('/purchase-orders/create', [PurchaseOrderController::class, 'create'])->middleware('can:purchasing.po.manage')->name('purchase-orders.create');

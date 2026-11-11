@@ -390,16 +390,16 @@
 
 ### Phase 13 — Utang Supplier & Pembayaran
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 7, Phase 9, Phase 12
 
 **Checklist:**
-- [ ] Migrasi `payables` + `payable_payments` (bila belum dibuat di Phase 9).
-- [ ] Layar total utang per supplier + daftar belum lunas.
-- [ ] Filter jatuh tempo.
-- [ ] Form pembayaran + validasi sisa utang.
-- [ ] Update status + posting kas keluar.
-- [ ] Notifikasi `PayableDueSoon`.
+- [x] Migrasi `payables` + `payable_payments` (payables dibuat pada Phase 9).
+- [x] Layar total utang per supplier + daftar belum lunas.
+- [x] Filter jatuh tempo.
+- [x] Form pembayaran + validasi sisa utang.
+- [x] Update status + posting kas keluar.
+- [x] Notifikasi `PayableDueSoon`.
 
 **Acceptance criteria:**
 - Utang terbentuk otomatis dari penerimaan kredit.
@@ -407,8 +407,17 @@
 - Status belum dibayar/sebagian/lunas benar.
 - Kas keluar dan audit tercatat.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Purchasing/Services/PayableService.php`
+- `app/Modules/Purchasing/Models/PayablePayment.php`
+- `app/Http/Controllers/Purchasing/PayableController.php`
+- `database/migrations/2026_11_11_214640_create_payable_payments_table.php`
+- `tests/Feature/PayableTest.php`
+- `php artisan test --compact` — 101 tests passed, 659 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan/blocker:** `php artisan migrate` terhadap koneksi MySQL lokal belum dapat diverifikasi karena service MySQL pada 127.0.0.1:3306 tidak aktif; migrasi tervalidasi melalui suite SQLite.
 
 ---
 

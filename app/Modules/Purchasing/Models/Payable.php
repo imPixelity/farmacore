@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Attributes\UseFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'supplier_id', 'goods_receipt_id', 'invoice_no', 'total_amount', 'paid_amount', 'due_date',
@@ -41,6 +42,16 @@ class Payable extends Model
     public function goodsReceipt(): BelongsTo
     {
         return $this->belongsTo(GoodsReceipt::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(PayablePayment::class);
+    }
+
+    public function remainingAmount(): string
+    {
+        return bcsub((string) $this->total_amount, (string) $this->paid_amount, 2);
     }
 
     public function creator(): BelongsTo

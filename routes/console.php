@@ -3,6 +3,7 @@
 use App\Jobs\Inventory\CheckExpiry;
 use App\Jobs\Inventory\CheckReorderPoint;
 use App\Jobs\Inventory\RecalculateStockPolicy;
+use App\Jobs\Purchasing\CheckPayableDueSoon;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -21,4 +22,8 @@ Schedule::job(new CheckReorderPoint)
 
 Schedule::job(new CheckExpiry)
     ->dailyAt('06:00')
+    ->withoutOverlapping();
+
+Schedule::job(new CheckPayableDueSoon)
+    ->dailyAt('07:00')
     ->withoutOverlapping();
