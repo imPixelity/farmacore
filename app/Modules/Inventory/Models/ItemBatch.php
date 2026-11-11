@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use LogicException;
 
-#[Fillable(['item_id', 'batch_no', 'expiry_date', 'created_by', 'updated_by'])]
+#[Fillable(['item_id', 'goods_receipt_item_id', 'batch_no', 'expiry_date', 'unit_cost_base', 'created_by', 'updated_by'])]
 #[UseFactory(ItemBatchFactory::class)]
 class ItemBatch extends Model
 {
@@ -33,6 +33,7 @@ class ItemBatch extends Model
         return [
             'expiry_date' => 'date',
             'qty_on_hand' => 'decimal:3',
+            'unit_cost_base' => 'decimal:4',
         ];
     }
 
@@ -75,6 +76,11 @@ class ItemBatch extends Model
     public function movements(): HasMany
     {
         return $this->hasMany(StockMovement::class, 'item_batch_id');
+    }
+
+    public function sourceReceiptItem(): BelongsTo
+    {
+        return $this->belongsTo(GoodsReceiptItem::class, 'goods_receipt_item_id');
     }
 
     public function creator(): BelongsTo

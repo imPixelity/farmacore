@@ -6,6 +6,7 @@ use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
 use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
+use App\Http\Controllers\Inventory\GoodsReceiptController;
 use App\Http\Controllers\Inventory\StockController;
 use App\Http\Controllers\Md\DiscountRuleController;
 use App\Http\Controllers\Md\DoctorController;
@@ -121,6 +122,28 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
     });
 
     Route::prefix('inventory')->name('inventory.')->group(function (): void {
+        Route::get('/receipts', [GoodsReceiptController::class, 'index'])
+            ->middleware('can:inventory.receipt.view')
+            ->name('receipts.index');
+        Route::get('/receipts/create', [GoodsReceiptController::class, 'create'])
+            ->middleware('can:inventory.receipt.manage')
+            ->name('receipts.create');
+        Route::post('/receipts', [GoodsReceiptController::class, 'store'])
+            ->middleware('can:inventory.receipt.manage')
+            ->name('receipts.store');
+        Route::get('/receipts/{goodsReceipt}', [GoodsReceiptController::class, 'show'])
+            ->middleware('can:inventory.receipt.view')
+            ->name('receipts.show');
+        Route::get('/receipts/{goodsReceipt}/edit', [GoodsReceiptController::class, 'edit'])
+            ->middleware('can:inventory.receipt.manage')
+            ->name('receipts.edit');
+        Route::put('/receipts/{goodsReceipt}', [GoodsReceiptController::class, 'update'])
+            ->middleware('can:inventory.receipt.manage')
+            ->name('receipts.update');
+        Route::post('/receipts/{goodsReceipt}/confirm', [GoodsReceiptController::class, 'confirm'])
+            ->middleware('can:inventory.receipt.manage')
+            ->name('receipts.confirm');
+
         Route::get('/stock', [StockController::class, 'index'])
             ->middleware('can:inventory.stock.view')
             ->name('stock.index');

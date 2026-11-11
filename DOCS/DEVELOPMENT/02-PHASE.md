@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 8 — Done (berhenti di sini; tunggu instruksi sebelum Phase 9) |
+| Status proyek | Phase 9 — Done (berhenti; Phase 10 belum dimulai) |
 
 ---
 
@@ -44,7 +44,7 @@
 | 6 | Harga, Margin, Diskon & Pajak | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | PricingService, histori harga, margin berprioritas, tarif/default PPN, TaxService, DiscountService, UI, otorisasi, audit, migrasi MySQL, 54 test, Pint, build dan diff check terverifikasi. Nilai margin/tarif belum diasumsikan; HNA diperbarui pada Phase 9. |
 | 7 | Kas/Bank & Financial Posting | ACC | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Ledger kas/bank, kategori, posting tunggal, form pengeluaran, reversal, dan guard saldo negatif selesai; migrasi MySQL, test, Pint, dan build terverifikasi. |
 | 8 | Stok per Batch & StockService | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Stok batch dan ledger append-only diposting melalui StockService dengan row lock; CHECK non-negatif, agregasi unit, rincian batch/ED, otorisasi, migrasi, test, dan build terverifikasi. |
-| 9 | Penerimaan Barang | INV | ⬜ Not started | 0% | — | — | — |
+| 9 | Penerimaan Barang | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Draft, peringatan faktur duplikat, validasi/approval ED, diskon dan PPN, konfirmasi atomik stok/HNA/harga/payable/kas/pajak, audit, serta immutability terverifikasi. |
 | 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ⬜ Not started | 0% | — | — | — |
 | 11 | Perencanaan Pembelian & Purchase Order | PUR | ⬜ Not started | 0% | — | — | — |
 | 12 | Pencocokan Penerimaan & Evaluasi Supplier | PUR | ⬜ Not started | 0% | — | — | — |
@@ -293,26 +293,26 @@
 
 ### Phase 9 — Penerimaan Barang
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 5, Phase 7, Phase 8
 
 **Checklist:**
-- [ ] Migrasi `goods_receipts` + `goods_receipt_items`.
-- [ ] Form penerimaan + peringatan duplikasi faktur.
-- [ ] Validasi ED + persetujuan apoteker.
-- [ ] Perhitungan total sebelum/sesudah PPN.
-- [ ] Konfirmasi atomik: stok, HNA, harga jual, payables/kas, pajak.
-- [ ] Audit + larangan edit setelah konfirmasi.
+- [x] Migrasi `goods_receipts` + `goods_receipt_items`, `payables`, dan metadata asal dan biaya batch; faktur tidak diberi unique constraint.
+- [x] Form draft/edit + peringatan duplikasi faktur dengan keputusan lanjut/batal.
+- [x] Validasi ED + persetujuan apoteker (`approved_by`).
+- [x] Perhitungan diskon baris/faktur, alokasi diskon proporsional, serta total sebelum/sesudah PPN menggunakan BCMath.
+- [x] Konfirmasi atomik: stok melalui `StockService`, HNA/harga melalui `PricingService`, payable atau kas melalui `FinancialPostingService`, dan pajak masukan.
+- [x] Audit otomatis + larangan perubahan penerimaan/baris setelah konfirmasi.
 
 **Acceptance criteria:**
-- Draft tidak mengubah stok; konfirmasi menambah stok satuan terkecil.
-- ED tidak valid ditolak kecuali disetujui.
-- Total PPN benar.
-- Kredit membentuk `payables`; tunai memposting kas keluar.
-- Kegagalan di tengah proses rollback total.
+- [x] Draft tidak mengubah stok; konfirmasi menambah stok satuan terkecil dan menulis mutasi melalui `StockService`.
+- [x] ED yang lewat atau lebih awal dari tanggal faktur ditolak kecuali disetujui apoteker; persetujuan bertahan saat draft diedit.
+- [x] Total PPN menghitung basis taxable setelah diskon baris dan alokasi diskon faktur, termasuk campuran barang taxable/non-taxable.
+- [x] Kredit membentuk satu `payables`; tunai memposting kas keluar melalui `FinancialPostingService`.
+- [x] Kegagalan posting kas membatalkan stok, HNA, payable/financial, tax, dan konfirmasi dalam transaksi yang sama.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `2026_11_11_084402_create_goods_receipt_tables.php` Ran pada MariaDB 11.8.8; schema FK/index dan CHECK `item_batches.qty_on_hand >= 0` diverifikasi. Route `/inventory/receipts` (7 route) dan permission diverifikasi. `tests/Feature/Inventory/GoodsReceiptTest.php` (8 test/84 assertion) dan suite penuh (81 test/577 assertion) lulus; Pint, `npm run build`, `git diff --check`, dan `php artisan migrate:status --no-interaction` lulus. Pest mencatat empat warning tanpa detail. Commit Phase 9 dibuat; berhenti sebelum Phase 10 sesuai alur per-phase.
+**Catatan/blocker:** Penerimaan Phase 9 berjalan tanpa PO; `purchase_order_id`/pencocokan PO ditunda sampai Phase 11 saat model PO tersedia. Pembayaran payable tetap di phase berikutnya.
 
 ---
 
@@ -794,6 +794,8 @@
 | 11-11-2026 | Agent | 7 | Phase 7 selesai: skema akun kas/bank, kategori dan ledger; `FinancialPostingService` sebagai single writer dengan row lock dan transaksi; form pengeluaran manual; reversal append-only; serta guard saldo negatif berbasis permission. Migrasi MySQL, 9 test/52 assertion terfokus, suite penuh 63 test/444 assertion, Pint, build, route, dan diff check terverifikasi. Pest masih melaporkan satu warning tanpa detail. Commit Phase 7 dibuat; berhenti sebelum Phase 8 sesuai alur per-phase. |
 | 11-11-2026 | Agent | 8 | Memulai Phase 8 setelah Phase 7 Done; invariant batch/ledger, saldo satuan dasar, lock transaksi, CHECK stok non-negatif, dan layar baca-saja ditinjau. |
 | 11-11-2026 | Agent | 8 | Phase 8 selesai: migrasi batch dan mutasi, `StockService` sebagai single writer dengan lock/transaksi, larangan saldo negatif dan ledger mutasi append-only, serta halaman stok per barang/satuan dan detail batch/ED. Skema dan CHECK diverifikasi pada MariaDB 11.8.8; 10 test/49 assertion terfokus dan suite 73 test/493 assertion lulus, Pint, build, route, dan diff check terverifikasi. Pest melaporkan tiga warning tanpa detail. Commit Phase 8 dibuat; berhenti sebelum Phase 9 sesuai alur per-phase. |
+| 11-11-2026 | Agent | 9 | Memulai Phase 9 setelah Phase 8 Done; scope faktur, konversi ke satuan dasar, validasi ED, diskon, PPN, konfirmasi stok/keuangan, dan immutability penerimaan terkonfirmasi ditinjau. |
+| 11-11-2026 | Agent | 9 | Phase 9 selesai: draft penerimaan, peringatan faktur duplikat, persetujuan ED, alokasi diskon + PPN, konfirmasi atomik stok/HNA/harga/utang atau kas/pajak, audit dan immutable confirmed receipt. 8 test terfokus dan suite 81 test/577 assertion, migration/schema MariaDB, route, Pint, build, dan diff check diverifikasi. Pest memberi empat warning tanpa detail. Commit Phase 9 dibuat; berhenti sebelum Phase 10 sesuai aturan per-phase. |
 
 ---
 
