@@ -4,6 +4,7 @@ namespace App\Modules\Md\Models;
 
 use App\Models\User;
 use App\Modules\Core\Traits\Auditable;
+use App\Modules\Inventory\Models\ItemBatch;
 use Database\Factories\ItemFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -52,6 +53,11 @@ class Item extends Model
     public function orderUnit(): BelongsTo
     {
         return $this->belongsTo(Unit::class, 'order_unit_id');
+    }
+
+    public function batches(): HasMany
+    {
+        return $this->hasMany(ItemBatch::class);
     }
 
     public function prices(): HasMany

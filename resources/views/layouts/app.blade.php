@@ -104,7 +104,10 @@
                     @can('accounting.cash.view')
                         <a href="{{ route('accounting.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">K</span>Kas &amp; bank</a>
                     @endcan
-                    @foreach ([['Penjualan', 'pos.sale.view'], ['Persediaan', 'inventory.stock.view'], ['Pembelian', 'purchasing.po.manage'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
+                    @can('inventory.stock.view')
+                        <a href="{{ route('inventory.stock.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">I</span>Persediaan</a>
+                    @endcan
+                    @foreach ([['Penjualan', 'pos.sale.view'], ['Pembelian', 'purchasing.po.manage'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
                         @can($permission)
                             <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true">
                                 <span class="flex items-center gap-3">

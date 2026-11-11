@@ -6,6 +6,7 @@ use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
 use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
+use App\Http\Controllers\Inventory\StockController;
 use App\Http\Controllers\Md\DiscountRuleController;
 use App\Http\Controllers\Md\DoctorController;
 use App\Http\Controllers\Md\HealthServiceController;
@@ -117,6 +118,15 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/discounts/{discountRule}/edit', [DiscountRuleController::class, 'edit'])->middleware('can:md.price.manage')->name('discounts.edit');
         Route::put('/discounts/{discountRule}', [DiscountRuleController::class, 'update'])->middleware('can:md.price.manage')->name('discounts.update');
         Route::patch('/discounts/{discountRule}/status', [DiscountRuleController::class, 'updateStatus'])->middleware('can:md.price.manage')->name('discounts.status');
+    });
+
+    Route::prefix('inventory')->name('inventory.')->group(function (): void {
+        Route::get('/stock', [StockController::class, 'index'])
+            ->middleware('can:inventory.stock.view')
+            ->name('stock.index');
+        Route::get('/stock/{item}', [StockController::class, 'show'])
+            ->middleware('can:inventory.stock.view')
+            ->name('stock.show');
     });
 
     Route::prefix('accounting')->name('accounting.')->group(function (): void {

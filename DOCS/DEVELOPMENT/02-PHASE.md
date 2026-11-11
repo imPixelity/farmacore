@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 7 — Done (berhenti di sini; tunggu instruksi sebelum Phase 8) |
+| Status proyek | Phase 8 — Done (berhenti di sini; tunggu instruksi sebelum Phase 9) |
 
 ---
 
@@ -43,7 +43,7 @@
 | 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Seluruh master, masking/otorisasi pasien, relasi akun tenaga farmasi, audit, migrasi MySQL, test dan build terverifikasi. |
 | 6 | Harga, Margin, Diskon & Pajak | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | PricingService, histori harga, margin berprioritas, tarif/default PPN, TaxService, DiscountService, UI, otorisasi, audit, migrasi MySQL, 54 test, Pint, build dan diff check terverifikasi. Nilai margin/tarif belum diasumsikan; HNA diperbarui pada Phase 9. |
 | 7 | Kas/Bank & Financial Posting | ACC | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Ledger kas/bank, kategori, posting tunggal, form pengeluaran, reversal, dan guard saldo negatif selesai; migrasi MySQL, test, Pint, dan build terverifikasi. |
-| 8 | Stok per Batch & StockService | INV | ⬜ Not started | 0% | — | — | — |
+| 8 | Stok per Batch & StockService | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Stok batch dan ledger append-only diposting melalui StockService dengan row lock; CHECK non-negatif, agregasi unit, rincian batch/ED, otorisasi, migrasi, test, dan build terverifikasi. |
 | 9 | Penerimaan Barang | INV | ⬜ Not started | 0% | — | — | — |
 | 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ⬜ Not started | 0% | — | — | — |
 | 11 | Perencanaan Pembelian & Purchase Order | PUR | ⬜ Not started | 0% | — | — | — |
@@ -269,24 +269,25 @@
 
 ### Phase 8 — Stok per Batch & StockService
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 6
 
 **Checklist:**
-- [ ] Migrasi `item_batches` + `stock_movements`.
-- [ ] Implementasi `StockService` increase/decrease/available.
-- [ ] `SELECT ... FOR UPDATE` + rollback saat stok kurang.
-- [ ] Constraint `CHECK (qty_on_hand >= 0)`.
-- [ ] Layar stok per barang + rincian batch/ED.
+- [x] Migrasi `item_batches` + `stock_movements` beserta foreign key, unique key, dan indeks.
+- [x] Implementasi `StockService` increase/decrease/available sebagai satu-satunya jalur penulisan saldo dan ledger.
+- [x] `SELECT ... FOR UPDATE`, transaksi database, retry deadlock, dan rollback saat stok kurang.
+- [x] Constraint `CHECK (qty_on_hand >= 0)` pada MariaDB; tes SQLite memakai trigger non-negatif yang setara.
+- [x] Layar stok baca-saja per barang/satuan dan rincian batch/kedaluwarsa dengan otorisasi.
 
 **Acceptance criteria:**
-- Setiap perubahan stok menulis satu mutasi dengan `qty_after`.
-- Stok tidak pernah negatif.
-- `qty_on_hand` = jumlah seluruh mutasi batch.
-- Layar menampilkan stok per satuan dan per batch.
+- [x] Setiap perubahan stok menulis tepat satu mutasi bertanda dengan `qty_after` dalam transaksi yang sama.
+- [x] Stok tidak pernah negatif; validasi service dan constraint database menolak pengurangan berlebih.
+- [x] Batch baru selalu berawal dari nol; saldo batch selalu sama dengan jumlah mutasi yang diposting oleh service.
+- [x] Layar menampilkan stok per satuan dasar/konversi, jumlah tersedia, dan rincian batch beserta ED.
+- [x] Halaman stok hanya dapat diakses pengguna dengan permission `inventory.stock.view`.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `2026_11_11_080750_create_inventory_stock_tables.php` berstatus Ran pada MariaDB 11.8.8; schema `item_batches` dan `stock_movements` terverifikasi, termasuk unique/index/FK dan CHECK `qty_on_hand >= 0`. `tests/Feature/StockServiceTest.php` (10 test/49 assertions) dan suite penuh (73 test/493 assertions) lulus; `php artisan route:list --path=inventory --no-interaction` menampilkan dua route GET; `vendor/bin/pint --dirty --format agent`, `npm run build`, dan `git diff --check` lulus.
+**Catatan/blocker:** Tidak ada blocker. Stok hanya dapat diubah melalui service, belum ada form penyesuaian manual. Pada Phase 9, penerimaan perlu membuat batch bersaldo nol lalu memanggil `StockService::increase()` untuk mencatat jumlah masuk. Pest melaporkan tiga warning tanpa detail pada suite penuh, tanpa tes gagal.
 
 ---
 
@@ -791,6 +792,8 @@
 | 11-11-2026 | Agent | 6 | Memulai Phase 6 setelah Phase 5 Done; formula BR-01, pengaturan pajak, prioritas margin, dan kebijakan pemilihan diskon ditinjau. |
 | 11-11-2026 | Agent | 6 | Phase 6 selesai: histori harga BR-01, margin berprioritas, aturan diskon, pengaturan/default PPN, dan pencatatan `tax_records` diimplementasikan. Migrasi MySQL, schema, 54 test/392 assertion, Pint, build, route, dan diff check terverifikasi. Tarif/margin tidak diasumsikan; HNA ditangani pada Phase 9. Berhenti sebelum Phase 7 sesuai alur per-phase. |
 | 11-11-2026 | Agent | 7 | Phase 7 selesai: skema akun kas/bank, kategori dan ledger; `FinancialPostingService` sebagai single writer dengan row lock dan transaksi; form pengeluaran manual; reversal append-only; serta guard saldo negatif berbasis permission. Migrasi MySQL, 9 test/52 assertion terfokus, suite penuh 63 test/444 assertion, Pint, build, route, dan diff check terverifikasi. Pest masih melaporkan satu warning tanpa detail. Commit Phase 7 dibuat; berhenti sebelum Phase 8 sesuai alur per-phase. |
+| 11-11-2026 | Agent | 8 | Memulai Phase 8 setelah Phase 7 Done; invariant batch/ledger, saldo satuan dasar, lock transaksi, CHECK stok non-negatif, dan layar baca-saja ditinjau. |
+| 11-11-2026 | Agent | 8 | Phase 8 selesai: migrasi batch dan mutasi, `StockService` sebagai single writer dengan lock/transaksi, larangan saldo negatif dan ledger mutasi append-only, serta halaman stok per barang/satuan dan detail batch/ED. Skema dan CHECK diverifikasi pada MariaDB 11.8.8; 10 test/49 assertion terfokus dan suite 73 test/493 assertion lulus, Pint, build, route, dan diff check terverifikasi. Pest melaporkan tiga warning tanpa detail. Commit Phase 8 dibuat; berhenti sebelum Phase 9 sesuai alur per-phase. |
 
 ---
 
