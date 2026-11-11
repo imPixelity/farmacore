@@ -27,10 +27,12 @@
 
 1. **Baca dokumen ini** minimal Bagian 1–10 sebelum mulai bekerja.
 2. **Baca `02-PHASE.md`** untuk mengetahui phase yang sudah selesai, sedang berjalan, dan berikutnya.
-3. **Kerjakan phase berikutnya** sesuai dependency dan acceptance criteria pada Bagian 10.
+3. **Kerjakan hanya satu phase aktif** sesuai dependency dan acceptance criteria pada Bagian 10; jangan mulai phase berikutnya sebelum phase aktif selesai.
 4. **Jika butuh detail requirement**, buka dokumen sumber (URS/SRS/SDD) sesuai rujukan ID pada Bagian 4. Dokumen sumber hanya dibaca.
-5. **Setelah phase selesai**, perbarui `02-PHASE.md`: status, checklist, evidence, catatan, dan changelog.
-6. **Jika seluruh phase selesai dan masih ada pengembangan lanjut**, tambahkan phase baru di Bagian 10 dokumen ini, lalu buat track-nya di `02-PHASE.md`.
+5. **Verifikasi seluruh acceptance criteria** dan Definition of Done sebelum menyatakan phase selesai.
+6. **Setelah phase selesai**, perbarui `02-PHASE.md`: status, checklist, evidence, catatan, dan changelog.
+7. **Commit pekerjaan phase** setelah implementasi, pengujian, dan tracker diperbarui. Jika phase terblokir, perbarui tracker sebagai Blocked dan commit checkpoint tanpa menandai phase selesai.
+8. **Jika seluruh phase selesai dan masih ada pengembangan lanjut**, tambahkan phase baru di Bagian 10 dokumen ini, lalu buat track-nya di `02-PHASE.md`.
 
 ### 0.2 Aturan dokumen
 
@@ -39,6 +41,14 @@
 - Requirement ID, aturan bisnis, dan keputusan teknis harus konsisten dengan dokumen sumber. Jangan mengarang requirement baru tanpa mencatatnya sebagai TBD.
 - Perubahan keputusan teknis harus dicatat pada Bagian 2 dan diumumkan pada changelog `02-PHASE.md`.
 - Jangan mengubah `01-URS.md`, `02-SRS.md`, dan `03-SDD.md`.
+
+### 0.3 Rules eksekusi agent per phase
+
+- Agent bekerja **per phase**, satu phase dalam satu waktu, mengikuti dependency dan scope yang ditetapkan. Jangan mengerjakan atau memulai phase berikutnya sebelum phase aktif berstatus Done.
+- Phase hanya boleh ditandai Done jika semua acceptance criteria dan Definition of Done terverifikasi; status, checklist, evidence, catatan, dan changelog `02-PHASE.md` harus diperbarui terlebih dahulu.
+- Jika ada blocker, catat penyebab dan pekerjaan yang belum terpenuhi di `02-PHASE.md`, ubah status menjadi Blocked, lalu berhenti pada phase tersebut. Jangan menutupi blocker dengan pengujian alternatif yang tidak membuktikan acceptance criteria.
+- Buat commit Git terfokus untuk setiap phase yang selesai, mencakup kode, test, dan pembaruan tracker. Phase yang terblokir boleh dibuatkan commit checkpoint, tetapi tidak boleh ditandai selesai.
+- Jangan mengubah dokumen sumber `01-URS.md`, `02-SRS.md`, dan `03-SDD.md`; perubahan pada dokumen kerja ini harus terbatas pada aturan proses, keputusan, dan roadmap yang memang diminta.
 
 ---
 
