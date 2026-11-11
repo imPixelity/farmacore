@@ -1,0 +1,8 @@
+<section class="max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/2 sm:p-6">
+    <h2 class="mb-5 font-bold text-slate-900">Informasi layanan</h2>
+    <div class="grid gap-5 sm:grid-cols-2">
+        <label class="sm:col-span-2"><span class="mb-2 block text-sm font-semibold text-slate-700">Nama layanan</span><input name="name" value="{{ old('name', $healthService?->name) }}" required maxlength="100" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">@error('name')<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror</label>
+        <label><span class="mb-2 block text-sm font-semibold text-slate-700">Biaya standar (Rp)</span><input type="number" name="default_fee" value="{{ old('default_fee', $healthService?->default_fee ?? '0.00') }}" required min="0" step="0.01" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm">@error('default_fee')<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror</label>
+        <label><span class="mb-2 block text-sm font-semibold text-slate-700">Status</span><select name="is_active" required class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm"><option value="1" @selected((string) old('is_active', $healthService?->is_active === false ? '0' : '1') === '1')>Aktif</option><option value="0" @selected((string) old('is_active', $healthService?->is_active === false ? '0' : '1') === '0')>Nonaktif</option></select>@error('is_active')<span class="mt-1 block text-sm text-rose-700">{{ $message }}</span>@enderror</label>
+    </div>
+</section>

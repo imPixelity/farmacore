@@ -4,10 +4,12 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Modules\Core\Traits\Auditable;
+use App\Modules\Md\Models\PharmacyStaff;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -36,6 +38,11 @@ class User extends Authenticatable
         }
 
         $this->writeAudit('updated', ['roles' => $oldRoles], ['roles' => $newRoles]);
+    }
+
+    public function pharmacyStaff(): HasOne
+    {
+        return $this->hasOne(PharmacyStaff::class);
     }
 
     protected function casts(): array

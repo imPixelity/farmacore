@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 4 Done; Phase 5 belum dimulai |
+| Status proyek | Phase 5 — In progress (jangan mulai Phase 6 sebelum Phase 5 selesai) |
 
 ---
 
@@ -40,7 +40,7 @@
 | 2 | Auth, Pengguna & RBAC | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Login/session, user CRUD, role/permission, bootstrap apoteker, test dan migrasi terverifikasi. |
 | 3 | Audit, Pengaturan & Infrastruktur Notifikasi | CORE | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Audit, settings ter-cache dan dinamis, serta notifikasi deduplikasi terverifikasi. |
 | 4 | Barang, Kategori, Satuan, Konversi, Barcode | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | CRUD/master item, konversi, validasi barcode, audit, authorization, UI, migrasi MySQL dan test terverifikasi. |
-| 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ⬜ Not started | 0% | — | — | — |
+| 5 | Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan | MD | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Seluruh master, masking/otorisasi pasien, relasi akun tenaga farmasi, audit, migrasi MySQL, test dan build terverifikasi. |
 | 6 | Harga, Margin, Diskon & Pajak | MD | ⬜ Not started | 0% | — | — | — |
 | 7 | Kas/Bank & Financial Posting | ACC | ⬜ Not started | 0% | — | — | — |
 | 8 | Stok per Batch & StockService | INV | ⬜ Not started | 0% | — | — | — |
@@ -191,25 +191,25 @@
 
 ### Phase 5 — Supplier, Pasien, Dokter, Tenaga Farmasi, Layanan
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 11-11-2026 · **Selesai:** 11-11-2026
 **Dependency:** Phase 4
 
 **Checklist:**
-- [ ] Migrasi `suppliers`, `patients`, `doctors`, `pharmacy_staff`, `health_services`.
-- [ ] CRUD supplier/PBF.
-- [ ] CRUD pasien + pencarian + masking identitas.
-- [ ] CRUD dokter + asal dokter.
-- [ ] CRUD tenaga farmasi + relasi ke `users`.
-- [ ] CRUD layanan pemeriksaan.
+- [x] Migrasi `suppliers`, `patients`, `doctors`, `pharmacy_staff`, `health_services` dengan foreign key, unique/index, dan field audit.
+- [x] CRUD supplier/PBF; seluruh master dapat dicari/filter dan dinonaktifkan tanpa hard-delete.
+- [x] CRUD pasien + pencarian nama/kode/identitas berizin; identitas, kontak, alamat, dan tanggal lahir dimasking untuk peran tanpa hak.
+- [x] CRUD dokter + validasi asal `apotek`/`luar`.
+- [x] CRUD tenaga farmasi + relasi unik ke akun aktif ber-role `tenaga_farmasi`.
+- [x] CRUD layanan pemeriksaan + validasi biaya.
 
 **Acceptance criteria:**
-- Seluruh master mitra dapat dikelola dan dinonaktifkan.
-- Data pasien disamarkan untuk peran tanpa hak.
-- Tenaga farmasi terhubung ke akun pengguna.
-- Perubahan tercatat di audit.
+- [x] Seluruh master mitra dapat dikelola dan dinonaktifkan; tidak ada route DELETE.
+- [x] Data sensitif pasien hanya tampil penuh dan dapat dicari berdasarkan identitas untuk `apoteker` dan `tenaga_farmasi`; peran lain mendapat tampilan tersamarkan.
+- [x] Tenaga farmasi terhubung ke akun pengguna aktif dengan role yang tepat.
+- [x] Perubahan tercatat di audit tanpa merekam nilai identitas, kontak, alamat, atau tanggal lahir pasien.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** Migrasi `2026_11_11_070627_create_partner_master_tables.php` berhasil dijalankan pada MySQL `farmacore`; `php artisan migrate:status` menunjukkan `Ran` dan schema memuat kelima tabel; `tests/Feature/PartnerMasterDataTest.php` (10 test/94 assertion) mencakup CRUD, validasi, RBAC, masking, pencarian sensitif, relasi akun, audit redaksi dan larangan DELETE; `php artisan test --compact` (46 test/340 assertion lulus); `vendor/bin/pint --dirty --format agent` lulus; `npm run build` sukses; route master terdaftar; `git diff --check` bersih.
+**Catatan/blocker:** Hak `md.patient.view_sensitive` diberikan kepada `apoteker` dan `tenaga_farmasi`; pencarian nomor identitas dibatasi ke pemegang hak tersebut. Perubahan field sensitif hanya mencatat nama field yang berubah, bukan nilainya. Tidak ada blocker.
 
 ---
 
@@ -779,6 +779,8 @@
 | 11-11-2026 | Agent | 3 | Menyelesaikan audit append-only (termasuk role), viewer filter, settings ter-cache/dinamis, dan notifikasi dengan deduplikasi serta read state per-user; 26 test/175 assertion lulus, migrasi dan seeder MySQL, Pint, serta build terverifikasi. Phase 3 Done; berhenti sebelum Phase 4. |
 | 11-11-2026 | Agent | 4 | Memulai Phase 4 setelah Phase 3 Done; kebutuhan master data, skema, dan struktur modul ditinjau. |
 | 11-11-2026 | Agent | 4 | Menyelesaikan kategori, satuan, barang, konversi langsung ke unit dasar, barcode dan pencarian; seluruh perubahan diaudit, akses dibatasi permission, hard-delete tidak disediakan. Migrasi MySQL berhasil; suite test, Pint, build, dan pemeriksaan diff lulus. Phase 4 Done; berhenti sebelum Phase 5. |
+| 11-11-2026 | Agent | 5 | Memulai Phase 5 setelah Phase 4 Done; scope master mitra, tenaga farmasi, dan privasi data pasien ditinjau. |
+| 11-11-2026 | Agent | 5 | Menyelesaikan supplier/PBF, pasien, dokter, tenaga farmasi, dan layanan pemeriksaan; data sensitif pasien dimasking dan audit meredaksi nilai sensitif, akses serta pencarian identitas dibatasi permission. Migrasi MySQL, 46 test/340 assertion, Pint, build, route, dan diff check terverifikasi. Phase 5 Done; berhenti sebelum Phase 6. |
 
 ---
 

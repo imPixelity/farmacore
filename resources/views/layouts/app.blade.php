@@ -73,6 +73,28 @@
                             Satuan
                         </a>
                     @endcan
+                    @can('md.item.view')
+                        <a href="{{ route('md.suppliers.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">P</span>
+                            Supplier
+                        </a>
+                        <a href="{{ route('md.patients.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">R</span>
+                            Pasien
+                        </a>
+                        <a href="{{ route('md.doctors.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">D</span>
+                            Dokter
+                        </a>
+                        <a href="{{ route('md.pharmacy-staff.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">T</span>
+                            Tenaga farmasi
+                        </a>
+                        <a href="{{ route('md.health-services.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">L</span>
+                            Layanan
+                        </a>
+                    @endcan
                     @foreach ([['Penjualan', 'pos.sale.view'], ['Persediaan', 'inventory.stock.view'], ['Pembelian', 'purchasing.po.manage'], ['Resep & layanan', 'rx.prescription.manage'], ['Laporan', 'report.view.sales']] as [$module, $permission])
                         @can($permission)
                             <button type="button" disabled class="flex w-full cursor-not-allowed items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm text-slate-400" aria-disabled="true">

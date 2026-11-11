@@ -16,6 +16,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'apoteker' => ['*'],
         'tenaga_farmasi' => [
             'md.item.view',
+            'md.patient.view_sensitive',
             'pos.sale.view',
             'rx.prescription.manage',
             'rx.screening.perform',
@@ -71,6 +72,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'core.settings.update',
             'md.item.view',
             'md.item.manage',
+            'md.patient.view_sensitive',
             'md.price.manage',
             'inventory.stock.view',
             'inventory.receipt.view',
