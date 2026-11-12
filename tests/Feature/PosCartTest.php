@@ -2,14 +2,17 @@
 
 use App\Livewire\Pos\PosScreen;
 use App\Models\User;
+use App\Modules\Accounting\Models\CashBankAccount;
 use App\Modules\Inventory\Models\ItemBatch;
 use App\Modules\Inventory\Services\StockService;
 use App\Modules\Md\Models\DiscountRule;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\ItemPrice;
+use App\Modules\Pos\Models\Sale;
 use App\Modules\Rx\Models\Prescription;
 use App\Modules\Rx\Models\PrescriptionItem;
 use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\TransactionCategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 
@@ -17,6 +20,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function (): void {
     $this->seed(RolesAndPermissionsSeeder::class);
+    $this->seed(TransactionCategorySeeder::class);
 });
 
 function preparePosItem(string $price = '1200.00', string $stock = '10.000'): Item
@@ -85,6 +89,10 @@ it('loads only verified prescription items into the cart', function () {
     $cashier->assignRole('kasir');
     $this->actingAs($cashier);
     $item = preparePosItem('1500.00');
+    ItemPrice::factory()->for($item)->create([
+        'sales_type' => 'resep',
+        'selling_price' => '1500.00',
+    ]);
     $prescription = Prescription::factory()->create();
     Prescription::duringWorkflow(function () use ($prescription): void {
         $prescription->forceFill(['status' => 'verified'])->save();
@@ -99,6 +107,26 @@ it('loads only verified prescription items into the cart', function () {
         ->assertSet('cart.rx-item-'.$prescriptionItem->id.'.quantity', '2.000')
         ->assertSee($prescription->rx_no)
         ->assertSee('Rp 3.000,00');
+});
+
+it('completes checkout from the POS component and clears the cart', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('kasir');
+    $this->actingAs($cashier);
+    $item = preparePosItem('1000.00', '2.000');
+    $account = CashBankAccount::factory()->create();
+
+    Livewire::test(PosScreen::class)
+        ->call('addItem', $item->id)
+        ->set('cashBankAccountId', (string) $account->id)
+        ->set('paymentAmount', '1000.00')
+        ->set('cashReceived', '1050.00')
+        ->call('checkout')
+        ->assertSet('cart', [])
+        ->assertSee('berhasil diselesaikan');
+
+    expect(Sale::query()->where('grand_total', '1000.00')->exists())->toBeTrue();
+    expect($account->fresh()->current_balance)->toBe('1000.00');
 });
 
 it('reports an unknown barcode without interrupting the cart', function () {

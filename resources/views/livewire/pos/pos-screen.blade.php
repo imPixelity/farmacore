@@ -73,7 +73,7 @@
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/2">
                 <div class="border-b border-slate-100 px-5 py-4 sm:px-6">
                     <h3 class="font-bold text-slate-900">Resep terverifikasi</h3>
-                    <p class="mt-1 text-sm text-slate-500">Memuat obat resep ke keranjang tanpa mengubah status resep.</p>
+                    <p class="mt-1 text-sm text-slate-500">Memuat resep terverifikasi atau siap diserahkan tanpa mengubah status resep.</p>
                 </div>
                 <div class="divide-y divide-slate-100">
                     @forelse ($this->prescriptions as $prescription)
@@ -133,8 +133,84 @@
                 <div class="flex justify-between text-sm text-slate-600"><span>Subtotal</span><span>Rp {{ number_format((float) $this->cartSummary['subtotal'], 2, ',', '.') }}</span></div>
                 <div class="flex justify-between text-sm text-emerald-700"><span>Diskon</span><span>- Rp {{ number_format((float) $this->cartSummary['discount_amount'], 2, ',', '.') }}</span></div>
                 <div class="flex justify-between border-t border-slate-100 pt-3 text-lg font-bold text-slate-900"><span>Total</span><span>Rp {{ number_format((float) $this->cartSummary['total'], 2, ',', '.') }}</span></div>
-                <p class="rounded-xl bg-amber-50 px-3 py-2 text-xs leading-5 text-amber-800">Checkout dan pembayaran tersedia di Phase 19.</p>
+                @if ($checkoutMessage)
+                    <p class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold leading-5 text-emerald-800" role="status">{{ $checkoutMessage }}</p>
+                @endif
             </div>
+
+            <form wire:submit="checkout" class="space-y-4 border-t border-slate-100 px-5 py-5 sm:px-6">
+                <div>
+                    <h4 class="font-bold text-slate-900">Checkout</h4>
+                    <p class="mt-1 text-xs text-slate-500">Stok, harga, pajak, dan pembayaran divalidasi ulang saat disimpan.</p>
+                </div>
+                <label class="block">
+                    <span class="mb-1.5 block text-xs font-semibold text-slate-600">Pasien {{ $salesType === 'resep' || $paymentMethod === 'kredit' ? '(wajib)' : '(opsional)' }}</span>
+                    <select wire:model="patientId" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        <option value="">Pilih pasien</option>
+                        @foreach ($this->patients as $patient)
+                            <option value="{{ $patient->id }}">{{ $patient->name }} · {{ $patient->code }}</option>
+                        @endforeach
+                    </select>
+                    @error('patient_id') <span class="mt-1 block text-xs text-rose-700">{{ $message }}</span> @enderror
+                </label>
+                @if ($salesType === 'resep')
+                    <div class="rounded-xl bg-sky-50 px-3 py-2 text-xs text-sky-800">Resep terpilih: {{ $prescriptionId !== '' ? ($this->prescriptions->firstWhere('id', (int) $prescriptionId)?->rx_no ?? 'tidak ditemukan') : 'belum dipilih' }}</div>
+                    @error('prescription_id') <span class="block text-xs text-rose-700">{{ $message }}</span> @enderror
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <label>
+                            <span class="mb-1.5 block text-xs font-semibold text-slate-600">Jasa dokter</span>
+                            <input wire:model="doctorFee" type="number" min="0" step="0.01" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        </label>
+                        <label>
+                            <span class="mb-1.5 block text-xs font-semibold text-slate-600">Tuslah</span>
+                            <input wire:model="tuslahFee" type="number" min="0" step="0.01" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        </label>
+                    </div>
+                @endif
+                <label class="block">
+                    <span class="mb-1.5 block text-xs font-semibold text-slate-600">Metode pembayaran</span>
+                    <select wire:model.live="paymentMethod" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        <option value="tunai">Tunai</option>
+                        <option value="non_tunai">Non-tunai</option>
+                        <option value="kredit">Kredit</option>
+                    </select>
+                </label>
+                @if ($paymentMethod === 'non_tunai')
+                    <label class="block">
+                        <span class="mb-1.5 block text-xs font-semibold text-slate-600">Channel</span>
+                        <input wire:model="paymentChannel" type="text" maxlength="30" placeholder="Transfer, kartu, atau QRIS" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                    </label>
+                @endif
+                @if ($paymentMethod !== 'kredit')
+                    <label class="block">
+                        <span class="mb-1.5 block text-xs font-semibold text-slate-600">Akun {{ $paymentMethod === 'tunai' ? 'kas' : 'bank' }}</span>
+                        <select wire:model="cashBankAccountId" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                            <option value="">Pilih akun</option>
+                            @foreach ($this->cashBankAccounts as $account)
+                                @if (($paymentMethod === 'tunai' && $account->type === 'kas') || ($paymentMethod === 'non_tunai' && $account->type === 'bank'))
+                                    <option value="{{ $account->id }}">{{ $account->name }} · Saldo Rp {{ number_format((float) $account->current_balance, 2, ',', '.') }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </label>
+                @endif
+                <div class="grid gap-3 sm:grid-cols-2">
+                    <label>
+                        <span class="mb-1.5 block text-xs font-semibold text-slate-600">Nominal dibayar/dikreditkan</span>
+                        <input wire:model="paymentAmount" type="number" min="0.01" step="0.01" placeholder="Total otomatis" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                    </label>
+                    @if ($paymentMethod === 'tunai')
+                        <label>
+                            <span class="mb-1.5 block text-xs font-semibold text-slate-600">Uang diterima</span>
+                            <input wire:model="cashReceived" type="number" min="0.01" step="0.01" placeholder="Sama dengan nominal" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        </label>
+                    @endif
+                </div>
+                @foreach (['payments', 'payment', 'stock', 'tax_setting', 'doctor_fee'] as $errorKey)
+                    @error($errorKey) <span class="block text-xs text-rose-700">{{ $message }}</span> @enderror
+                @endforeach
+                <button type="submit" class="w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50" @disabled($this->cartSummary['lines'] === [])>Selesaikan penjualan</button>
+            </form>
         </aside>
     </div>
 </div>

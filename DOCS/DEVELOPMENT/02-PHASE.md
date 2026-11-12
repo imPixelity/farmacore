@@ -589,17 +589,17 @@
 
 ### Phase 19 — Checkout, FEFO & Pembayaran
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 7, Phase 16, Phase 18
 
 **Checklist:**
-- [ ] Migrasi `sales`, `sale_items`, `sale_item_batches`, `sale_payments`.
-- [ ] Implementasi `SaleService` + alokasi FEFO.
-- [ ] Pilih resep terverifikasi + jasa dokter/tuslah.
-- [ ] Checkout atomik + validasi ulang stok/harga.
-- [ ] Pembayaran tunai/non-tunai/kredit + kembalian.
-- [ ] Posting pemasukan/piutang + pajak keluaran.
-- [ ] Snapshot harga di `sale_items`.
+- [x] Migrasi `sales`, `sale_items`, `sale_item_batches`, `sale_payments`.
+- [x] Implementasi `SaleService` + alokasi FEFO.
+- [x] Pilih resep terverifikasi + jasa dokter/tuslah.
+- [x] Checkout atomik + validasi ulang stok/harga.
+- [x] Pembayaran tunai/non-tunai/kredit + kembalian.
+- [x] Posting pemasukan/piutang + pajak keluaran.
+- [x] Snapshot harga di `sale_items`.
 
 **Acceptance criteria:**
 - Transaksi selesai < 3 detik.
@@ -609,8 +609,21 @@
 - Kredit wajib pasien dan membentuk piutang.
 - Pemasukan/piutang dan pajak tercatat.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `database/migrations/2026_11_11_235204_create_sales_and_receivables_tables.php`
+- `app/Modules/Pos/Services/SaleService.php`
+- `app/Modules/Pos/Models/Sale.php`
+- `app/Modules/Accounting/Models/Receivable.php`
+- `app/Modules/Md/Services/TaxService.php`
+- `app/Livewire/Pos/PosScreen.php`
+- `tests/Feature/SaleServiceTest.php`
+- `tests/Feature/PosCartTest.php`
+- `php artisan test --compact tests/Feature/SaleServiceTest.php tests/Feature/PosCartTest.php` — 11 tests passed, 47 assertions
+- `php artisan test --compact` — 123 tests passed, 768 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan:** Alur pembayaran piutang lanjutan (`receivable_payments`, status lunas/sebagian, dan posting pembayaran piutang) tetap menjadi scope Phase 20. Phase ini sudah membuat receivable saat checkout kredit.
 
 ---
 

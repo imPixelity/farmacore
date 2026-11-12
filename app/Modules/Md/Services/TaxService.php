@@ -139,6 +139,38 @@ class TaxService
         return $this->record($source, 'output', $grossAmount, $isTaxable, $transactionDate);
     }
 
+    public function recordCalculatedOutputTax(
+        Model $source,
+        string $ratePercent,
+        string $taxableAmount,
+        string $taxAmount,
+        DateTimeInterface $transactionDate,
+    ): TaxRecord {
+        if (! $source->exists) {
+            throw ValidationException::withMessages([
+                'source' => 'Pajak hanya dapat dicatat untuk transaksi yang sudah tersimpan.',
+            ]);
+        }
+
+        return DB::transaction(function () use ($source, $ratePercent, $taxableAmount, $taxAmount, $transactionDate): TaxRecord {
+            return TaxRecord::query()->firstOrCreate(
+                [
+                    'source_type' => $source->getMorphClass(),
+                    'source_id' => $source->getKey(),
+                    'direction' => 'output',
+                ],
+                [
+                    'rate_percent' => bcadd($ratePercent, '0', 2),
+                    'taxable_amount' => bcadd($taxableAmount, '0', 2),
+                    'tax_amount' => bcadd($taxAmount, '0', 2),
+                    'transaction_date' => $transactionDate->format('Y-m-d'),
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ],
+            );
+        });
+    }
+
     private function record(Model $source, string $direction, string $grossAmount, bool $isTaxable, DateTimeInterface $transactionDate): TaxRecord
     {
         if (! $source->exists) {

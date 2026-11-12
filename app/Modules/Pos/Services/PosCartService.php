@@ -60,7 +60,7 @@ class PosCartService
     public function verifiedPrescriptions(): Collection
     {
         return Prescription::query()
-            ->where('status', 'verified')
+            ->whereIn('status', ['verified', 'prepared'])
             ->with(['patient:id,name,code', 'doctor:id,name', 'items.item:id,name,code,category_id,base_unit_id'])
             ->orderByDesc('rx_date')
             ->orderByDesc('id')
@@ -228,7 +228,7 @@ class PosCartService
             ->with('prescription')
             ->whereKey($prescriptionItemId)
             ->where('item_id', $item->id)
-            ->whereHas('prescription', fn (Builder $query): Builder => $query->where('status', 'verified'))
+            ->whereHas('prescription', fn (Builder $query): Builder => $query->whereIn('status', ['verified', 'prepared']))
             ->first();
 
         if (! $prescriptionItem) {
