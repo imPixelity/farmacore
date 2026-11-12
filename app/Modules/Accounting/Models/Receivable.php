@@ -3,6 +3,7 @@
 namespace App\Modules\Accounting\Models;
 
 use App\Models\User;
+use App\Modules\Core\Traits\Auditable;
 use App\Modules\Md\Models\Patient;
 use App\Modules\Pos\Models\Sale;
 use Database\Factories\ReceivableFactory;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Receivable extends Model
 {
     /** @use HasFactory<ReceivableFactory> */
-    use HasFactory;
+    use Auditable, HasFactory;
 
     /** @return array<string, string> */
     protected function casts(): array

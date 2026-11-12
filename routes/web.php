@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Accounting\CashBankController;
+use App\Http\Controllers\Accounting\ReceivableController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
@@ -251,6 +252,12 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::get('/', [CashBankController::class, 'index'])
             ->middleware('can:accounting.cash.view')
             ->name('index');
+        Route::get('/receivables', [ReceivableController::class, 'index'])
+            ->middleware('can:accounting.receivable.manage')
+            ->name('receivables.index');
+        Route::post('/receivables/{receivable}/payments', [ReceivableController::class, 'pay'])
+            ->middleware('can:accounting.receivable.manage')
+            ->name('receivables.pay');
 
         Route::middleware('can:accounting.cash.manage')->group(function (): void {
             Route::post('/accounts', [CashBankController::class, 'storeAccount'])->name('accounts.store');

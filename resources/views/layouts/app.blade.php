@@ -104,6 +104,9 @@
                     @can('accounting.cash.view')
                         <a href="{{ route('accounting.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">K</span>Kas &amp; bank</a>
                     @endcan
+                    @can('accounting.receivable.manage')
+                        <a href="{{ route('accounting.receivables.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">P</span>Piutang pelanggan</a>
+                    @endcan
                     @can('inventory.stock.view')
                         <a href="{{ route('inventory.stock.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">I</span>Persediaan</a>
                         <a href="{{ route('inventory.expiry.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">E</span>Monitor kedaluwarsa</a>

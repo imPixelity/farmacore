@@ -629,15 +629,15 @@
 
 ### Phase 20 — Piutang Pelanggan
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-12 · **Selesai:** 2026-11-12
 **Dependency:** Phase 7, Phase 19
 
 **Checklist:**
-- [ ] Migrasi `receivables` + `receivable_payments` (bila belum dibuat di Phase 19).
-- [ ] Layar piutang per pelanggan.
-- [ ] Form pembayaran + validasi sisa.
-- [ ] Update status + posting kas masuk.
-- [ ] Riwayat pembayaran.
+- [x] Migrasi `receivables` + `receivable_payments` (dibuat pada Phase 19).
+- [x] Layar piutang per pelanggan.
+- [x] Form pembayaran + validasi sisa.
+- [x] Update status + posting kas masuk.
+- [x] Riwayat pembayaran.
 
 **Acceptance criteria:**
 - Piutang terbentuk dari penjualan kredit.
@@ -645,8 +645,19 @@
 - Status dan sisa piutang benar.
 - Kas masuk tercatat.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Accounting/Services/ReceivableService.php`
+- `app/Http/Controllers/Accounting/ReceivableController.php`
+- `app/Http/Requests/Accounting/PayReceivableRequest.php`
+- `resources/views/accounting/receivables/index.blade.php`
+- `routes/web.php` (`accounting.receivables.index`, `accounting.receivables.pay`)
+- `tests/Feature/ReceivableServiceTest.php`
+- `php artisan test --compact tests/Feature/ReceivableServiceTest.php` — 4 tests passed, 24 assertions
+- `php artisan test --compact` — 127 tests passed, 792 assertions
+- `vendor/bin/pint --dirty --format agent` — passed
+- `npm run build` — passed
+
+**Catatan:** Tabel piutang dibuat pada migration Phase 19; Phase 20 menambahkan pembayaran, status, riwayat, filter, dan posting kas masuk. Pembatalan/retur penjualan tetap menjadi scope Phase 21.
 
 ---
 

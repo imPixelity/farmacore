@@ -3,6 +3,7 @@
 namespace App\Modules\Accounting\Models;
 
 use App\Models\User;
+use App\Modules\Core\Traits\Auditable;
 use Database\Factories\ReceivablePaymentFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -15,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ReceivablePayment extends Model
 {
     /** @use HasFactory<ReceivablePaymentFactory> */
-    use HasFactory;
+    use Auditable, HasFactory;
 
     /** @return array<string, string> */
     protected function casts(): array
