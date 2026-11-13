@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['sale_id', 'patient_id', 'total_amount', 'paid_amount', 'due_date', 'status', 'created_by', 'updated_by'])]
+#[Fillable(['sale_id', 'patient_id', 'total_amount', 'paid_amount', 'due_date', 'status', 'cancelled_at', 'created_by', 'updated_by'])]
 #[UseFactory(ReceivableFactory::class)]
 class Receivable extends Model
 {
@@ -28,6 +28,7 @@ class Receivable extends Model
             'total_amount' => 'decimal:2',
             'paid_amount' => 'decimal:2',
             'due_date' => 'date',
+            'cancelled_at' => 'datetime',
         ];
     }
 

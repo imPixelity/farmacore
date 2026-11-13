@@ -8,6 +8,7 @@ use App\Modules\Accounting\Models\TransactionCategory;
 use App\Modules\Accounting\Services\FinancialPostingService;
 use App\Modules\Inventory\Models\ItemBatch;
 use App\Modules\Inventory\Services\StockService;
+use App\Modules\Md\Models\HealthService;
 use App\Modules\Md\Models\Item;
 use App\Modules\Md\Models\Patient;
 use App\Modules\Md\Services\DiscountService;
@@ -16,6 +17,7 @@ use App\Modules\Md\Services\TaxService;
 use App\Modules\Pos\Models\Sale;
 use App\Modules\Pos\Models\SaleItem;
 use App\Modules\Pos\Models\SaleItemBatch;
+use App\Modules\Pos\Models\SaleService as SaleHealthService;
 use App\Modules\Rx\Models\Prescription;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -57,6 +59,11 @@ class SaleService
                 $saleType,
             );
             $prepared = $this->prepareLines($data['cart'], $saleType, $prescription);
+            $serviceRows = $this->prepareServices($data['services'] ?? []);
+            $healthServiceFee = '0.00';
+            foreach ($serviceRows as $serviceRow) {
+                $healthServiceFee = bcadd($healthServiceFee, $serviceRow['fee'], 2);
+            }
             $doctorFee = $this->positiveMoney((string) ($data['doctor_fee'] ?? '0.00'), 'doctor_fee', allowZero: true);
             $tuslahFee = $this->positiveMoney((string) ($data['tuslah_fee'] ?? '0.00'), 'tuslah_fee', allowZero: true);
 
@@ -78,7 +85,7 @@ class SaleService
                 $taxRate = $line['tax_rate'];
             }
 
-            $grandTotal = bcadd(bcadd($subtotal, $doctorFee, 2), $tuslahFee, 2);
+            $grandTotal = bcadd(bcadd(bcadd($subtotal, $doctorFee, 2), $tuslahFee, 2), $healthServiceFee, 2);
             $payments = $this->preparePayments($data['payments'], $grandTotal, $patient !== null);
             $invoiceNo = 'INV-'.Str::ulid();
             $sale = new Sale;
@@ -93,13 +100,23 @@ class SaleService
                 'discount_total' => $discountTotal,
                 'doctor_fee' => $doctorFee,
                 'tuslah_fee' => $tuslahFee,
-                'service_fee_total' => bcadd($doctorFee, $tuslahFee, 2),
+                'service_fee_total' => bcadd(bcadd($doctorFee, $tuslahFee, 2), $healthServiceFee, 2),
                 'tax_amount' => $taxAmount,
                 'grand_total' => $grandTotal,
                 'payment_status' => $payments['payment_status'],
                 'status' => 'completed',
             ]);
             $sale->save();
+
+            foreach ($serviceRows as $serviceRow) {
+                SaleHealthService::query()->create([
+                    'sale_id' => $sale->id,
+                    'health_service_id' => $serviceRow['health_service_id'],
+                    'service_name' => $serviceRow['service_name'],
+                    'fee' => $serviceRow['fee'],
+                    'result_note' => $serviceRow['result_note'],
+                ]);
+            }
 
             foreach ($prepared as $line) {
                 $saleItem = new SaleItem;
@@ -119,6 +136,7 @@ class SaleService
             }
 
             $remainingDoctorFee = $doctorFee;
+            $remainingHealthServiceFee = $healthServiceFee;
 
             foreach ($payments['lines'] as $payment) {
                 $salePayment = $sale->payments()->create([
@@ -132,7 +150,13 @@ class SaleService
                 ]);
 
                 if ($payment['method'] !== 'kredit') {
-                    $remainingDoctorFee = $this->postPaymentRevenue($sale, $salePayment, $payment['amount'], $remainingDoctorFee);
+                    [$remainingDoctorFee, $remainingHealthServiceFee] = $this->postPaymentRevenue(
+                        $sale,
+                        $salePayment,
+                        $payment['amount'],
+                        $remainingDoctorFee,
+                        $remainingHealthServiceFee,
+                    );
                 }
             }
 
@@ -152,7 +176,7 @@ class SaleService
                 $this->taxes->recordCalculatedOutputTax($sale, $taxRate, $taxableAmount, $taxAmount, now());
             }
 
-            return $sale->fresh(['items.batches.itemBatch', 'payments', 'patient', 'prescription', 'receivable', 'taxRecords']);
+            return $sale->fresh(['items.batches.itemBatch', 'payments', 'services', 'patient', 'prescription', 'receivable', 'taxRecords']);
         }, attempts: 5);
     }
 
@@ -231,6 +255,36 @@ class SaleService
         }
 
         return $this->taxes->calculateIncludedTax($grossAmount, $rate);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $services
+     * @return array<int, array{health_service_id: int, service_name: string, fee: string, result_note: string|null}>
+     */
+    private function prepareServices(array $services): array
+    {
+        $prepared = [];
+
+        foreach ($services as $index => $service) {
+            $serviceId = (int) ($service['health_service_id'] ?? 0);
+            $healthService = HealthService::query()->active()->find($serviceId);
+            if (! $healthService) {
+                throw ValidationException::withMessages(["services.{$index}.health_service_id" => 'Layanan pemeriksaan tidak ditemukan atau tidak aktif.']);
+            }
+            $fee = $this->positiveMoney((string) ($service['fee'] ?? $healthService->default_fee), "services.{$index}.fee", allowZero: true);
+            $resultNote = filled($service['result_note'] ?? null) ? trim((string) $service['result_note']) : null;
+            if ($resultNote !== null && mb_strlen($resultNote) > 5000) {
+                throw ValidationException::withMessages(["services.{$index}.result_note" => 'Catatan hasil pemeriksaan terlalu panjang.']);
+            }
+            $prepared[] = [
+                'health_service_id' => $healthService->id,
+                'service_name' => $healthService->name,
+                'fee' => $fee,
+                'result_note' => $resultNote,
+            ];
+        }
+
+        return $prepared;
     }
 
     private function allocateAndDecrease(SaleItem $saleItem, Item $item, string $quantity, string $invoiceNo): void
@@ -351,20 +405,25 @@ class SaleService
         ];
     }
 
-    private function postPaymentRevenue(Sale $sale, object $payment, string $amount, string $doctorFee): string
+    /** @return array{0: string, 1: string} */
+    private function postPaymentRevenue(Sale $sale, object $payment, string $amount, string $doctorFee, string $healthServiceFee): array
     {
         $doctorPortion = bccomp($doctorFee, $amount, 2) < 0 ? $doctorFee : $amount;
-        $salePortion = bcsub($amount, $doctorPortion, 2);
+        $remainingAmount = bcsub($amount, $doctorPortion, 2);
+        $healthPortion = bccomp($healthServiceFee, $remainingAmount, 2) < 0 ? $healthServiceFee : $remainingAmount;
+        $salePortion = bcsub($remainingAmount, $healthPortion, 2);
 
         if (bccomp($salePortion, '0.00', 2) > 0) {
             $this->postRevenue($sale, $payment->cash_bank_account_id, $salePortion, $this->saleSourceCode($sale->sale_type));
         }
-
         if (bccomp($doctorPortion, '0.00', 2) > 0) {
             $this->postRevenue($sale, $payment->cash_bank_account_id, $doctorPortion, 'DOCTOR_FEE');
         }
+        if (bccomp($healthPortion, '0.00', 2) > 0) {
+            $this->postRevenue($sale, $payment->cash_bank_account_id, $healthPortion, 'HEALTH_SERVICE');
+        }
 
-        return bcsub($doctorFee, $doctorPortion, 2);
+        return [bcsub($doctorFee, $doctorPortion, 2), bcsub($healthServiceFee, $healthPortion, 2)];
     }
 
     private function postRevenue(Sale $sale, int $accountId, string $amount, string $sourceCode): void

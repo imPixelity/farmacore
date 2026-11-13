@@ -663,16 +663,16 @@
 
 ### Phase 21 — Struk, Pembatalan, Retur & Layanan Pemeriksaan
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-13 · **Selesai:** 2026-11-13
 **Dependency:** Phase 19, Phase 20
 
 **Checklist:**
-- [ ] `ReceiptPrintService` + template 80 mm.
-- [ ] Cetak ulang + tanda "SALINAN".
-- [ ] Pembatalan + alasan + transaksi lawan + pengembalian stok.
-- [ ] Migrasi `sale_returns` + `sale_return_items`.
-- [ ] Retur + validasi + flag `restock`.
-- [ ] `sale_services` + `result_note`.
+- [x] `ReceiptPrintService` + template 80 mm.
+- [x] Cetak ulang + tanda "SALINAN".
+- [x] Pembatalan + alasan + transaksi lawan + pengembalian stok.
+- [x] Migrasi `sale_returns` + `sale_return_items`.
+- [x] Retur + validasi + flag `restock`.
+- [x] `sale_services` + `result_note`.
 
 **Acceptance criteria:**
 - Struk lengkap dan dapat dicetak ulang.
@@ -680,8 +680,19 @@
 - Retur memvalidasi qty dan mengikuti `restock`.
 - Biaya pemeriksaan masuk total dan pemasukan.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `app/Modules/Pos/Services/ReceiptPrintService.php` + `resources/views/pos/receipt.blade.php` — struk 80 mm, reprint "SALINAN".
+- `app/Modules/Pos/Services/SaleLifecycleService.php` — pembatalan atomik, pemulihan batch, reversal transaksi keuangan, penandaan piutang batal.
+- `app/Modules/Pos/Services/SaleReturnService.php` + migration Phase 21 — retur, validasi sisa qty, flag `restock`, refund `SALE_REFUND`.
+- `app/Modules/Pos/Services/SaleService.php` + `sale_services` — biaya dan hasil pemeriksaan masuk total serta kategori `HEALTH_SERVICE`.
+- `tests/Feature/PosPhase21Test.php` — 5 test, 18 assertions.
+- `php artisan test --compact` — 132 tests passed, 810 assertions.
+- `vendor/bin/pint --dirty --format agent` — passed.
+- `npm run build` — passed.
+- `php artisan route:list --except-vendor --name=pos --json` — routes receipt, cancel, return registered.
+- `git diff --check` — passed.
+
+**Catatan/blocker:** Kebijakan batas waktu pembatalan dan aturan produk yang boleh direstock masih TBD di dokumen sumber; implementasi menerima alasan wajib dan menerapkan flag `restock` secara eksplisit.
 
 ---
 

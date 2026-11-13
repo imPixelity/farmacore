@@ -24,6 +24,8 @@ use App\Http\Controllers\Md\PricingController;
 use App\Http\Controllers\Md\SupplierController;
 use App\Http\Controllers\Md\TaxController;
 use App\Http\Controllers\Md\UnitController;
+use App\Http\Controllers\Pos\SaleController;
+use App\Http\Controllers\Pos\SaleReturnController;
 use App\Http\Controllers\Purchasing\PayableController;
 use App\Http\Controllers\Purchasing\PurchaseOrderController;
 use App\Http\Controllers\Rx\PrescriptionController;
@@ -38,6 +40,9 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void {
     Route::get('/', fn () => view('welcome'))->name('home');
     Route::get('/pos', fn () => view('pos.index'))->middleware('can:pos.sale.view')->name('pos.index');
+    Route::get('/pos/sales/{sale}/receipt', [SaleController::class, 'receipt'])->middleware('can:pos.sale.view')->name('pos.sales.receipt');
+    Route::post('/pos/sales/{sale}/cancel', [SaleController::class, 'cancel'])->middleware('can:pos.sale.cancel')->name('pos.sales.cancel');
+    Route::post('/pos/sales/{sale}/returns', [SaleReturnController::class, 'store'])->middleware('can:pos.return.manage')->name('pos.sales.returns.store');
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');

@@ -5,6 +5,7 @@ namespace App\Modules\Rx\Services;
 use App\Models\AuditLog;
 use App\Modules\Md\Models\Patient;
 use App\Modules\Md\Models\PharmacyStaff;
+use App\Modules\Pos\Models\Sale;
 use App\Modules\Rx\Models\PrescriptionCompounding;
 use App\Modules\Rx\Models\PrescriptionDispense;
 use App\Modules\Rx\Models\PrescriptionScreening;
@@ -29,6 +30,29 @@ class PatientHistoryService
             ->orderByDesc('id')
             ->get();
         $timeline = [];
+
+        $sales = Sale::query()
+            ->whereBelongsTo($patient)
+            ->with(['items.item:id,name', 'services'])
+            ->orderByDesc('sale_date')
+            ->orderByDesc('id')
+            ->get();
+        foreach ($sales as $sale) {
+            $timeline[] = [
+                'date' => $sale->sale_date,
+                'type' => 'penjualan',
+                'title' => 'Penjualan '.$sale->invoice_no,
+                'description' => 'Total '.$sale->grand_total.' · status '.$sale->status,
+            ];
+            foreach ($sale->services as $service) {
+                $timeline[] = [
+                    'date' => $sale->sale_date,
+                    'type' => 'pemeriksaan',
+                    'title' => $service->service_name,
+                    'description' => 'Biaya '.$service->fee.($service->result_note ? ' · '.$service->result_note : ''),
+                ];
+            }
+        }
 
         foreach ($prescriptions as $prescription) {
             $timeline[] = [

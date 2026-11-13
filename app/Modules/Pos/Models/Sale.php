@@ -77,6 +77,16 @@ class Sale extends Model
         return $this->hasMany(SalePayment::class);
     }
 
+    public function services(): HasMany
+    {
+        return $this->hasMany(SaleService::class);
+    }
+
+    public function returns(): HasMany
+    {
+        return $this->hasMany(SaleReturn::class);
+    }
+
     public function receivable(): HasOne
     {
         return $this->hasOne(Receivable::class);
