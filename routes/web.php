@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Accounting\CashBankController;
 use App\Http\Controllers\Accounting\ReceivableController;
+use App\Http\Controllers\Accounting\TaxController as AccountingTaxController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Core\AuditLogController;
 use App\Http\Controllers\Core\NotificationController;
@@ -263,6 +264,18 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
         Route::post('/receivables/{receivable}/payments', [ReceivableController::class, 'pay'])
             ->middleware('can:accounting.receivable.manage')
             ->name('receivables.pay');
+        Route::get('/taxes', [AccountingTaxController::class, 'index'])
+            ->middleware('can:accounting.tax.manage')
+            ->name('taxes.index');
+        Route::post('/taxes', [AccountingTaxController::class, 'store'])
+            ->middleware('can:accounting.tax.manage')
+            ->name('taxes.store');
+        Route::put('/taxes/{taxObligation}', [AccountingTaxController::class, 'update'])
+            ->middleware('can:accounting.tax.manage')
+            ->name('taxes.update');
+        Route::post('/taxes/{taxObligation}/paid', [AccountingTaxController::class, 'markPaid'])
+            ->middleware('can:accounting.tax.manage')
+            ->name('taxes.paid');
 
         Route::middleware('can:accounting.cash.manage')->group(function (): void {
             Route::post('/accounts', [CashBankController::class, 'storeAccount'])->name('accounts.store');

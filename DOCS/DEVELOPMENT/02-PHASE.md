@@ -48,16 +48,16 @@
 | 10 | Kebijakan Stok, ROP, Buffer & Kedaluwarsa | INV | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Kebijakan, ROP, buffer, notifikasi, monitor ED, dan blok batch kedaluwarsa terverifikasi. |
 | 11 | Perencanaan Pembelian & Purchase Order | PUR | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Rekomendasi ROP, draft PO, estimasi total, transisi kirim, immutability, audit, UI, migrasi, dan authorization terverifikasi. |
 | 12 | Pencocokan Penerimaan & Evaluasi Supplier | PUR | ✅ Done | 100% | 11-11-2026 | 11-11-2026 | Matching penerimaan-PO, konfirmasi perbedaan, kandidat retur, metrik supplier, dan riwayat harga terverifikasi. |
-| 13 | Utang Supplier & Pembayaran | PUR | ⬜ Not started | 0% | — | — | — |
-| 14 | Stock Opname, Mutasi & Write-off | INV | ⬜ Not started | 0% | — | — | — |
-| 15 | Retur Pembelian | INV | ⬜ Not started | 0% | — | — | — |
-| 16 | Pencatatan Resep & Alur Pelayanan | RX | ⬜ Not started | 0% | — | — | — |
-| 17 | Riwayat Pasien & Aktivitas Tenaga Farmasi | RX | ⬜ Not started | 0% | — | — | — |
-| 18 | Keranjang, Harga & Diskon POS | POS | ⬜ Not started | 0% | — | — | — |
-| 19 | Checkout, FEFO & Pembayaran | POS | ⬜ Not started | 0% | — | — | — |
-| 20 | Piutang Pelanggan | ACC | ⬜ Not started | 0% | — | — | — |
-| 21 | Struk, Pembatalan, Retur & Layanan Pemeriksaan | POS | ⬜ Not started | 0% | — | — | — |
-| 22 | Pajak: Kewajiban & Laporan Pendukung | ACC | ⬜ Not started | 0% | — | — | — |
+| 13 | Utang Supplier & Pembayaran | PUR | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Payable, pembayaran sebagian/lunas, posting kas keluar, notifikasi jatuh tempo, audit, test dan build terverifikasi. |
+| 14 | Stock Opname, Mutasi & Write-off | INV | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Snapshot opname, selisih, approval/reject, write-off, mutasi stok, riwayat, audit, test dan build terverifikasi. |
+| 15 | Retur Pembelian | INV | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Retur per batch, validasi kumulatif, restock, penyesuaian payable/supplier credit, audit, test dan build terverifikasi. |
+| 16 | Pencatatan Resep & Alur Pelayanan | RX | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Workflow resep, screening, peracikan, penyerahan, guard transisi, pencatatan tenaga farmasi, test dan build terverifikasi. |
+| 17 | Riwayat Pasien & Aktivitas Tenaga Farmasi | RX | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Patient history, timeline aktivitas resep, filter aktivitas staff, permission dan audit akses terverifikasi. |
+| 18 | Keranjang, Harga & Diskon POS | POS | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | PosScreen, pencarian/barcode, pemuatan resep, validasi stok, harga/diskon real-time, test dan build terverifikasi. |
+| 19 | Checkout, FEFO & Pembayaran | POS | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Checkout atomik, FEFO, pembayaran tunai/non-tunai/kredit, piutang, pajak keluaran, posting pemasukan, test dan build terverifikasi. |
+| 20 | Piutang Pelanggan | ACC | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Layar piutang, pembayaran sebagian/lunas, validasi overpayment, posting kas masuk, riwayat, audit, test dan build terverifikasi. |
+| 21 | Struk, Pembatalan, Retur & Layanan Pemeriksaan | POS | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Struk 80 mm/salinan, pembatalan dengan reversal dan pemulihan stok, retur/restock, layanan pemeriksaan, test dan build terverifikasi. |
+| 22 | Pajak: Kewajiban & Laporan Pendukung | ACC | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Tax obligations manual, status bayar, rekap PPN per periode, penjualan bruto, filter laporan, permission, test dan build terverifikasi. |
 | 23 | 12 Laporan & Filter Periode | RPT | ⬜ Not started | 0% | — | — | — |
 | 24 | Ekspor PDF & XLSX | RPT | ⬜ Not started | 0% | — | — | — |
 | 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ⬜ Not started | 0% | — | — | — |
@@ -698,15 +698,15 @@
 
 ### Phase 22 — Pajak: Kewajiban & Laporan Pendukung
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 2026-11-13 · **Selesai:** 2026-11-13
 **Dependency:** Phase 6, Phase 9, Phase 19
 
 **Checklist:**
-- [ ] Migrasi `tax_obligations`.
-- [ ] Rekap PPN masukan/keluaran per periode.
-- [ ] CRUD kewajiban pajak + status bayar.
-- [ ] Laporan pendukung pajak + filter periode.
-- [ ] Dokumentasi bahwa PPh tidak dihitung otomatis.
+- [x] Migrasi `tax_obligations`.
+- [x] Rekap PPN masukan/keluaran per periode.
+- [x] CRUD kewajiban pajak + status bayar.
+- [x] Laporan pendukung pajak + filter periode.
+- [x] Dokumentasi bahwa PPh tidak dihitung otomatis.
 
 **Acceptance criteria:**
 - PPN masukan/keluaran tercatat per transaksi.
@@ -714,8 +714,22 @@
 - Kewajiban dapat dicatat dan ditandai dibayar.
 - Laporan pendukung tampil sesuai filter.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:**
+- `database/migrations/2026_11_13_065103_create_tax_obligations_table.php`
+- `app/Modules/Accounting/Models/TaxObligation.php`
+- `app/Modules/Accounting/Services/TaxObligationService.php`
+- `app/Modules/Accounting/Services/TaxReportService.php`
+- `app/Http/Controllers/Accounting/TaxController.php`
+- `app/Http/Requests/Accounting/TaxObligationRequest.php`
+- `resources/views/accounting/taxes/index.blade.php`
+- `tests/Feature/TaxPhase22Test.php` — 4 test, 15 assertions.
+- `php artisan test --compact` — 136 tests passed, 825 assertions.
+- `vendor/bin/pint --dirty --format agent` — passed.
+- `npm run build` — passed.
+- `php artisan route:list --except-vendor --name=accounting.taxes --json` — route index, store, update, paid terdaftar.
+- `git diff --check` — passed.
+
+**Catatan/blocker:** PPh tidak dihitung otomatis; staf keuangan mencatat nominal kewajiban secara manual sesuai ketentuan yang berlaku. `tax_records` PPN masukan/keluaran tetap dicatat otomatis oleh transaksi penerimaan/penjualan melalui `TaxService`. Verifikasi migrasi MySQL lokal tetap menunggu service MySQL pada 127.0.0.1:3306; migrasi tervalidasi melalui SQLite test suite.
 
 ---
 
@@ -889,6 +903,16 @@
 | 11-11-2026 | Agent | 10 | Phase 10 selesai: kebijakan stok configurable, perhitungan min/buffer/ROP dan override, job berkala serta notifikasi ROP/ED, monitor/filter kedaluwarsa, dan blok penjualan batch expired. 10 test terfokus/35 assertion dan suite 91 test/612 assertion lulus; migration/schema MariaDB, 13 route, jadwal, Pint, build, dan diff check terverifikasi. Formula parameter tetap mengikuti keputusan apoteker; commit Phase 10 dibuat dan agent berhenti sebelum Phase 11. |
 | 11-11-2026 | Agent | 11 | Phase 11 selesai: perencanaan pembelian berbasis ROP, rekomendasi jumlah dengan konversi satuan, PO draft dan estimasi total, pengiriman immutable, audit perubahan status, permission, UI, dan migration selesai. 4 test terfokus/17 assertion dan suite 95 test/629 assertion lulus; migration MariaDB, 7 route, Pint, build, dan diff check terverifikasi. Berhenti sebelum Phase 12 sesuai dependency. |
 | 11-11-2026 | Agent | 12 | Phase 12 selesai: integrasi PO ke penerimaan, ReceiptMatchingService dengan status per baris/header, warning qty/harga dan konfirmasi eksplisit, kandidat retur, akumulasi qty/status PO, evaluasi supplier, update lead time, riwayat harga, UI, migration, dan authorization. 3 test matching/11 assertion, 8 test penerimaan/84 assertion, suite 98 test/640 assertion lulus; migration MariaDB, 8 route, Pint, build, dan diff check terverifikasi. Berhenti sebelum Phase 13 sesuai dependency. |
+| 12-11-2026 | Agent | 13 | Phase 13 selesai: payables supplier, pembayaran sebagian/lunas, validasi sisa, posting kas keluar, notifikasi jatuh tempo, audit, UI, migration, test dan build terverifikasi. |
+| 12-11-2026 | Agent | 14 | Phase 14 selesai: stock opname, snapshot/selisih, approval/reject, write-off, mutasi stok, riwayat, audit, migration, test dan build terverifikasi. |
+| 12-11-2026 | Agent | 15 | Phase 15 selesai: retur pembelian per batch, validasi kumulatif, restock, penyesuaian payable/supplier credit, audit, migration, test dan build terverifikasi. |
+| 12-11-2026 | Agent | 16 | Phase 16 selesai: workflow resep, screening, peracikan, penyerahan, guard transisi dan pencatatan tenaga farmasi; migration, test dan build terverifikasi. |
+| 12-11-2026 | Agent | 17 | Phase 17 selesai: patient history, timeline aktivitas resep, filter aktivitas staff, permission dan audit akses; test dan build terverifikasi. |
+| 12-11-2026 | Agent | 18 | Phase 18 selesai: PosScreen, keranjang, pencarian/barcode, pemuatan resep, validasi stok, harga/diskon real-time; test dan build terverifikasi. |
+| 12-11-2026 | Agent | 19 | Phase 19 selesai: checkout atomik, FEFO, pembayaran tunai/non-tunai/kredit, piutang, pajak keluaran dan posting pemasukan; test, Pint dan build terverifikasi. |
+| 12-11-2026 | Agent | 20 | Phase 20 selesai: layar piutang, pembayaran sebagian/lunas, validasi overpayment, posting kas masuk, riwayat dan audit; suite 127 test/792 assertion, Pint dan build terverifikasi. |
+| 13-11-2026 | Agent | 21 | Phase 21 selesai: struk 80 mm/salinan, pembatalan dengan reversal dan pemulihan stok, retur/restock, layanan pemeriksaan dan result note; suite 132 test/810 assertion, Pint, build, route dan diff check terverifikasi. |
+| 13-11-2026 | Agent | 22 | Phase 22 selesai: migration `tax_obligations`, pencatatan/edit kewajiban manual, status bayar, rekap PPN masukan/keluaran dan penjualan bruto per periode, filter laporan, permission, serta penegasan PPh tidak dihitung otomatis; suite 136 test/825 assertion, Pint, build, route dan diff check terverifikasi. |
 
 ---
 
