@@ -37,7 +37,10 @@ return new class extends Migration
             $table->decimal('line_value', 15, 2);
             $table->enum('reason', ['rusak', 'tidak_sesuai', 'mendekati_ed', 'salah_kirim']);
             $table->timestamps();
-            $table->unique(['purchase_return_id', 'goods_receipt_item_id', 'item_batch_id']);
+            $table->unique(
+                ['purchase_return_id', 'goods_receipt_item_id', 'item_batch_id'],
+                'purchase_return_items_unique',
+            );
             $table->index(['goods_receipt_item_id', 'item_batch_id']);
         });
     }

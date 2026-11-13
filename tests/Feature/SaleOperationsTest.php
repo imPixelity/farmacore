@@ -29,12 +29,12 @@ beforeEach(function (): void {
     $this->actingAs($cashier);
 });
 
-function phase21SaleFixture(string $price = '100.00', string $stock = '5.000'): array
+function saleFixture(string $price = '100.00', string $stock = '5.000'): array
 {
     $item = Item::factory()->create();
     ItemPrice::factory()->for($item)->create(['sales_type' => 'obat_bebas', 'selling_price' => $price]);
     $batch = ItemBatch::factory()->for($item)->create(['expiry_date' => today()->addMonths(6)]);
-    app(StockService::class)->increase($batch, $stock, 'receipt', 'Fixture Phase 21');
+    app(StockService::class)->increase($batch, $stock, 'receipt', 'Test stock receipt');
     $account = CashBankAccount::factory()->create(['opening_balance' => '1000.00', 'current_balance' => '1000.00']);
     $sale = app(SaleService::class)->checkout([
         'sale_type' => 'obat_bebas',
@@ -51,7 +51,7 @@ function phase21SaleFixture(string $price = '100.00', string $stock = '5.000'): 
 }
 
 it('cancels a sale without deleting it and reverses stock and financial postings', function () {
-    [$sale, $batch, $account] = phase21SaleFixture();
+    [$sale, $batch, $account] = saleFixture();
 
     app(SaleLifecycleService::class)->cancel($sale, 'Salah input kasir');
 
@@ -65,7 +65,7 @@ it('cancels a sale without deleting it and reverses stock and financial postings
 });
 
 it('rejects a second cancellation', function () {
-    [$sale] = phase21SaleFixture();
+    [$sale] = saleFixture();
     app(SaleLifecycleService::class)->cancel($sale, 'Duplikat');
 
     expect(fn () => app(SaleLifecycleService::class)->cancel($sale->fresh(), 'Duplikat'))
@@ -73,7 +73,7 @@ it('rejects a second cancellation', function () {
 });
 
 it('records a validated return, refunds cash, and optionally restocks the original batch', function () {
-    [$sale, $batch, $account] = phase21SaleFixture();
+    [$sale, $batch, $account] = saleFixture();
 
     $return = app(SaleReturnService::class)->create($sale, [
         'items' => [['sale_item_id' => $sale->items->first()->id, 'qty_base' => '1.000']],
@@ -97,7 +97,7 @@ it('records a validated return, refunds cash, and optionally restocks the origin
 });
 
 it('adds health services to the sale total and posts health service revenue', function () {
-    [$item] = phase21SaleFixture('100.00');
+    [$item] = saleFixture('100.00');
     $service = HealthService::factory()->create(['name' => 'Cek tekanan darah', 'default_fee' => '25.00']);
     $account = CashBankAccount::factory()->create(['opening_balance' => '1000.00', 'current_balance' => '1000.00']);
 
@@ -116,7 +116,7 @@ it('adds health services to the sale total and posts health service revenue', fu
 });
 
 it('renders an original and copy receipt', function () {
-    [$sale] = phase21SaleFixture();
+    [$sale] = saleFixture();
     $service = app(ReceiptPrintService::class);
 
     expect($service->render($sale, false)->render())->toContain('STRUK PEMBAYARAN');

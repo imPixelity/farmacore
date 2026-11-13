@@ -29,6 +29,7 @@ use App\Http\Controllers\Pos\SaleController;
 use App\Http\Controllers\Pos\SaleReturnController;
 use App\Http\Controllers\Purchasing\PayableController;
 use App\Http\Controllers\Purchasing\PurchaseOrderController;
+use App\Http\Controllers\Reporting\ReportController;
 use App\Http\Controllers\Rx\PrescriptionController;
 use App\Http\Middleware\EnsureActiveSession;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +41,8 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void {
     Route::get('/', fn () => view('welcome'))->name('home');
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::get('/pos', fn () => view('pos.index'))->middleware('can:pos.sale.view')->name('pos.index');
     Route::get('/pos/sales/{sale}/receipt', [SaleController::class, 'receipt'])->middleware('can:pos.sale.view')->name('pos.sales.receipt');
     Route::post('/pos/sales/{sale}/cancel', [SaleController::class, 'cancel'])->middleware('can:pos.sale.cancel')->name('pos.sales.cancel');

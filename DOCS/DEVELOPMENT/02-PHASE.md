@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 12 — Done (berhenti; Phase 13 belum dimulai) |
+| Status proyek | Phase 23 — Blocked; acceptance target performa belum dapat diverifikasi |
 
 ---
 
@@ -58,7 +58,7 @@
 | 20 | Piutang Pelanggan | ACC | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Layar piutang, pembayaran sebagian/lunas, validasi overpayment, posting kas masuk, riwayat, audit, test dan build terverifikasi. |
 | 21 | Struk, Pembatalan, Retur & Layanan Pemeriksaan | POS | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Struk 80 mm/salinan, pembatalan dengan reversal dan pemulihan stok, retur/restock, layanan pemeriksaan, test dan build terverifikasi. |
 | 22 | Pajak: Kewajiban & Laporan Pendukung | ACC | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Tax obligations manual, status bayar, rekap PPN per periode, penjualan bruto, filter laporan, permission, test dan build terverifikasi. |
-| 23 | 12 Laporan & Filter Periode | RPT | ⬜ Not started | 0% | — | — | — |
+| 23 | 12 Laporan & Filter Periode | RPT | ⛔ Blocked | 80% | 13-11-2026 | — | Implementasi dan verifikasi fungsional selesai; target performa <10 detik belum dapat diverifikasi karena tidak ada dataset MySQL representatif. Phase 24 belum dimulai. |
 | 24 | Ekspor PDF & XLSX | RPT | ⬜ Not started | 0% | — | — | — |
 | 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ⬜ Not started | 0% | — | — | — |
 | 26 | Migrasi Data Awal & Seeder Produksi | CORE | ⬜ Not started | 0% | — | — | — |
@@ -685,7 +685,7 @@
 - `app/Modules/Pos/Services/SaleLifecycleService.php` — pembatalan atomik, pemulihan batch, reversal transaksi keuangan, penandaan piutang batal.
 - `app/Modules/Pos/Services/SaleReturnService.php` + migration Phase 21 — retur, validasi sisa qty, flag `restock`, refund `SALE_REFUND`.
 - `app/Modules/Pos/Services/SaleService.php` + `sale_services` — biaya dan hasil pemeriksaan masuk total serta kategori `HEALTH_SERVICE`.
-- `tests/Feature/PosPhase21Test.php` — 5 test, 18 assertions.
+- `tests/Feature/SaleOperationsTest.php` — 5 test, 18 assertions.
 - `php artisan test --compact` — 132 tests passed, 810 assertions.
 - `vendor/bin/pint --dirty --format agent` — passed.
 - `npm run build` — passed.
@@ -722,7 +722,7 @@
 - `app/Http/Controllers/Accounting/TaxController.php`
 - `app/Http/Requests/Accounting/TaxObligationRequest.php`
 - `resources/views/accounting/taxes/index.blade.php`
-- `tests/Feature/TaxPhase22Test.php` — 4 test, 15 assertions.
+- `tests/Feature/TaxObligationAndReportTest.php` — 4 test, 15 assertions.
 - `php artisan test --compact` — 136 tests passed, 825 assertions.
 - `vendor/bin/pint --dirty --format agent` — passed.
 - `npm run build` — passed.
@@ -735,24 +735,25 @@
 
 ### Phase 23 — 12 Laporan & Filter Periode
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ⛔ Blocked · **Progress:** 80% · **Mulai:** 13-11-2026 · **Selesai:** —
 **Dependency:** Phase 13, Phase 17, Phase 20, Phase 21, Phase 22
 
 **Checklist:**
-- [ ] `ReportService` untuk 12 laporan.
-- [ ] `ReportViewer` generik + filter periode.
-- [ ] Permission `report.view.*`.
-- [ ] Paginasi + indeks pendukung.
-- [ ] Uji performa laporan 1 bulan.
+- [x] `ReportService` untuk 12 laporan.
+- [x] `ReportViewer` generik + filter periode.
+- [x] Permission `report.view.*`.
+- [x] Paginasi + indeks pendukung.
+- [ ] Uji performa laporan 1 bulan pada dataset MySQL representatif.
 
 **Acceptance criteria:**
-- 12 laporan tersedia dan dapat difilter.
-- Laporan 1 bulan < 10 detik.
-- Angka konsisten dengan data transaksi.
-- Akses tidak berwenang ditolak.
+- [x] 12 laporan tersedia dan dapat difilter.
+- [ ] Laporan 1 bulan < 10 detik.
+- [x] Angka konsisten dengan data transaksi.
+- [x] Akses tidak berwenang ditolak.
+- [x] Laporan stok/utang/piutang memakai sumber data yang sama dengan modul asal.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `tests/Feature/ReportingTest.php` (12 test/109 assertion); suite penuh (148 test/934 assertion); seluruh migrasi termasuk indeks laporan berstatus `Ran` pada MySQL dan berjalan pada SQLite in-memory; smoke-check query seluruh 12 laporan pada MySQL, `EXPLAIN` untuk filter transaksi dan penjualan, Pint, build Vite, route reports, dan `git diff --check` lulus.
+**Catatan/blocker:** Tidak tersedia dataset MySQL representatif untuk memverifikasi acceptance <10 detik. Tabel sumber laporan saat ini kosong; `EXPLAIN` pada tabel kosong bukan evidence performa pada volume produksi. Sesuai source of truth, phase berstatus Blocked dan Phase 24 tidak dimulai sampai acceptance ini dapat diverifikasi.
 
 ---
 
@@ -913,6 +914,10 @@
 | 12-11-2026 | Agent | 20 | Phase 20 selesai: layar piutang, pembayaran sebagian/lunas, validasi overpayment, posting kas masuk, riwayat dan audit; suite 127 test/792 assertion, Pint dan build terverifikasi. |
 | 13-11-2026 | Agent | 21 | Phase 21 selesai: struk 80 mm/salinan, pembatalan dengan reversal dan pemulihan stok, retur/restock, layanan pemeriksaan dan result note; suite 132 test/810 assertion, Pint, build, route dan diff check terverifikasi. |
 | 13-11-2026 | Agent | 22 | Phase 22 selesai: migration `tax_obligations`, pencatatan/edit kewajiban manual, status bayar, rekap PPN masukan/keluaran dan penjualan bruto per periode, filter laporan, permission, serta penegasan PPh tidak dihitung otomatis; suite 136 test/825 assertion, Pint, build, route dan diff check terverifikasi. |
+| 13-11-2026 | Agent | — | Konsistensi tracker: status ringkasan diselaraskan ke Phase 22, path evidence test Phase 21/22 diperbarui setelah rename berbasis domain. |
+| 13-11-2026 | Agent | 23 | Implementasi 12 laporan, filter tanggal, permission, paginasi, indeks pendukung, dan UI generik selesai; memperbaiki arus kas dari transaksi reversal serta perlakuan retur lama dan porsi PPN pada pendapatan bersih. 12 test/109 assertion terfokus dan suite 148 test/934 assertion lulus, Pint, build, route, SQLite migration, dan diff check terverifikasi. Phase tetap In progress karena benchmark <10 detik pada dataset MySQL representatif belum dilakukan; migrasi MySQL ditunda karena Phase 13–22 masih pending. |
+| 13-11-2026 | Agent | 23 | Lanjutan verifikasi MySQL: memperpendek nama unique index purchase return agar sesuai batas identifier MySQL; menyelesaikan migrasi pending Phase 13–23, smoke-check SQL seluruh laporan, dan memastikan EXPLAIN memakai indeks tanggal/status. Tabel sumber laporan belum memiliki data, sehingga benchmark performa representatif tetap tertunda; suite penuh 148 test/934 assertion dan Pint lulus. |
+| 13-11-2026 | Agent | 23 | Mengikuti aturan master doc 0.3: Phase 23 diubah menjadi Blocked karena target laporan 1 bulan <10 detik belum dapat diverifikasi tanpa dataset MySQL representatif. Progress fungsional dipertahankan 80%; Phase 24 tidak dimulai. |
 
 ---
 
