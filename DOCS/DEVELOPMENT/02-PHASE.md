@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 26 — Done; Phase 27 belum dimulai |
+| Status proyek | Phase 27 — Blocked |
 
 ---
 
@@ -62,7 +62,7 @@
 | 24 | Ekspor PDF & XLSX | RPT | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | PDF/XLSX, metadata, ekspor antrian, kontrol akses, kegagalan aman, test, Pint, build dan route terverifikasi; uji worker produksi ditunda ke BL-002. |
 | 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | Implementasi scan tiga layar, fallback manual, struk 80 mm, dan cetak ulang salinan terverifikasi; UAT perangkat fisik ditunda ke BL-003. |
 | 26 | Migrasi Data Awal & Seeder Produksi | CORE | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | Template CSV/XLSX, preview/import/cancel, saldo awal melalui `StockService`, seeder idempoten, stock opname awal, panduan, test, migrasi dan seeder MySQL terverifikasi. |
-| 27 | Pengujian Menyeluruh & Hardening | Semua | ⬜ Not started | 0% | — | — | — |
+| 27 | Pengujian Menyeluruh & Hardening | Semua | ⛔ Blocked | 70% | 16-11-2026 | — | Cakupan test dan hardening aplikasi selesai diverifikasi; benchmark POS serta uji konkurensi/deadlock MySQL belum dapat dilakukan tanpa staging dan dataset representatif (BL-004); benchmark laporan bulanan tetap tertunda pada BL-001. HTTPS/HSTS dan secure cookie menunggu deployment (BL-005). Laporan: `DOCS/DEVELOPMENT/PHASE-27-TEST-REPORT.md`. |
 | 28 | Deployment, UAT, Dokumentasi & Rilis v1.0 | Semua | ⬜ Not started | 0% | — | — | — |
 
 ---
@@ -96,6 +96,8 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 | BL-001 | 23 — 12 Laporan & Filter Periode | Benchmark seluruh laporan untuk periode 1 bulan | Belum ada deployment dan dataset MySQL representatif untuk mengukur performa operasional. | Setelah deployment tersedia dan dataset representatif dapat digunakan. | Ukur laporan periode 1 bulan pada dataset tersebut; setiap laporan memenuhi target <10 detik dan hasil pengukuran dicatat. | ⬜ Open | Belum tersedia |
 | BL-002 | 24 — Ekspor PDF & XLSX | Verifikasi end-to-end worker queue ekspor laporan | Worker belum dijalankan pada lingkungan deployment; test saat ini memverifikasi dispatch dan pemrosesan job secara terpisah. | Setelah deployment dan worker Laravel queue dikonfigurasi. | Ajukan ekspor PDF dan XLSX pada lingkungan ter-deploy; pastikan status berubah queued → completed dan file dapat diunduh pemilik yang berizin. | ⬜ Open | Menunggu deployment |
 | BL-003 | 25 — Integrasi Perangkat: Barcode & Printer | UAT pemindai HID dan printer struk fisik 80 mm, termasuk pemulihan fokus dan kondisi printer offline | Belum ada deployment maupun perangkat scanner/printer apotek yang ditentukan; tes otomatis memverifikasi logika/markup tetapi tidak mensimulasikan perangkat fisik atau dialog cetak browser. | Setelah deployment tersedia dan pemindai HID serta printer 80 mm tersedia/terkonfigurasi di lokasi apotek. | Uji scan barcode dikenal/tidak dikenal pada POS, penerimaan, dan stok; pastikan fokus pulih, struk asli dan salinan tercetak 80 mm serta ditandai SALINAN, dan printer offline tidak membatalkan atau menggandakan transaksi yang sudah tersimpan. Catat konfigurasi perangkat dan hasil UAT. | ⬜ Open | Menunggu deployment dan perangkat fisik |
+| BL-004 | 27 — Pengujian Menyeluruh & Hardening | Benchmark pencarian POS dan checkout serta uji beban/konkurensi dan deadlock pada MySQL/InnoDB | Belum tersedia staging PHP-FPM dan dataset operasional representatif; test runner paralel memakai SQLite in-memory dan tidak mensimulasikan transaksi database bersamaan. | Setelah tersedia lingkungan staging MySQL/InnoDB dengan dataset representatif dan sarana menjalankan 5–10 sesi bersamaan. | Catat hasil benchmark pencarian POS <2 detik dan checkout <3 detik; jalankan transaksi bersamaan 5–10 pengguna terhadap data yang saling beririsan, pastikan tidak ada deadlock/kegagalan integritas yang tak tertangani, serta catat durasi, lock wait/deadlock, konfigurasi dan evidence. | ⬜ Open | Menunggu staging dan dataset representatif |
+| BL-005 | 27 — Pengujian Menyeluruh & Hardening | Verifikasi akses HTTPS, HSTS, dan secure session cookie pada deployment | Belum ada domain/proxy/TLS staging; middleware aplikasi belum dapat membuktikan konfigurasi TLS dan cookie di jalur eksternal. | Setelah domain dan deployment staging dengan TLS/proxy dikonfigurasi. | Verifikasi akses eksternal menggunakan HTTPS, header HSTS sesuai kebijakan deployment, cookie sesi beratribut Secure dan konfigurasi trusted proxy benar; catat respons/header aktual dan konfigurasi yang digunakan. | ⬜ Open | Menunggu deployment TLS staging |
 
 ---
 
@@ -835,23 +837,23 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 - [x] Impor dapat diulang/dibatalkan tanpa data ganda.
 
 **Evidence:** Migrasi `2026_11_16_134756_create_initial_data_import_runs_table.php`; `InitialDataSeeder`, `DatabaseSeeder`, dan `RolesAndPermissionsSeeder`; template/import di `app/Modules/Core/Exports/` dan `app/Modules/Core/Services/InitialDataImport{Reader,Service}.php`; panduan `DOCS/DEVELOPMENT/PHASE-26-IMPORT-GUIDE.md`; `tests/Feature/InitialDataImportTest.php` (7 test/84 assertion, mencakup XLSX/CSV, validasi status pajak, `manual_in` yang direkonsiliasi ke ledger, pengulangan, pembatalan, seeder idempoten, dan stock opname awal). Suite penuh `php artisan test --compact` (168 test/1.123 assertion; 5 warning Pest tanpa detail), Pint (`--dirty` dan file baru), `npm run build`, dan `git diff --check` lulus. Pada MySQL, `php artisan migrate --no-interaction` menerapkan migrasi report exports dan initial data import; `migrate:status` menunjukkan semua migrasi Ran. `DatabaseSeeder` berhasil dijalankan dua kali; query read-only mengonfirmasi baseline 8 satuan, 3 kategori, 1 akun Kas Utama, dan 0 import run.
-**Catatan/blocker:** Tidak ada untuk Phase 26. Phase 27 tetap Not started.
+**Catatan/blocker:** Tidak ada untuk Phase 26. Phase 27 sudah dimulai dan kini Blocked pada verifikasi performa, konkurensi, dan keamanan deployment.
 
 ---
 
 ### Phase 27 — Pengujian Menyeluruh & Hardening
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ⛔ Blocked · **Progress:** 70% · **Mulai:** 16-11-2026 · **Selesai:** —
 **Dependency:** Phase 1–26
 
 **Checklist:**
-- [ ] Unit test: harga, diskon, konversi, FEFO, rumus stok, status.
-- [ ] Feature test: penerimaan, penjualan, retur, opname, pembayaran.
-- [ ] Uji otorisasi per peran.
-- [ ] Uji performa POS dan laporan.
-- [ ] Uji konkurensi/deadlock.
-- [ ] Review keamanan + perbaikan temuan.
-- [ ] Laporan hasil pengujian.
+- [x] Test aturan kritis: harga, diskon, konversi, FEFO, rumus stok, status; kalkulasi harga dan input invalid tercakup pada `tests/Feature/PricingAndDiscountTest.php`.
+- [x] Feature test alur penerimaan, penjualan, retur, opname, dan pembayaran tersedia serta lulus.
+- [x] Uji otorisasi per peran tersedia dan lulus.
+- [ ] Uji performa POS dan laporan; benchmark POS menunggu BL-004 dan laporan periode bulanan menunggu BL-001.
+- [ ] Uji konkurensi/deadlock pada MySQL/InnoDB; menunggu BL-004.
+- [x] Review keamanan aplikasi dan perbaikan temuan; verifikasi HTTPS/HSTS/cookie deployment menunggu BL-005.
+- [x] Laporan hasil pengujian tersedia: `DOCS/DEVELOPMENT/PHASE-27-TEST-REPORT.md`.
 
 **Acceptance criteria:**
 - Service kritis memiliki test dan lulus.
@@ -860,8 +862,8 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 - Tidak ada deadlock pada uji dasar.
 - Temuan kritis tertutup.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `DOCS/DEVELOPMENT/PHASE-27-TEST-REPORT.md`; `tests/Feature/PricingAndDiscountTest.php`; `tests/Feature/SaleServiceTest.php`; `tests/Feature/SecurityHeadersTest.php`; test suite normal/paralel, `composer audit`, Pint, build dan diff check (rincian hasil pada laporan).
+**Catatan/blocker:** Phase tetap Blocked karena target performa dan uji konkurensi/deadlock belum dibuktikan pada staging MySQL/InnoDB dengan dataset representatif (BL-001 dan BL-004). TLS/HSTS/secure cookie juga belum diverifikasi pasca-deployment (BL-005). Jangan mulai Phase 28 sebelum acceptance criteria Phase 27 terpenuhi.
 
 ---
 
@@ -935,7 +937,9 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 | 16-11-2026 | Agent | 25 | Memulai Phase 25 setelah Phase 24 Done; meninjau interface HID dan cetak browser pada SDD Bagian 8 serta mengaudit implementasi POS, penerimaan, stok, dan struk. |
 | 16-11-2026 | Agent | 25 | Phase 25 selesai untuk scope pra-deployment: scan POS exact, scan penerimaan memilih baris kosong atau membuat baris, pencarian stok dengan autofocus, fallback manual, struk browser 80 mm, riwayat dan cetak ulang SALINAN. Suite 161 test/1.039 assertion (5 warning Pest tanpa detail), Pint, build, route `pos.sales`, dan diff check lulus. UAT scanner/printer fisik dan perilaku browser target menunggu deployment/perangkat dan dicatat sebagai BL-003; Phase 26 eligible. |
 | 16-11-2026 | Agent | 26 | Memulai Phase 26 setelah dependency Phase 10 dan 15 Done; scope template, impor stok melalui `StockService`, seeder produksi, dan stock opname awal ditinjau. |
-| 16-11-2026 | Agent | 26 | Phase 26 selesai untuk scope pra-deployment: template CSV/XLSX, validasi/import preview-konfirmasi-pembatalan, idempotensi dan no-op impor ulang, stok awal dicatat lewat `StockService` sebagai `manual_in`, seeder baseline idempoten, stock opname awal, serta panduan migrasi. Suite penuh 168 test/1.123 assertion, Pint, build, dan diff check lulus. Pada MySQL, migrasi pending report exports dan initial data import diterapkan dan semua migrasi berstatus Ran; `DatabaseSeeder` dijalankan dua kali dengan baseline tetap 8 satuan, 3 kategori, dan 1 akun Kas Utama. Phase 27 tetap Not started. |
+| 16-11-2026 | Agent | 26 | Phase 26 selesai untuk scope pra-deployment: template CSV/XLSX, validasi/import preview-konfirmasi-pembatalan, idempotensi dan no-op impor ulang, stok awal dicatat lewat `StockService` sebagai `manual_in`, seeder baseline idempoten, stock opname awal, serta panduan migrasi. Suite penuh 168 test/1.123 assertion, Pint, build, dan diff check lulus. Pada MySQL, migrasi pending report exports dan initial data import diterapkan dan semua migrasi berstatus Ran; `DatabaseSeeder` dijalankan dua kali dengan baseline tetap 8 satuan, 3 kategori, dan 1 akun Kas Utama. Phase 27 eligible. |
+| 16-11-2026 | Agent | 27 | Memulai Phase 27 setelah Phase 1–26 Done; audit awal mengonfirmasi cakupan test fungsional yang luas dan meninjau target NFR, validasi paralel, konkurensi, performa, serta batas keamanan. |
+| 16-11-2026 | Agent | 27 | Cakupan test kritis/alur utama/otorisasi diverifikasi; ditambahkan validasi input kalkulasi harga serta hardening security headers, privasi pasien, escaping, dan urutan lock checkout. Suite normal/paralel, Composer audit, Pint, build, dan diff check dicatat di `PHASE-27-TEST-REPORT.md`. Phase ditandai Blocked (70%): benchmark POS, benchmark laporan bulanan, dan uji konkurensi/deadlock MySQL menunggu lingkungan/data (BL-001, BL-004); HTTPS/HSTS/secure cookie menunggu deployment (BL-005). Phase 28 belum dimulai. |
 
 ---
 

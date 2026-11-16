@@ -16,7 +16,6 @@ use App\Modules\Purchasing\Models\Payable;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\TransactionCategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use LogicException;
 
 uses(RefreshDatabase::class);
 

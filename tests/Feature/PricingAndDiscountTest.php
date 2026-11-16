@@ -15,6 +15,7 @@ use App\Modules\Md\Services\TaxService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\ValidationException;
 
 uses(RefreshDatabase::class);
 
@@ -36,6 +37,19 @@ it('calculates tax-inclusive purchase and selling prices with configured roundin
         'purchase_price_incl_tax' => '1000.0000',
         'selling_price' => '1200.00',
     ]);
+});
+
+it('rejects negative pricing inputs and a non-positive rounding step', function () {
+    $pricing = app(PricingService::class);
+
+    expect(fn () => $pricing->calculate('-0.0100', false, '0.00', '10.00', '1.00'))
+        ->toThrow(ValidationException::class);
+    expect(fn () => $pricing->calculate('1000.0000', false, '0.00', '-0.01', '1.00'))
+        ->toThrow(ValidationException::class);
+    expect(fn () => $pricing->calculate('1000.0000', false, '0.00', '10.00', '0.00'))
+        ->toThrow(ValidationException::class);
+    expect(fn () => $pricing->calculate('1000.0000', false, '0.00', '10.00', '-1.00'))
+        ->toThrow(ValidationException::class);
 });
 
 it('uses item margin before category and global margins and preserves price history', function () {

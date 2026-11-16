@@ -70,3 +70,15 @@ it('denies patient history access without the dedicated permission', function ()
         ->get(route('rx.patient-history.show', $patient))
         ->assertForbidden();
 });
+
+it('escapes patient names on the sensitive history page', function () {
+    $viewer = User::factory()->create();
+    $viewer->assignRole('apoteker');
+    $patient = Patient::factory()->create(['name' => '<svg onload=alert(1)>']);
+
+    $this->actingAs($viewer)
+        ->get(route('rx.patient-history.show', $patient))
+        ->assertOk()
+        ->assertSee('&lt;svg onload=alert(1)&gt;', escape: false)
+        ->assertDontSee('<svg onload=alert(1)>', escape: false);
+});

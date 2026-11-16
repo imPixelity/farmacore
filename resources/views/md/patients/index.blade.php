@@ -24,7 +24,7 @@
                         <td class="px-6 py-4 text-slate-600">{{ $canViewSensitiveData ? ($patient->phone ?: '—') : ($patient->maskedPhone() ?: '—') }}</td>
                         <td class="px-6 py-4 text-slate-600">{{ $canViewSensitiveData ? ($patient->address ?: '—') : ($patient->maskedAddress() ?: '—') }}</td>
                         <td class="px-6 py-4 text-slate-600">{{ $patient->birth_date ? ($canViewSensitiveData ? $patient->birth_date->format('d-m-Y') : $patient->maskedBirthDate()) : '—' }}</td>
-                        <td class="px-6 py-4">{{ $patient->is_active ? 'Aktif' : 'Nonaktif' }}</td><td class="px-6 py-4 text-right">@can('md.item.manage')<a href="{{ route('md.patients.edit', $patient) }}" class="font-semibold text-emerald-700">Ubah</a><form method="POST" action="{{ route('md.patients.status', $patient) }}" class="ml-3 inline">@csrf @method('PATCH')<button class="font-semibold text-rose-700">{{ $patient->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form>@endcan</td></tr>
+                        <td class="px-6 py-4">{{ $patient->is_active ? 'Aktif' : 'Nonaktif' }}</td><td class="px-6 py-4 text-right">@can('md.patient.view_sensitive')<a href="{{ route('md.patients.edit', $patient) }}" class="font-semibold text-emerald-700">Ubah</a>@endcan @can('md.item.manage')<form method="POST" action="{{ route('md.patients.status', $patient) }}" class="ml-3 inline">@csrf @method('PATCH')<button class="font-semibold text-rose-700">{{ $patient->is_active ? 'Nonaktifkan' : 'Aktifkan' }}</button></form>@endcan</td></tr>
                 @empty
                     <tr><td colspan="7" class="px-6 py-10 text-center text-slate-500">Belum ada pasien yang cocok.</td></tr>
                 @endforelse

@@ -9,7 +9,6 @@ use App\Modules\Accounting\Services\FinancialPostingService;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Database\Seeders\TransactionCategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use LogicException;
 
 uses(RefreshDatabase::class);
 

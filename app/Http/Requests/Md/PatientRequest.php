@@ -11,7 +11,13 @@ class PatientRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->can('md.item.manage') ?? false;
+        $user = $this->user();
+
+        if (! $user?->can('md.item.manage')) {
+            return false;
+        }
+
+        return ! ($this->route('patient') instanceof Patient) || $user->can('md.patient.view_sensitive');
     }
 
     /** @return array<string, ValidationRule|array<mixed>|string> */

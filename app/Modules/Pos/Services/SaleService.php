@@ -118,7 +118,8 @@ class SaleService
                 ]);
             }
 
-            foreach ($prepared as $line) {
+            $allocationLines = [];
+            foreach ($prepared as $lineIndex => $line) {
                 $saleItem = new SaleItem;
                 $saleItem->fill([
                     'sale_id' => $sale->id,
@@ -132,7 +133,27 @@ class SaleService
                     'line_total' => $line['total'],
                 ]);
                 $saleItem->save();
-                $this->allocateAndDecrease($saleItem, $line['item'], $line['quantity'], $sale->invoice_no);
+                $allocationLines[] = [
+                    'item_id' => $line['item']->id,
+                    'line_index' => $lineIndex,
+                    'sale_item' => $saleItem,
+                ];
+            }
+
+            usort($allocationLines, static function (array $left, array $right): int {
+                $itemOrder = $left['item_id'] <=> $right['item_id'];
+
+                return $itemOrder !== 0 ? $itemOrder : $left['line_index'] <=> $right['line_index'];
+            });
+
+            foreach ($allocationLines as $allocation) {
+                $line = $prepared[$allocation['line_index']];
+                $this->allocateAndDecrease(
+                    $allocation['sale_item'],
+                    $line['item'],
+                    $line['quantity'],
+                    $sale->invoice_no,
+                );
             }
 
             $remainingDoctorFee = $doctorFee;
@@ -189,15 +210,26 @@ class SaleService
             throw ValidationException::withMessages(['cart' => 'Keranjang penjualan tidak boleh kosong.']);
         }
 
-        $rawLines = [];
-        $itemsById = [];
-
+        $lineItemIds = [];
         foreach ($cart as $index => $line) {
             if (! is_array($line) || ! isset($line['item_id'], $line['quantity']) || ! is_numeric($line['item_id'])) {
                 throw ValidationException::withMessages(["cart.{$index}" => 'Baris keranjang tidak valid.']);
             }
 
-            $item = Item::query()->with('baseUnit')->lockForUpdate()->find((int) $line['item_id']);
+            $lineItemIds[$index] = (int) $line['item_id'];
+        }
+
+        $itemIds = array_values(array_unique($lineItemIds));
+        sort($itemIds, SORT_NUMERIC);
+        $itemsById = [];
+        foreach ($itemIds as $itemId) {
+            $itemsById[$itemId] = Item::query()->with('baseUnit')->lockForUpdate()->find($itemId);
+        }
+
+        $rawLines = [];
+        foreach ($cart as $index => $line) {
+            $itemId = $lineItemIds[$index];
+            $item = $itemsById[$itemId];
             if (! $item?->is_active) {
                 throw ValidationException::withMessages(["cart.{$index}" => 'Barang aktif wajib dipilih.']);
             }
@@ -211,7 +243,6 @@ class SaleService
                 throw ValidationException::withMessages(["cart.{$index}" => "Harga {$item->name} belum tersedia untuk jenis penjualan ini."]);
             }
 
-            $itemsById[$item->id] = $item;
             $rawLines[] = [
                 'item_id' => $item->id,
                 'category_id' => $item->category_id,

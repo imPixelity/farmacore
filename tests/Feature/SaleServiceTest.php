@@ -78,6 +78,26 @@ it('completes a cash sale with FEFO allocation and change', function () {
     expect(FinancialTransaction::query()->where('ref_id', $sale->id)->count())->toBe(1);
 });
 
+it('completes a sale with multiple items presented in reverse id order', function () {
+    [$firstItem, $firstBatch] = checkoutItem();
+    [$secondItem, $secondBatch] = checkoutItem();
+    $account = CashBankAccount::factory()->create();
+
+    $sale = app(SaleService::class)->checkout([
+        'sale_type' => 'obat_bebas',
+        'cart' => [
+            'item-'.$secondItem->id => ['item_id' => $secondItem->id, 'quantity' => '1.000'],
+            'item-'.$firstItem->id => ['item_id' => $firstItem->id, 'quantity' => '1.000'],
+        ],
+        'payments' => [cashPayment($account, '200.00')],
+    ]);
+
+    expect($sale->grand_total)->toBe('200.00');
+    expect($sale->items->pluck('item_id')->sort()->values()->all())->toBe([$firstItem->id, $secondItem->id]);
+    expect($firstBatch->fresh()->qty_on_hand)->toBe('9.000');
+    expect($secondBatch->fresh()->qty_on_hand)->toBe('9.000');
+});
+
 it('rolls back the sale and stock when FEFO cannot satisfy the requested quantity', function () {
     [$item, $validBatch] = checkoutItem('100.00', '1.000');
     $expiredBatch = ItemBatch::factory()->for($item)->create(['expiry_date' => today()->subDay()]);

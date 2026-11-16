@@ -301,6 +301,45 @@ it('creates updates and deactivates health services with validated fees', functi
     ])->assertSessionHasErrors('default_fee');
 });
 
+it('requires sensitive-data permission to view and update an existing patient', function () {
+    $patientManager = User::factory()->create();
+    $patientManager->givePermissionTo(['md.item.manage', 'md.item.view']);
+    $patient = Patient::factory()->create(['name' => 'Pasien Terlindungi']);
+
+    $this->actingAs($patientManager)
+        ->get(route('md.patients.index'))
+        ->assertOk()
+        ->assertDontSee(route('md.patients.edit', $patient));
+
+    $this->get(route('md.patients.edit', $patient))->assertForbidden();
+    $this->put(route('md.patients.update', $patient), [
+        'code' => $patient->code,
+        'name' => 'Perubahan Tidak Diizinkan',
+        'is_active' => '1',
+    ])->assertForbidden();
+
+    expect($patient->fresh()->name)->toBe('Pasien Terlindungi');
+});
+
+it('escapes patient-provided markup in the sensitive patient listing', function () {
+    $manager = User::factory()->create();
+    $manager->assignRole('apoteker');
+    $patient = Patient::factory()->create([
+        'name' => '<script>alert(1)</script>',
+        'address' => '<img src=x onerror=alert(1)>',
+    ]);
+
+    $this->actingAs($manager)
+        ->get(route('md.patients.index'))
+        ->assertOk()
+        ->assertSee('&lt;script&gt;alert(1)&lt;/script&gt;', escape: false)
+        ->assertSee('&lt;img src=x onerror=alert(1)&gt;', escape: false)
+        ->assertDontSee('<script>alert(1)</script>', escape: false)
+        ->assertDontSee('<img src=x onerror=alert(1)>', escape: false);
+
+    expect($patient->fresh()->name)->toBe('<script>alert(1)</script>');
+});
+
 it('authorizes read and management access and never exposes master-data deletion routes', function () {
     $cashier = User::factory()->create();
     $cashier->assignRole('kasir');

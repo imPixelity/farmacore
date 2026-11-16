@@ -56,6 +56,7 @@ class PatientController extends Controller
     public function edit(Patient $patient): View
     {
         Gate::authorize('md.item.manage');
+        Gate::authorize('md.patient.view_sensitive');
 
         return view('md.patients.edit', compact('patient'));
     }
