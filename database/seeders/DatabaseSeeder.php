@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             RolesAndPermissionsSeeder::class,
             CoreSettingsSeeder::class,
             TransactionCategorySeeder::class,
+            InitialDataSeeder::class,
         ]);
     }
 }

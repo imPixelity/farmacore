@@ -56,6 +56,12 @@
                             Pengaturan
                         </a>
                     @endcan
+                    @can('core.data_import.manage')
+                        <a href="{{ route('core.data-imports.index') }}" class="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">
+                            <span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">I</span>
+                            Migrasi data awal
+                        </a>
+                    @endcan
                     <p class="mb-3 mt-8 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Modul</p>
                     @can('md.item.view')
                         <a href="{{ route('md.items.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950">

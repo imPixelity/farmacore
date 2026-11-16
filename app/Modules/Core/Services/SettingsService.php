@@ -17,14 +17,14 @@ class SettingsService
         'expiry_alert_days' => [
             'label' => 'Ambang peringatan kedaluwarsa (hari)',
             'type' => 'number',
-            'default' => null,
-            'help' => 'Dibiarkan kosong sampai kebijakan apotek ditetapkan.',
+            'default' => 90,
+            'help' => 'Nilai awal 90 hari; sesuaikan dengan kebijakan apotek.',
         ],
         'payable_alert_days' => [
             'label' => 'Ambang peringatan utang (hari)',
             'type' => 'number',
-            'default' => null,
-            'help' => 'Dibiarkan kosong sampai kebijakan apotek ditetapkan.',
+            'default' => 7,
+            'help' => 'Nilai awal 7 hari; sesuaikan dengan kebijakan apotek.',
         ],
         'login_max_attempts' => [
             'label' => 'Batas percobaan login gagal',

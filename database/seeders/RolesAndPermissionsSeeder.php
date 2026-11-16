@@ -71,6 +71,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'core.audit.view',
             'core.settings.view',
             'core.settings.update',
+            'core.data_import.manage',
             'md.item.view',
             'md.item.manage',
             'md.patient.view_sensitive',

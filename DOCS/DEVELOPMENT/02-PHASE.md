@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 25 — Done untuk scope pra-deployment; UAT perangkat fisik ditunda ke BL-003 |
+| Status proyek | Phase 26 — Done; Phase 27 belum dimulai |
 
 ---
 
@@ -61,7 +61,7 @@
 | 23 | 12 Laporan & Filter Periode | RPT | ✅ Done | 100% | 13-11-2026 | 16-11-2026 | Implementasi dan verifikasi fungsional selesai; benchmark target <10 detik ditunda ke backlog BL-001 sampai tersedia deployment dan dataset representatif. |
 | 24 | Ekspor PDF & XLSX | RPT | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | PDF/XLSX, metadata, ekspor antrian, kontrol akses, kegagalan aman, test, Pint, build dan route terverifikasi; uji worker produksi ditunda ke BL-002. |
 | 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | Implementasi scan tiga layar, fallback manual, struk 80 mm, dan cetak ulang salinan terverifikasi; UAT perangkat fisik ditunda ke BL-003. |
-| 26 | Migrasi Data Awal & Seeder Produksi | CORE | ⬜ Not started | 0% | — | — | — |
+| 26 | Migrasi Data Awal & Seeder Produksi | CORE | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | Template CSV/XLSX, preview/import/cancel, saldo awal melalui `StockService`, seeder idempoten, stock opname awal, panduan, test, migrasi dan seeder MySQL terverifikasi. |
 | 27 | Pengujian Menyeluruh & Hardening | Semua | ⬜ Not started | 0% | — | — | — |
 | 28 | Deployment, UAT, Dokumentasi & Rilis v1.0 | Semua | ⬜ Not started | 0% | — | — | — |
 
@@ -817,25 +817,25 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 
 ### Phase 26 — Migrasi Data Awal & Seeder Produksi
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 16-11-2026 · **Selesai:** 16-11-2026
 **Dependency:** Phase 10, Phase 15
 
 **Checklist:**
-- [ ] Template CSV/XLSX barang, satuan, supplier, stok awal.
-- [ ] Importer + validasi baris.
-- [ ] Stok awal sebagai mutasi `manual_in`.
-- [ ] Seeder peran, satuan, kategori, pengaturan, akun kas.
-- [ ] Stock opname awal.
-- [ ] Panduan migrasi.
+- [x] Template CSV/XLSX barang, satuan, supplier, stok awal.
+- [x] Importer + validasi baris.
+- [x] Stok awal sebagai mutasi `manual_in` melalui `StockService`.
+- [x] Seeder peran, satuan, kategori, pengaturan, akun kas.
+- [x] Stock opname awal.
+- [x] Panduan migrasi.
 
 **Acceptance criteria:**
-- Baris tidak valid ditolak dengan pesan jelas.
-- Stok awal rekonsiliasi dengan `stock_movements`.
-- Seeder idempoten.
-- Impor dapat diulang tanpa data ganda.
+- [x] Baris tidak valid ditolak dengan pesan jelas.
+- [x] Stok awal rekonsiliasi dengan `stock_movements`.
+- [x] Seeder idempoten.
+- [x] Impor dapat diulang/dibatalkan tanpa data ganda.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** Migrasi `2026_11_16_134756_create_initial_data_import_runs_table.php`; `InitialDataSeeder`, `DatabaseSeeder`, dan `RolesAndPermissionsSeeder`; template/import di `app/Modules/Core/Exports/` dan `app/Modules/Core/Services/InitialDataImport{Reader,Service}.php`; panduan `DOCS/DEVELOPMENT/PHASE-26-IMPORT-GUIDE.md`; `tests/Feature/InitialDataImportTest.php` (7 test/84 assertion, mencakup XLSX/CSV, validasi status pajak, `manual_in` yang direkonsiliasi ke ledger, pengulangan, pembatalan, seeder idempoten, dan stock opname awal). Suite penuh `php artisan test --compact` (168 test/1.123 assertion; 5 warning Pest tanpa detail), Pint (`--dirty` dan file baru), `npm run build`, dan `git diff --check` lulus. Pada MySQL, `php artisan migrate --no-interaction` menerapkan migrasi report exports dan initial data import; `migrate:status` menunjukkan semua migrasi Ran. `DatabaseSeeder` berhasil dijalankan dua kali; query read-only mengonfirmasi baseline 8 satuan, 3 kategori, 1 akun Kas Utama, dan 0 import run.
+**Catatan/blocker:** Tidak ada untuk Phase 26. Phase 27 tetap Not started.
 
 ---
 
@@ -933,7 +933,9 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 | 16-11-2026 | Agent | 24 | Memulai pemeriksaan Phase 24; pada awalnya terblokir karena dependency PDF/XLSX belum terpasang. Setelah persetujuan pengguna, `barryvdh/laravel-dompdf` v3.1.2 dan `maatwebsite/excel` v4.0.6 ditambahkan dan implementasi dilanjutkan. |
 | 16-11-2026 | Agent | 24 | Phase 24 selesai: ekspor PDF/XLSX seluruh 12 laporan, metadata, nilai numerik, queue, permission/audit riwayat pasien, dan penanganan kegagalan terverifikasi; suite penuh 157 test/1.017 assertion, Pint, build, route dan diff check lulus. Verifikasi worker pada lingkungan deployment dicatat sebagai BL-002; Phase 25 eligible. |
 | 16-11-2026 | Agent | 25 | Memulai Phase 25 setelah Phase 24 Done; meninjau interface HID dan cetak browser pada SDD Bagian 8 serta mengaudit implementasi POS, penerimaan, stok, dan struk. |
-| 16-11-2026 | Agent | 25 | Phase 25 selesai untuk scope pra-deployment: scan POS exact, scan penerimaan memilih baris kosong atau membuat baris, pencarian stok dengan autofocus, fallback manual, struk browser 80 mm, riwayat dan cetak ulang SALINAN. Suite 161 test/1.039 assertion (5 warning Pest tanpa detail), Pint, build, route `pos.sales`, dan diff check lulus. UAT scanner/printer fisik dan perilaku browser target menunggu deployment/perangkat dan dicatat sebagai BL-003; ESC/POS tidak diputuskan. Phase 26 eligible. |
+| 16-11-2026 | Agent | 25 | Phase 25 selesai untuk scope pra-deployment: scan POS exact, scan penerimaan memilih baris kosong atau membuat baris, pencarian stok dengan autofocus, fallback manual, struk browser 80 mm, riwayat dan cetak ulang SALINAN. Suite 161 test/1.039 assertion (5 warning Pest tanpa detail), Pint, build, route `pos.sales`, dan diff check lulus. UAT scanner/printer fisik dan perilaku browser target menunggu deployment/perangkat dan dicatat sebagai BL-003; Phase 26 eligible. |
+| 16-11-2026 | Agent | 26 | Memulai Phase 26 setelah dependency Phase 10 dan 15 Done; scope template, impor stok melalui `StockService`, seeder produksi, dan stock opname awal ditinjau. |
+| 16-11-2026 | Agent | 26 | Phase 26 selesai untuk scope pra-deployment: template CSV/XLSX, validasi/import preview-konfirmasi-pembatalan, idempotensi dan no-op impor ulang, stok awal dicatat lewat `StockService` sebagai `manual_in`, seeder baseline idempoten, stock opname awal, serta panduan migrasi. Suite penuh 168 test/1.123 assertion, Pint, build, dan diff check lulus. Pada MySQL, migrasi pending report exports dan initial data import diterapkan dan semua migrasi berstatus Ran; `DatabaseSeeder` dijalankan dua kali dengan baseline tetap 8 satuan, 3 kategori, dan 1 akun Kas Utama. Phase 27 tetap Not started. |
 
 ---
 

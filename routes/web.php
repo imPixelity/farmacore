@@ -5,6 +5,7 @@ use App\Http\Controllers\Accounting\ReceivableController;
 use App\Http\Controllers\Accounting\TaxController as AccountingTaxController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Core\AuditLogController;
+use App\Http\Controllers\Core\InitialDataImportController;
 use App\Http\Controllers\Core\NotificationController;
 use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
@@ -69,6 +70,25 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
     Route::put('/settings', [SettingsController::class, 'update'])
         ->middleware('can:core.settings.update')
         ->name('settings.update');
+
+    Route::get('/data-migration', [InitialDataImportController::class, 'index'])
+        ->middleware('can:core.data_import.manage')
+        ->name('core.data-imports.index');
+    Route::post('/data-migration/preview', [InitialDataImportController::class, 'preview'])
+        ->middleware('can:core.data_import.manage')
+        ->name('core.data-imports.preview');
+    Route::post('/data-migration/confirm', [InitialDataImportController::class, 'confirm'])
+        ->middleware('can:core.data_import.manage')
+        ->name('core.data-imports.confirm');
+    Route::post('/data-migration/cancel', [InitialDataImportController::class, 'cancel'])
+        ->middleware('can:core.data_import.manage')
+        ->name('core.data-imports.cancel');
+    Route::get('/data-migration/template.xlsx', [InitialDataImportController::class, 'templateXlsx'])
+        ->middleware('can:core.data_import.manage')
+        ->name('core.data-imports.template.xlsx');
+    Route::get('/data-migration/templates/{type}/csv', [InitialDataImportController::class, 'templateCsv'])
+        ->middleware('can:core.data_import.manage')
+        ->name('core.data-imports.template.csv');
 
     Route::prefix('master')->name('md.')->group(function (): void {
         Route::get('/items', [ItemController::class, 'index'])->middleware('can:md.item.view')->name('items.index');

@@ -16,6 +16,10 @@ class CoreSettingsSeeder extends Seeder
             'login_max_attempts' => 5,
             'login_lockout_minutes' => 15,
             'session_timeout_minutes' => 30,
+            'expiry_alert_days' => 90,
+            'payable_alert_days' => 7,
+            'price_rounding_step' => 1,
+            'usage_average_months' => 3,
         ] as $key => $value) {
             AppSetting::query()->firstOrCreate(['key' => $key], ['value' => $value]);
         }
