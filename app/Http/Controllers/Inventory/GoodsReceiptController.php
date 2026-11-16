@@ -162,7 +162,7 @@ class GoodsReceiptController extends Controller
             ->where('is_active', true)
             ->with(['itemUnits.unit:id,name'])
             ->orderBy('name')
-            ->get(['id', 'code', 'name', 'base_unit_id', 'is_taxable']);
+            ->get(['id', 'code', 'name', 'barcode', 'base_unit_id', 'is_taxable']);
 
         $lines = old('lines');
 

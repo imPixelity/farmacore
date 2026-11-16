@@ -23,7 +23,7 @@
         <form method="GET" action="{{ route('inventory.stock.index') }}" class="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-end sm:px-6">
             <label class="w-full sm:max-w-md">
                 <span class="mb-1.5 block text-xs font-semibold text-slate-600">Cari barang</span>
-                <input type="search" name="search" value="{{ request('search') }}" placeholder="Nama, kode, atau barcode" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                <input type="search" name="search" value="{{ request('search') }}" placeholder="Nama, kode, atau barcode" autofocus class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
             </label>
             <div class="flex gap-2">
                 <a href="{{ route('inventory.stock.index') }}" class="rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50">Reset</a>

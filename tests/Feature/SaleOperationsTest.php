@@ -115,10 +115,33 @@ it('adds health services to the sale total and posts health service revenue', fu
     expect(FinancialTransaction::query()->where('ref_id', $sale->id)->sum('amount'))->toBe(125);
 });
 
-it('renders an original and copy receipt', function () {
+it('forbids users without sale-view permission from opening sales history', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->get(route('pos.sales.index'))->assertForbidden();
+});
+
+it('lists sales with a dedicated copy receipt link for reprinting', function () {
+    [$sale] = saleFixture();
+
+    $this->get(route('pos.sales.index'))
+        ->assertOk()
+        ->assertSee($sale->invoice_no)
+        ->assertSee('Cetak ulang (SALINAN)')
+        ->assertSee(route('pos.sales.receipt', ['sale' => $sale, 'copy' => 1]));
+});
+
+it('renders 80 millimeter original and copy receipts without changing the sale', function () {
     [$sale] = saleFixture();
     $service = app(ReceiptPrintService::class);
 
     expect($service->render($sale, false)->render())->toContain('STRUK PEMBAYARAN');
     expect($service->render($sale, true)->render())->toContain('SALINAN');
+
+    $this->get(route('pos.sales.receipt', ['sale' => $sale, 'copy' => 1]))
+        ->assertOk()
+        ->assertSee('SALINAN')
+        ->assertSee('size: 80mm auto');
+
+    $this->assertModelExists($sale);
 });

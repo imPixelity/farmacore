@@ -40,6 +40,6 @@
         @endif
     @endforeach
     <p class="center">Terima kasih</p>
-    <button class="no-print" onclick="window.print()">Cetak</button>
+    <button type="button" class="no-print" onclick="window.print()">Cetak</button>
 </body>
 </html>

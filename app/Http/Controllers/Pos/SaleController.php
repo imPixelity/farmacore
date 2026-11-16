@@ -12,6 +12,19 @@ use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
+    public function index(): View
+    {
+        abort_unless(auth()->user()?->can('pos.sale.view'), 403);
+
+        $sales = Sale::query()
+            ->with('cashier:id,name')
+            ->orderByDesc('sale_date')
+            ->orderByDesc('id')
+            ->paginate(20);
+
+        return view('pos.sales.index', ['sales' => $sales]);
+    }
+
     public function receipt(Sale $sale, ReceiptPrintService $receipts): View
     {
         abort_unless(auth()->user()?->can('pos.sale.view'), 403);

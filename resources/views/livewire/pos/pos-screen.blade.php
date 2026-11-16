@@ -7,6 +7,7 @@
                         <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-700">Point of sale</p>
                         <h2 class="mt-1 text-xl font-bold text-slate-900">Keranjang penjualan</h2>
                         <p class="mt-1 text-sm text-slate-500">Harga dan stok selalu diverifikasi ulang dari data terkini.</p>
+                        <a href="{{ route('pos.sales.index') }}" class="mt-2 inline-flex text-sm font-semibold text-emerald-700 hover:text-emerald-900">Riwayat penjualan</a>
                     </div>
                     <label class="w-full lg:max-w-xs">
                         <span class="mb-1.5 block text-xs font-semibold text-slate-600">Jenis penjualan</span>
@@ -35,7 +36,7 @@
                     <form wire:submit="scanBarcode" class="contents">
                         <label class="md:col-span-2 lg:col-span-1">
                             <span class="mb-1.5 block text-xs font-semibold text-slate-600">Scan barcode</span>
-                            <input wire:model="barcode" type="text" inputmode="numeric" autocomplete="off" placeholder="Scan lalu Enter" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                            <input wire:model="barcode" type="text" autocomplete="off" autofocus placeholder="Scan lalu Enter" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
                         </label>
                     </form>
                 </div>
@@ -135,6 +136,9 @@
                 <div class="flex justify-between border-t border-slate-100 pt-3 text-lg font-bold text-slate-900"><span>Total</span><span>Rp {{ number_format((float) $this->cartSummary['total'], 2, ',', '.') }}</span></div>
                 @if ($checkoutMessage)
                     <p class="rounded-xl bg-emerald-50 px-3 py-2 text-xs font-semibold leading-5 text-emerald-800" role="status">{{ $checkoutMessage }}</p>
+                    @if ($completedSaleId)
+                        <a href="{{ route('pos.sales.receipt', $completedSaleId) }}" target="_blank" rel="noopener" class="inline-flex rounded-xl border border-emerald-200 px-3 py-2 text-xs font-semibold text-emerald-800 hover:bg-emerald-50">Lihat / cetak struk</a>
+                    @endif
                 @endif
             </div>
 

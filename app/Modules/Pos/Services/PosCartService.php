@@ -47,6 +47,14 @@ class PosCartService
             ->get();
     }
 
+    public function findActiveItemByBarcode(string $barcode): ?Item
+    {
+        return Item::query()
+            ->active()
+            ->where('barcode', trim($barcode))
+            ->first();
+    }
+
     /** @return Collection<int, ItemCategory> */
     public function categories(): Collection
     {

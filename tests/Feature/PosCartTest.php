@@ -116,7 +116,7 @@ it('completes checkout from the POS component and clears the cart', function () 
     $item = preparePosItem('1000.00', '2.000');
     $account = CashBankAccount::factory()->create();
 
-    Livewire::test(PosScreen::class)
+    $pos = Livewire::test(PosScreen::class)
         ->call('addItem', $item->id)
         ->set('cashBankAccountId', (string) $account->id)
         ->set('paymentAmount', '1000.00')
@@ -125,8 +125,34 @@ it('completes checkout from the POS component and clears the cart', function () 
         ->assertSet('cart', [])
         ->assertSee('berhasil diselesaikan');
 
+    $sale = Sale::query()->where('grand_total', '1000.00')->firstOrFail();
+    $pos->assertSet('completedSaleId', $sale->id)
+        ->assertSee(route('pos.sales.receipt', $sale));
     expect(Sale::query()->where('grand_total', '1000.00')->exists())->toBeTrue();
     expect($account->fresh()->current_balance)->toBe('1000.00');
+});
+
+it('adds the exact barcode match even when it is outside the first twenty search results', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('kasir');
+    $this->actingAs($cashier);
+
+    for ($index = 1; $index <= 21; $index++) {
+        Item::factory()->create([
+            'name' => sprintf('A Barcode Match %02d', $index),
+            'barcode' => sprintf('SCAN-TARGET-%02d', $index),
+        ]);
+    }
+
+    $target = preparePosItem();
+    $target->update(['name' => 'Z Exact Barcode Target', 'barcode' => 'SCAN-TARGET']);
+
+    Livewire::test(PosScreen::class)
+        ->set('barcode', 'SCAN-TARGET')
+        ->call('scanBarcode')
+        ->assertSet('cart.item-'.$target->id.'.quantity', '1.000')
+        ->assertSet('barcode', '')
+        ->assertSee('autofocus');
 });
 
 it('reports an unknown barcode without interrupting the cart', function () {
@@ -138,5 +164,6 @@ it('reports an unknown barcode without interrupting the cart', function () {
         ->set('barcode', 'UNKNOWN-123')
         ->call('scanBarcode')
         ->assertHasErrors(['barcode' => 'Barcode tidak dikenal. Transaksi tetap dapat dilanjutkan.'])
+        ->assertSet('barcode', '')
         ->assertSet('cart', []);
 });

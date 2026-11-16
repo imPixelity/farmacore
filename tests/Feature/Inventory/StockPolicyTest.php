@@ -212,6 +212,26 @@ it('filters the expiry monitor by an inclusive date range and shows batch detail
         ->assertDontSee('Expiry Filter Outside');
 });
 
+it('finds stock by barcode and focuses the search field for keyboard-wedge scanners', function () {
+    app(RolesAndPermissionsSeeder::class)->run();
+    $user = User::factory()->create();
+    $user->assignRole('gudang');
+    $matchingItem = Item::factory()->create([
+        'name' => 'Barcode Stock Match',
+        'barcode' => 'STOCK-SCAN-001',
+    ]);
+    Item::factory()->create([
+        'name' => 'Barcode Stock Other',
+        'barcode' => 'STOCK-SCAN-002',
+    ]);
+
+    $this->actingAs($user)->get(route('inventory.stock.index', ['search' => 'STOCK-SCAN-001']))
+        ->assertOk()
+        ->assertSee($matchingItem->name)
+        ->assertDontSee('Barcode Stock Other')
+        ->assertSee('autofocus');
+});
+
 it('rejects policy management for users without permission', function () {
     $user = User::factory()->create();
 

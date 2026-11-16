@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 24 — Done; Phase 25 menjadi phase berikutnya yang eligible |
+| Status proyek | Phase 25 — Done untuk scope pra-deployment; UAT perangkat fisik ditunda ke BL-003 |
 
 ---
 
@@ -60,7 +60,7 @@
 | 22 | Pajak: Kewajiban & Laporan Pendukung | ACC | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Tax obligations manual, status bayar, rekap PPN per periode, penjualan bruto, filter laporan, permission, test dan build terverifikasi. |
 | 23 | 12 Laporan & Filter Periode | RPT | ✅ Done | 100% | 13-11-2026 | 16-11-2026 | Implementasi dan verifikasi fungsional selesai; benchmark target <10 detik ditunda ke backlog BL-001 sampai tersedia deployment dan dataset representatif. |
 | 24 | Ekspor PDF & XLSX | RPT | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | PDF/XLSX, metadata, ekspor antrian, kontrol akses, kegagalan aman, test, Pint, build dan route terverifikasi; uji worker produksi ditunda ke BL-002. |
-| 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ⬜ Not started | 0% | — | — | — |
+| 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | Implementasi scan tiga layar, fallback manual, struk 80 mm, dan cetak ulang salinan terverifikasi; UAT perangkat fisik ditunda ke BL-003. |
 | 26 | Migrasi Data Awal & Seeder Produksi | CORE | ⬜ Not started | 0% | — | — | — |
 | 27 | Pengujian Menyeluruh & Hardening | Semua | ⬜ Not started | 0% | — | — | — |
 | 28 | Deployment, UAT, Dokumentasi & Rilis v1.0 | Semua | ⬜ Not started | 0% | — | — | — |
@@ -95,6 +95,7 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 | :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
 | BL-001 | 23 — 12 Laporan & Filter Periode | Benchmark seluruh laporan untuk periode 1 bulan | Belum ada deployment dan dataset MySQL representatif untuk mengukur performa operasional. | Setelah deployment tersedia dan dataset representatif dapat digunakan. | Ukur laporan periode 1 bulan pada dataset tersebut; setiap laporan memenuhi target <10 detik dan hasil pengukuran dicatat. | ⬜ Open | Belum tersedia |
 | BL-002 | 24 — Ekspor PDF & XLSX | Verifikasi end-to-end worker queue ekspor laporan | Worker belum dijalankan pada lingkungan deployment; test saat ini memverifikasi dispatch dan pemrosesan job secara terpisah. | Setelah deployment dan worker Laravel queue dikonfigurasi. | Ajukan ekspor PDF dan XLSX pada lingkungan ter-deploy; pastikan status berubah queued → completed dan file dapat diunduh pemilik yang berizin. | ⬜ Open | Menunggu deployment |
+| BL-003 | 25 — Integrasi Perangkat: Barcode & Printer | UAT pemindai HID dan printer struk fisik 80 mm, termasuk pemulihan fokus dan kondisi printer offline | Belum ada deployment maupun perangkat scanner/printer apotek yang ditentukan; tes otomatis memverifikasi logika/markup tetapi tidak mensimulasikan perangkat fisik atau dialog cetak browser. | Setelah deployment tersedia dan pemindai HID serta printer 80 mm tersedia/terkonfigurasi di lokasi apotek. | Uji scan barcode dikenal/tidak dikenal pada POS, penerimaan, dan stok; pastikan fokus pulih, struk asli dan salinan tercetak 80 mm serta ditandai SALINAN, dan printer offline tidak membatalkan atau menggandakan transaksi yang sudah tersimpan. Catat konfigurasi perangkat dan hasil UAT. | ⬜ Open | Menunggu deployment dan perangkat fisik |
 
 ---
 
@@ -791,25 +792,26 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 
 ### Phase 25 — Integrasi Perangkat: Barcode & Printer
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 16-11-2026 · **Selesai:** 16-11-2026
 **Dependency:** Phase 21
 
 **Checklist:**
-- [ ] Input barcode HID di POS, penerimaan, dan stok.
-- [ ] Autofocus + pemulihan fokus kolom pindai.
-- [ ] Pencarian manual fallback.
-- [ ] Cetak struk 80 mm.
-- [ ] Cetak ulang + tanda salinan.
-- [ ] Opsi ESC/POS (bila diputuskan).
+- [x] Input barcode HID di POS, penerimaan, dan stok; barcode POS dicari secara exact tanpa batas hasil pencarian umum.
+- [x] Autofocus + pemulihan fokus kolom pindai setelah scan.
+- [x] Pencarian manual fallback tersedia.
+- [x] Cetak struk browser dengan layout 80 mm.
+- [x] Riwayat transaksi menyediakan cetak ulang dengan tanda SALINAN.
+- [x] Opsi ESC/POS dievaluasi; tetap tidak diterapkan karena belum diputuskan dan alur browser sudah memenuhi desain yang dipilih.
 
 **Acceptance criteria:**
-- Barcode terbaca di ketiga layar.
-- Fokus pulih otomatis setelah scan.
-- Printer offline tidak membatalkan transaksi.
-- Cetak ulang tersedia.
+- [x] Implementasi barcode tersedia pada POS, penerimaan, dan stok; pencarian manual tetap tersedia.
+- [x] Kolom pindai mendapat autofocus dan kode memulihkan fokus setelah scan.
+- [x] Struk memakai layout cetak 80 mm; cetak dilakukan terpisah dari penyimpanan transaksi.
+- [x] Cetak ulang tersedia dari Riwayat Penjualan dan menghasilkan tanda SALINAN.
+- [Deferred → BL-003] Verifikasi pemindai dan printer fisik, pemulihan fokus pada browser target, serta kondisi printer offline.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `tests/Feature/PosCartTest.php` (scan exact melewati 20 hasil dan barcode tak dikenal tanpa mengganggu keranjang); `tests/Feature/Inventory/GoodsReceiptTest.php` (form dan opsi barcode); `tests/Feature/Inventory/StockPolicyTest.php` (pencarian stok barcode); `tests/Feature/SaleOperationsTest.php` (riwayat, tautan salinan, struk 80 mm dan persistensi transaksi). Suite penuh `php artisan test --compact` (161 test/1.039 assertion; Pest melaporkan 5 warning tanpa detail), `vendor/bin/pint --dirty --format agent`, `npm run build`, route `pos.sales`, dan `git diff --check` lulus.
+**Catatan/blocker:** UAT perangkat fisik dan interaksi browser/printer belum dilakukan karena deployment serta model perangkat apotek belum tersedia; ditunda ke BL-003 dan tidak diklaim lulus. ESC/POS tetap belum diputuskan sehingga tidak ditambahkan. Phase 26 eligible.
 
 ---
 
@@ -930,6 +932,8 @@ Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilak
 | 16-11-2026 | Agent | — | Aturan backlog verifikasi pasca-deployment ditambahkan ke master doc dan tracker. Phase 23 ditandai Done untuk scope pra-deployment; benchmark <10 detik tetap terbuka sebagai BL-001 dan tidak diklaim lulus. Phase 24 menjadi phase berikutnya yang eligible. |
 | 16-11-2026 | Agent | 24 | Memulai pemeriksaan Phase 24; pada awalnya terblokir karena dependency PDF/XLSX belum terpasang. Setelah persetujuan pengguna, `barryvdh/laravel-dompdf` v3.1.2 dan `maatwebsite/excel` v4.0.6 ditambahkan dan implementasi dilanjutkan. |
 | 16-11-2026 | Agent | 24 | Phase 24 selesai: ekspor PDF/XLSX seluruh 12 laporan, metadata, nilai numerik, queue, permission/audit riwayat pasien, dan penanganan kegagalan terverifikasi; suite penuh 157 test/1.017 assertion, Pint, build, route dan diff check lulus. Verifikasi worker pada lingkungan deployment dicatat sebagai BL-002; Phase 25 eligible. |
+| 16-11-2026 | Agent | 25 | Memulai Phase 25 setelah Phase 24 Done; meninjau interface HID dan cetak browser pada SDD Bagian 8 serta mengaudit implementasi POS, penerimaan, stok, dan struk. |
+| 16-11-2026 | Agent | 25 | Phase 25 selesai untuk scope pra-deployment: scan POS exact, scan penerimaan memilih baris kosong atau membuat baris, pencarian stok dengan autofocus, fallback manual, struk browser 80 mm, riwayat dan cetak ulang SALINAN. Suite 161 test/1.039 assertion (5 warning Pest tanpa detail), Pint, build, route `pos.sales`, dan diff check lulus. UAT scanner/printer fisik dan perilaku browser target menunggu deployment/perangkat dan dicatat sebagai BL-003; ESC/POS tidak diputuskan. Phase 26 eligible. |
 
 ---
 

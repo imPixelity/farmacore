@@ -64,14 +64,17 @@ it('saves a draft without changing stock and calculates converted quantity, disc
     seedGoodsReceiptConfiguration();
     $user = goodsReceiptWarehouseUser();
     $supplier = Supplier::factory()->create(['payment_term_days' => 30]);
-    $item = Item::factory()->create(['is_taxable' => true]);
+    $item = Item::factory()->create(['is_taxable' => true, 'barcode' => 'RECEIPT-SCAN-001']);
     $itemUnit = ItemUnit::query()->where('item_id', $item->id)->where('unit_id', $item->order_unit_id)->firstOrFail();
     $itemUnit->update(['factor_to_base' => '10.000']);
     $payload = goodsReceiptPayload($supplier, $item);
 
     $this->actingAs($user)->get(route('inventory.receipts.create'))
         ->assertOk()
-        ->assertSee('Tambah baris');
+        ->assertSee('Tambah baris')
+        ->assertSee('data-barcode="RECEIPT-SCAN-001"', false)
+        ->assertSee('data-receipt-barcode')
+        ->assertSee('autofocus');
 
     $response = $this->actingAs($user)->post(route('inventory.receipts.store'), $payload);
 

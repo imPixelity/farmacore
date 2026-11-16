@@ -86,6 +86,13 @@
                 </div>
                 <button type="button" data-add-line class="rounded-xl border border-emerald-200 px-4 py-2.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-50">Tambah baris</button>
             </div>
+            <div class="grid gap-2 border-b border-slate-100 p-5 sm:grid-cols-[minmax(0,24rem)_1fr] sm:items-end sm:px-6">
+                <label>
+                    <span class="mb-1.5 block text-xs font-semibold text-slate-600">Scan barcode barang</span>
+                    <input type="text" data-receipt-barcode autocomplete="off" autofocus placeholder="Scan lalu Enter" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                </label>
+                <p data-receipt-barcode-message role="status" aria-live="polite" class="text-sm text-slate-500">Pencarian manual tetap tersedia pada pilihan barang.</p>
+            </div>
             @error('lines')<p class="px-5 pt-4 text-sm text-rose-700 sm:px-6">{{ $message }}</p>@enderror
             <div class="overflow-x-auto">
                 <table class="w-full min-w-275 text-left text-sm">
@@ -131,6 +138,8 @@
             const supplier = document.querySelector('[data-supplier-select]');
             const paymentMethod = document.querySelector('[data-payment-method]');
             const dueDate = document.querySelector('[data-due-date]');
+            const barcodeInput = document.querySelector('[data-receipt-barcode]');
+            const barcodeMessage = document.querySelector('[data-receipt-barcode-message]');
 
             const updateUnits = (row) => {
                 const itemSelect = row.querySelector('[data-item-select]');
@@ -157,6 +166,48 @@
                 const option = supplier.options[supplier.selectedIndex];
                 dueDate.required = paymentMethod.value === 'kredit' && !option?.dataset.paymentTermDays;
             };
+
+            const scanReceiptBarcode = () => {
+                const barcode = barcodeInput.value.trim();
+                barcodeInput.value = '';
+
+                if (!barcode) {
+                    barcodeInput.focus();
+                    return;
+                }
+
+                const matchingOption = Array.from(tbody.querySelectorAll('[data-item-select] option'))
+                    .find((option) => option.value && option.dataset.barcode === barcode);
+
+                if (!matchingOption) {
+                    barcodeMessage.textContent = 'Barcode tidak dikenal. Pilih barang secara manual atau coba pindai lagi.';
+                    barcodeMessage.className = 'text-sm text-amber-800';
+                    barcodeInput.focus();
+                    return;
+                }
+
+                let row = Array.from(tbody.querySelectorAll('[data-receipt-line]'))
+                    .find((line) => !line.querySelector('[data-item-select]').value);
+
+                if (!row) {
+                    document.querySelector('[data-add-line]').click();
+                    row = tbody.lastElementChild;
+                }
+
+                const itemSelect = row.querySelector('[data-item-select]');
+                itemSelect.value = matchingOption.value;
+                itemSelect.dispatchEvent(new Event('change', { bubbles: true }));
+                barcodeMessage.textContent = `${matchingOption.textContent.trim()} dipilih.`;
+                barcodeMessage.className = 'text-sm text-emerald-700';
+                requestAnimationFrame(() => barcodeInput.focus());
+            };
+
+            barcodeInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    scanReceiptBarcode();
+                }
+            });
 
             tbody.querySelectorAll('[data-receipt-line]').forEach(updateUnits);
             updateDueDate();

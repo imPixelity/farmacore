@@ -42,6 +42,8 @@ class PosScreen extends Component
 
     public ?string $checkoutMessage = null;
 
+    public ?int $completedSaleId = null;
+
     /** @var array<string, array{item_id: int, quantity: string, prescription_item_id: int|null}> */
     public array $cart = [];
 
@@ -104,13 +106,16 @@ class PosScreen extends Component
     public function scanBarcode(PosCartService $service): void
     {
         $this->authorizeCartMutation();
+        $this->clearCheckoutFeedback();
         $barcode = trim($this->barcode);
+        $this->barcode = '';
+        $this->resetErrorBag('barcode');
 
         if ($barcode === '') {
             return;
         }
 
-        $item = $service->searchItems($barcode)->first(fn ($item): bool => $item->barcode === $barcode);
+        $item = $service->findActiveItemByBarcode($barcode);
 
         if (! $item) {
             $this->addError('barcode', 'Barcode tidak dikenal. Transaksi tetap dapat dilanjutkan.');
@@ -120,8 +125,6 @@ class PosScreen extends Component
 
         $this->runCartAction(function () use ($item, $service): void {
             $this->cart = $service->addItem($this->cart, $item->id);
-            $this->barcode = '';
-            $this->resetErrorBag('barcode');
         });
     }
 
@@ -165,6 +168,7 @@ class PosScreen extends Component
     public function removeItem(string $key): void
     {
         $this->authorizeCartMutation();
+        $this->clearCheckoutFeedback();
         unset($this->cart[$key]);
         $this->resetErrorBag();
     }
@@ -172,6 +176,7 @@ class PosScreen extends Component
     public function clearCart(): void
     {
         $this->authorizeCartMutation();
+        $this->clearCheckoutFeedback();
         $this->cart = [];
         $this->prescriptionId = '';
         $this->resetErrorBag();
@@ -180,6 +185,7 @@ class PosScreen extends Component
     public function checkout(SaleService $saleService): void
     {
         $this->authorizeCartMutation();
+        $this->clearCheckoutFeedback();
         $summary = $this->cartSummary;
 
         try {
@@ -200,6 +206,7 @@ class PosScreen extends Component
             ]);
 
             $this->checkoutMessage = "Penjualan {$sale->invoice_no} berhasil diselesaikan.";
+            $this->completedSaleId = $sale->id;
             $this->cart = [];
             $this->prescriptionId = '';
             $this->patientId = '';
@@ -244,9 +251,17 @@ class PosScreen extends Component
         abort_unless(auth()->user()?->can('pos.sale.create'), 403);
     }
 
+    private function clearCheckoutFeedback(): void
+    {
+        $this->checkoutMessage = null;
+        $this->completedSaleId = null;
+    }
+
     /** @param callable(): void $callback */
     private function runCartAction(callable $callback): void
     {
+        $this->clearCheckoutFeedback();
+
         try {
             $callback();
             $this->resetErrorBag();

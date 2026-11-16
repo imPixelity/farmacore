@@ -3,7 +3,7 @@
         <select name="lines[{{ $index }}][item_id]" data-item-select required class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
             <option value="">Pilih barang</option>
             @foreach ($items as $item)
-                <option value="{{ $item->id }}" @selected((string) ($line['item_id'] ?? '') === (string) $item->id)>{{ $item->code }} · {{ $item->name }}</option>
+                <option value="{{ $item->id }}" data-barcode="{{ $item->barcode ?? '' }}" @selected((string) ($line['item_id'] ?? '') === (string) $item->id)>{{ $item->code }} · {{ $item->name }}</option>
             @endforeach
         </select>
         @error("lines.{$index}.item_id")<p class="mt-1 text-xs text-rose-700">{{ $message }}</p>@enderror

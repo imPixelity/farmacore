@@ -46,6 +46,7 @@ Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void
     Route::post('/reports/{report}/exports', [ReportController::class, 'storeExport'])->name('reports.exports.store');
     Route::get('/reports/exports/{reportExport}/download', [ReportController::class, 'downloadExport'])->name('reports.exports.download');
     Route::get('/pos', fn () => view('pos.index'))->middleware('can:pos.sale.view')->name('pos.index');
+    Route::get('/pos/sales', [SaleController::class, 'index'])->middleware('can:pos.sale.view')->name('pos.sales.index');
     Route::get('/pos/sales/{sale}/receipt', [SaleController::class, 'receipt'])->middleware('can:pos.sale.view')->name('pos.sales.receipt');
     Route::post('/pos/sales/{sale}/cancel', [SaleController::class, 'cancel'])->middleware('can:pos.sale.cancel')->name('pos.sales.cancel');
     Route::post('/pos/sales/{sale}/returns', [SaleReturnController::class, 'store'])->middleware('can:pos.return.manage')->name('pos.sales.returns.store');
