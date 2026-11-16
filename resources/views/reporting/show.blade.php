@@ -21,6 +21,17 @@
                 </label>
                 <button class="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Tampilkan</button>
             </form>
+            <div class="flex flex-wrap gap-2">
+                @foreach (['pdf' => 'PDF', 'xlsx' => 'XLSX'] as $format => $label)
+                    <form method="POST" action="{{ route('reports.exports.store', request()->route('report')) }}">
+                        @csrf
+                        <input type="hidden" name="from" value="{{ $from }}">
+                        <input type="hidden" name="to" value="{{ $to }}">
+                        <input type="hidden" name="format" value="{{ $format }}">
+                        <button class="rounded-xl border border-emerald-700 px-4 py-2.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-50">Ekspor {{ $label }}</button>
+                    </form>
+                @endforeach
+            </div>
         </section>
 
         @if ($errors->any())
@@ -36,21 +47,7 @@
             @foreach ($summary as $card)
                 <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/2">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $card['label'] }}</p>
-                    <p class="mt-2 text-xl font-bold text-slate-900">
-                        @if ($card['value'] === null)
-                            —
-                        @elseif ($card['format'] === 'money')
-                            Rp {{ number_format((float) $card['value'], 2, ',', '.') }}
-                        @elseif ($card['format'] === 'percent')
-                            {{ number_format((float) $card['value'], 2, ',', '.') }}%
-                        @elseif ($card['format'] === 'quantity')
-                            {{ number_format((float) $card['value'], 3, ',', '.') }}
-                        @elseif ($card['format'] === 'decimal')
-                            {{ number_format((float) $card['value'], 1, ',', '.') }}
-                        @else
-                            {{ number_format((float) $card['value'], 0, ',', '.') }}
-                        @endif
-                    </p>
+                    <p class="mt-2 text-xl font-bold text-slate-900">{{ $formatter->display($card['value'], $card['format']) }}</p>
                 </article>
             @endforeach
         </section>
@@ -75,27 +72,7 @@
                                 @foreach ($definition['columns'] as $column)
                                     @php($value = data_get($row, $column['key']))
                                     <td class="px-5 py-4 {{ in_array($column['format'], ['money', 'quantity', 'decimal', 'integer', 'percent'], true) ? 'whitespace-nowrap tabular-nums' : '' }}">
-                                        @if ($value === null || $value === '')
-                                            —
-                                        @elseif ($column['format'] === 'money')
-                                            Rp {{ number_format((float) $value, 2, ',', '.') }}
-                                        @elseif ($column['format'] === 'quantity')
-                                            {{ number_format((float) $value, 3, ',', '.') }}
-                                        @elseif ($column['format'] === 'decimal')
-                                            {{ number_format((float) $value, 1, ',', '.') }}
-                                        @elseif ($column['format'] === 'integer')
-                                            {{ number_format((float) $value, 0, ',', '.') }}
-                                        @elseif ($column['format'] === 'percent')
-                                            {{ number_format((float) $value, 2, ',', '.') }}%
-                                        @elseif ($column['format'] === 'date')
-                                            {{ \Illuminate\Support\Carbon::parse($value)->format('d-m-Y') }}
-                                        @elseif ($column['format'] === 'datetime')
-                                            {{ \Illuminate\Support\Carbon::parse($value)->format('d-m-Y H:i') }}
-                                        @elseif ($column['format'] === 'direction')
-                                            {{ $value === 'in' ? 'Masuk' : 'Keluar' }}
-                                        @else
-                                            {{ str_replace('_', ' ', (string) $value) }}
-                                        @endif
+                                        {{ $formatter->display($value, $column['format']) }}
                                     </td>
                                 @endforeach
                             </tr>
@@ -110,6 +87,29 @@
             @if ($rows instanceof \Illuminate\Pagination\LengthAwarePaginator)
                 <div class="border-t border-slate-100 px-5 py-4 sm:px-6">{{ $rows->links() }}</div>
             @endif
+        </section>
+
+        <section class="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/2 sm:p-6">
+            <div>
+                <h2 class="font-bold text-slate-900">Ekspor laporan</h2>
+                <p class="mt-1 text-sm text-slate-500">Ekspor diproses di latar belakang. Muat ulang halaman untuk memperbarui status.</p>
+            </div>
+            @forelse ($exports as $export)
+                <div class="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">{{ strtoupper($export->format) }} · Periode {{ $export->from_date->format('d-m-Y') }} sampai {{ $export->to_date->format('d-m-Y') }}</p>
+                        <p class="mt-1 text-xs text-slate-500">Diminta {{ $export->created_at->format('d-m-Y H:i') }} · Status: {{ match ($export->status) {'queued' => 'Menunggu', 'processing' => 'Diproses', 'completed' => 'Siap diunduh', 'failed' => 'Gagal', default => 'Tidak diketahui'} }}</p>
+                        @if ($export->status === 'failed')
+                            <p class="mt-1 text-sm text-rose-700" role="alert">{{ $export->failure_message }}</p>
+                        @endif
+                    </div>
+                    @if ($export->status === 'completed')
+                        <a href="{{ route('reports.exports.download', $export) }}" class="w-fit rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800">Unduh</a>
+                    @endif
+                </div>
+            @empty
+                <p class="border-t border-slate-100 pt-4 text-sm text-slate-500">Belum ada ekspor untuk laporan ini.</p>
+            @endforelse
         </section>
     </div>
 @endsection

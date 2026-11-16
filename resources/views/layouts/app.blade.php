@@ -224,6 +224,12 @@
                         </div>
                     @endif
 
+                    @if (session('error'))
+                        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800" role="alert" aria-live="assertive">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     @if (session('status'))
                         <div class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800" role="status" aria-live="polite">
                             {{ session('status') }}

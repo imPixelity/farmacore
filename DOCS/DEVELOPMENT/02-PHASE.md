@@ -14,7 +14,7 @@
 | Versi dokumen | 1.0 |
 | Tanggal dibuat | 11 November 2026 |
 | Total phase | 28 |
-| Status proyek | Phase 23 — Blocked; acceptance target performa belum dapat diverifikasi |
+| Status proyek | Phase 24 — Done; Phase 25 menjadi phase berikutnya yang eligible |
 
 ---
 
@@ -24,7 +24,7 @@
 | :---- | :---- | :---- |
 | ⬜ | **Not started** | Belum dikerjakan |
 | 🟨 | **In progress** | Sedang dikerjakan |
-| ✅ | **Done** | Seluruh acceptance criteria terpenuhi dan evidence tersedia |
+| ✅ | **Done** | Scope pra-deployment dan acceptance criteria yang dapat diverifikasi pada tahap tersebut terpenuhi; kriteria pasca-deployment yang tertunda tercatat di backlog dan tidak diklaim lulus |
 | ⛔ | **Blocked** | Terhenti karena dependency, keputusan TBD, atau masalah teknis |
 | 🔁 | **Rework** | Sebelumnya selesai, tetapi perlu perbaikan |
 
@@ -58,8 +58,8 @@
 | 20 | Piutang Pelanggan | ACC | ✅ Done | 100% | 12-11-2026 | 12-11-2026 | Layar piutang, pembayaran sebagian/lunas, validasi overpayment, posting kas masuk, riwayat, audit, test dan build terverifikasi. |
 | 21 | Struk, Pembatalan, Retur & Layanan Pemeriksaan | POS | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Struk 80 mm/salinan, pembatalan dengan reversal dan pemulihan stok, retur/restock, layanan pemeriksaan, test dan build terverifikasi. |
 | 22 | Pajak: Kewajiban & Laporan Pendukung | ACC | ✅ Done | 100% | 13-11-2026 | 13-11-2026 | Tax obligations manual, status bayar, rekap PPN per periode, penjualan bruto, filter laporan, permission, test dan build terverifikasi. |
-| 23 | 12 Laporan & Filter Periode | RPT | ⛔ Blocked | 80% | 13-11-2026 | — | Implementasi dan verifikasi fungsional selesai; target performa <10 detik belum dapat diverifikasi karena tidak ada dataset MySQL representatif. Phase 24 belum dimulai. |
-| 24 | Ekspor PDF & XLSX | RPT | ⬜ Not started | 0% | — | — | — |
+| 23 | 12 Laporan & Filter Periode | RPT | ✅ Done | 100% | 13-11-2026 | 16-11-2026 | Implementasi dan verifikasi fungsional selesai; benchmark target <10 detik ditunda ke backlog BL-001 sampai tersedia deployment dan dataset representatif. |
+| 24 | Ekspor PDF & XLSX | RPT | ✅ Done | 100% | 16-11-2026 | 16-11-2026 | PDF/XLSX, metadata, ekspor antrian, kontrol akses, kegagalan aman, test, Pint, build dan route terverifikasi; uji worker produksi ditunda ke BL-002. |
 | 25 | Integrasi Perangkat: Barcode & Printer | CORE/POS | ⬜ Not started | 0% | — | — | — |
 | 26 | Migrasi Data Awal & Seeder Produksi | CORE | ⬜ Not started | 0% | — | — | — |
 | 27 | Pengujian Menyeluruh & Hardening | Semua | ⬜ Not started | 0% | — | — | — |
@@ -86,6 +86,15 @@
                      ⛔ Blocked → 🟨 In progress
 ✅ Done → 🔁 Rework → 🟨 In progress → ✅ Done
 ```
+
+### 3.2 Backlog verifikasi tertunda
+
+Gunakan backlog untuk acceptance criteria atau verifikasi yang belum dapat dilakukan sebelum deployment, misalnya benchmark yang membutuhkan data operasional representatif. Backlog bukan bukti bahwa kriteria telah terpenuhi. Phase dapat ditandai Done hanya sesuai aturan di `01-MASTER-DOC.md`; backlog harus mencantumkan phase asal, alasan penundaan, pemicu tindak lanjut, kriteria selesai, dan evidence yang dibutuhkan. Tutup item hanya setelah verifikasi dan evidence dicatat.
+
+| ID | Phase asal | Item tertunda | Alasan | Pemicu tindak lanjut | Kriteria selesai | Status | Evidence |
+| :---- | :---- | :---- | :---- | :---- | :---- | :---- | :---- |
+| BL-001 | 23 — 12 Laporan & Filter Periode | Benchmark seluruh laporan untuk periode 1 bulan | Belum ada deployment dan dataset MySQL representatif untuk mengukur performa operasional. | Setelah deployment tersedia dan dataset representatif dapat digunakan. | Ukur laporan periode 1 bulan pada dataset tersebut; setiap laporan memenuhi target <10 detik dan hasil pengukuran dicatat. | ⬜ Open | Belum tersedia |
+| BL-002 | 24 — Ekspor PDF & XLSX | Verifikasi end-to-end worker queue ekspor laporan | Worker belum dijalankan pada lingkungan deployment; test saat ini memverifikasi dispatch dan pemrosesan job secara terpisah. | Setelah deployment dan worker Laravel queue dikonfigurasi. | Ajukan ekspor PDF dan XLSX pada lingkungan ter-deploy; pastikan status berubah queued → completed dan file dapat diunduh pemilik yang berizin. | ⬜ Open | Menunggu deployment |
 
 ---
 
@@ -735,7 +744,7 @@
 
 ### Phase 23 — 12 Laporan & Filter Periode
 
-**Status:** ⛔ Blocked · **Progress:** 80% · **Mulai:** 13-11-2026 · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 13-11-2026 · **Selesai:** 16-11-2026
 **Dependency:** Phase 13, Phase 17, Phase 20, Phase 21, Phase 22
 
 **Checklist:**
@@ -743,40 +752,40 @@
 - [x] `ReportViewer` generik + filter periode.
 - [x] Permission `report.view.*`.
 - [x] Paginasi + indeks pendukung.
-- [ ] Uji performa laporan 1 bulan pada dataset MySQL representatif.
+- [Deferred → BL-001] Uji performa laporan 1 bulan pada dataset MySQL representatif (pasca-deployment).
 
 **Acceptance criteria:**
 - [x] 12 laporan tersedia dan dapat difilter.
-- [ ] Laporan 1 bulan < 10 detik.
+- [Deferred → BL-001] Laporan 1 bulan < 10 detik pada dataset MySQL representatif (verifikasi pasca-deployment).
 - [x] Angka konsisten dengan data transaksi.
 - [x] Akses tidak berwenang ditolak.
 - [x] Laporan stok/utang/piutang memakai sumber data yang sama dengan modul asal.
 
 **Evidence:** `tests/Feature/ReportingTest.php` (12 test/109 assertion); suite penuh (148 test/934 assertion); seluruh migrasi termasuk indeks laporan berstatus `Ran` pada MySQL dan berjalan pada SQLite in-memory; smoke-check query seluruh 12 laporan pada MySQL, `EXPLAIN` untuk filter transaksi dan penjualan, Pint, build Vite, route reports, dan `git diff --check` lulus.
-**Catatan/blocker:** Tidak tersedia dataset MySQL representatif untuk memverifikasi acceptance <10 detik. Tabel sumber laporan saat ini kosong; `EXPLAIN` pada tabel kosong bukan evidence performa pada volume produksi. Sesuai source of truth, phase berstatus Blocked dan Phase 24 tidak dimulai sampai acceptance ini dapat diverifikasi.
+**Catatan:** Implementasi dan seluruh verifikasi yang dapat dilakukan sebelum deployment selesai. Benchmark <10 detik belum dilakukan dan tidak diklaim terpenuhi; tabel sumber saat ini tidak berisi dataset representatif dan `EXPLAIN` pada tabel kosong bukan evidence performa produksi. Verifikasi ini dipindahkan ke backlog BL-001 sesuai aturan penundaan pasca-deployment. Tidak ada blocker pada scope pra-deployment Phase 23, sehingga Phase 24 dapat dimulai.
 
 ---
 
 ### Phase 24 — Ekspor PDF & XLSX
 
-**Status:** ⬜ Not started · **Progress:** 0% · **Mulai:** — · **Selesai:** —
+**Status:** ✅ Done · **Progress:** 100% · **Mulai:** 16-11-2026 · **Selesai:** 16-11-2026
 **Dependency:** Phase 23
 
 **Checklist:**
-- [ ] Implementasi `ReportExporter` PDF (DomPDF).
-- [ ] Implementasi ekspor XLSX (Laravel Excel).
-- [ ] Header metadata laporan.
-- [ ] Ekspor via antrian untuk laporan besar.
-- [ ] Penanganan kegagalan ekspor.
+- [x] Ekspor PDF melalui DomPDF dan XLSX melalui Laravel Excel untuk seluruh 12 laporan.
+- [x] Header metadata nama apotek, laporan, periode, waktu cetak, dan pembuat.
+- [x] Tombol ekspor, status, dan unduh pada viewer laporan.
+- [x] Permintaan ekspor diproses melalui queue; verifikasi worker ter-deploy ditunda ke BL-002.
+- [x] Penanganan kegagalan dengan cleanup file dan pesan aman tanpa perubahan data sumber.
 
 **Acceptance criteria:**
-- Angka ekspor sama dengan tampilan.
-- Header lengkap.
-- Laporan besar tidak memblokir request.
-- Kegagalan tidak memengaruhi data.
+- [x] Angka ekspor sama dengan tampilan; nilai angka tetap bertipe numerik pada XLSX.
+- [x] Header lengkap pada PDF dan XLSX.
+- [x] Permintaan laporan dijadwalkan melalui queue sehingga request tidak menunggu proses render.
+- [x] Kegagalan ekspor tidak mengubah data sumber dan ditampilkan kepada pengguna dengan aman.
 
-**Evidence:** —
-**Catatan/blocker:** —
+**Evidence:** `tests/Feature/ReportingExportTest.php` (9 test/83 assertion), mencakup PDF valid, header PDF/XLSX, 26 baris XLSX dengan nilai numerik dan proteksi formula, seluruh 12 jenis laporan, dispatch queue, izin pasien, kepemilikan unduhan, dan kegagalan tanpa mutasi data sumber. `tests/Feature/ReportingTest.php` (12 test/109 assertion); suite penuh `php artisan test --compact` (157 test/1.017 assertion); migration `2026_11_16_125849_create_report_exports_table.php` melalui suite SQLite; `vendor/bin/pint --dirty --format agent`, `npm run build`, route `reports.exports`, dan `git diff --check` lulus.
+**Catatan:** `barryvdh/laravel-dompdf` v3.1.2 dan `maatwebsite/excel` v4.0.6 terpasang. Semua jenis laporan diekspor lewat service yang sama dengan viewer dan nilai numerik XLSX tetap numerik. Worker queue produksi belum dijalankan karena belum deployment; verifikasi end-to-end dicatat di BL-002 dan tidak diklaim selesai. LibreOffice tidak digunakan sebagai dependency runtime.
 
 ---
 
@@ -918,6 +927,9 @@
 | 13-11-2026 | Agent | 23 | Implementasi 12 laporan, filter tanggal, permission, paginasi, indeks pendukung, dan UI generik selesai; memperbaiki arus kas dari transaksi reversal serta perlakuan retur lama dan porsi PPN pada pendapatan bersih. 12 test/109 assertion terfokus dan suite 148 test/934 assertion lulus, Pint, build, route, SQLite migration, dan diff check terverifikasi. Phase tetap In progress karena benchmark <10 detik pada dataset MySQL representatif belum dilakukan; migrasi MySQL ditunda karena Phase 13–22 masih pending. |
 | 13-11-2026 | Agent | 23 | Lanjutan verifikasi MySQL: memperpendek nama unique index purchase return agar sesuai batas identifier MySQL; menyelesaikan migrasi pending Phase 13–23, smoke-check SQL seluruh laporan, dan memastikan EXPLAIN memakai indeks tanggal/status. Tabel sumber laporan belum memiliki data, sehingga benchmark performa representatif tetap tertunda; suite penuh 148 test/934 assertion dan Pint lulus. |
 | 13-11-2026 | Agent | 23 | Mengikuti aturan master doc 0.3: Phase 23 diubah menjadi Blocked karena target laporan 1 bulan <10 detik belum dapat diverifikasi tanpa dataset MySQL representatif. Progress fungsional dipertahankan 80%; Phase 24 tidak dimulai. |
+| 16-11-2026 | Agent | — | Aturan backlog verifikasi pasca-deployment ditambahkan ke master doc dan tracker. Phase 23 ditandai Done untuk scope pra-deployment; benchmark <10 detik tetap terbuka sebagai BL-001 dan tidak diklaim lulus. Phase 24 menjadi phase berikutnya yang eligible. |
+| 16-11-2026 | Agent | 24 | Memulai pemeriksaan Phase 24; pada awalnya terblokir karena dependency PDF/XLSX belum terpasang. Setelah persetujuan pengguna, `barryvdh/laravel-dompdf` v3.1.2 dan `maatwebsite/excel` v4.0.6 ditambahkan dan implementasi dilanjutkan. |
+| 16-11-2026 | Agent | 24 | Phase 24 selesai: ekspor PDF/XLSX seluruh 12 laporan, metadata, nilai numerik, queue, permission/audit riwayat pasien, dan penanganan kegagalan terverifikasi; suite penuh 157 test/1.017 assertion, Pint, build, route dan diff check lulus. Verifikasi worker pada lingkungan deployment dicatat sebagai BL-002; Phase 25 eligible. |
 
 ---
 

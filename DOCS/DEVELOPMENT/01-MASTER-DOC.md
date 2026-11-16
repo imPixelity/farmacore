@@ -29,7 +29,7 @@
 2. **Baca `02-PHASE.md`** untuk mengetahui phase yang sudah selesai, sedang berjalan, dan berikutnya.
 3. **Kerjakan hanya satu phase aktif** sesuai dependency dan acceptance criteria pada Bagian 10; jangan mulai phase berikutnya sebelum phase aktif selesai.
 4. **Jika butuh detail requirement**, buka dokumen sumber (URS/SRS/SDD) sesuai rujukan ID pada Bagian 4. Dokumen sumber hanya dibaca.
-5. **Verifikasi seluruh acceptance criteria** dan Definition of Done sebelum menyatakan phase selesai.
+5. **Verifikasi seluruh acceptance criteria yang dapat diuji pada tahap tersebut** dan Definition of Done sebelum menyatakan phase selesai; kriteria pasca-deployment yang belum dapat diverifikasi harus dicatat di backlog dan tidak boleh diklaim terpenuhi.
 6. **Setelah phase selesai**, perbarui `02-PHASE.md`: status, checklist, evidence, catatan, dan changelog.
 7. **Commit pekerjaan phase** setelah implementasi, pengujian, dan tracker diperbarui. Jika phase terblokir, perbarui tracker sebagai Blocked dan commit checkpoint tanpa menandai phase selesai.
 8. **Jika seluruh phase selesai dan masih ada pengembangan lanjut**, tambahkan phase baru di Bagian 10 dokumen ini, lalu buat track-nya di `02-PHASE.md`.
@@ -45,8 +45,10 @@
 ### 0.3 Rules eksekusi agent per phase
 
 - Agent bekerja **per phase**, satu phase dalam satu waktu, mengikuti dependency dan scope yang ditetapkan. Jangan mengerjakan atau memulai phase berikutnya sebelum phase aktif berstatus Done.
-- Phase hanya boleh ditandai Done jika semua acceptance criteria dan Definition of Done terverifikasi; status, checklist, evidence, catatan, dan changelog `02-PHASE.md` harus diperbarui terlebih dahulu.
-- Jika ada blocker, catat penyebab dan pekerjaan yang belum terpenuhi di `02-PHASE.md`, ubah status menjadi Blocked, lalu berhenti pada phase tersebut. Jangan menutupi blocker dengan pengujian alternatif yang tidak membuktikan acceptance criteria.
+- Phase hanya boleh ditandai Done jika seluruh scope pra-deployment selesai, acceptance criteria yang dapat diverifikasi pada tahap tersebut dan Definition of Done terpenuhi, serta setiap kriteria yang menunggu deployment dicatat di backlog tanpa diklaim lulus. Status, checklist, evidence, catatan, dan changelog `02-PHASE.md` harus diperbarui terlebih dahulu.
+- Jika ada blocker yang menghambat implementasi, dependency, keputusan, atau verifikasi yang dapat dilakukan pada tahap pengembangan saat ini, catat penyebab dan pekerjaan yang belum terpenuhi di `02-PHASE.md`, ubah status menjadi Blocked, lalu berhenti pada phase tersebut. Jangan menutupi blocker dengan pengujian alternatif yang tidak membuktikan acceptance criteria.
+- Jika verifikasi acceptance criteria belum mungkin karena aplikasi belum di-deploy atau data operasional representatif baru tersedia setelah deployment, catat item tersebut di Backlog `02-PHASE.md` dengan pemicu, kriteria selesai, dan bukti yang diperlukan. Jangan mengklaim kriteria itu telah terpenuhi. Phase boleh dinyatakan Done dan phase berikutnya dapat dimulai hanya jika seluruh scope yang dapat dikerjakan sebelum deployment selesai dan item tertunda tidak menghambat fungsi, keamanan, atau integritas inti; jika tidak, status tetap Blocked.
+- Setelah kondisi backlog terpenuhi, lakukan verifikasi, lampirkan evidence, dan tutup item backlog melalui pembaruan tracker. Backlog yang belum selesai harus tetap terlihat hingga diverifikasi.
 - Buat commit Git terfokus untuk setiap phase yang selesai, mencakup kode, test, dan pembaruan tracker. Phase yang terblokir boleh dibuatkan commit checkpoint, tetapi tidak boleh ditandai selesai.
 - Jangan mengubah dokumen sumber `01-URS.md`, `02-SRS.md`, dan `03-SDD.md`; perubahan pada dokumen kerja ini harus terbatas pada aturan proses, keputusan, dan roadmap yang memang diminta.
 
@@ -502,7 +504,8 @@ Default pengaturan awal (dari SDD 6.1.2): `expiry_alert_days = 90`, `payable_ale
 
 - Satu phase = satu unit kerja yang dapat diselesaikan dan diverifikasi.
 - Phase dikerjakan sesuai urutan dependency, bukan sekadar urutan nomor.
-- Sebuah phase dianggap selesai hanya jika seluruh acceptance criteria terpenuhi dan `02-PHASE.md` diperbarui.
+- Sebuah phase dianggap selesai jika seluruh scope yang dapat dikerjakan sebelum deployment selesai dan acceptance criteria yang dapat diverifikasi pada tahap tersebut terpenuhi. Kriteria yang secara wajar hanya dapat diverifikasi setelah deployment harus ditandai tertunda dan dicatat di Backlog `02-PHASE.md`; kriteria tersebut tidak boleh diklaim terpenuhi.
+- Phase berikutnya boleh dimulai setelah phase aktif Done sesuai aturan di atas; item backlog pasca-deployment tetap dilacak sampai evidence verifikasi tersedia.
 - Phase baru (pengembangan lanjutan) ditambahkan di akhir dengan nomor berikutnya, lengkap dengan scope, REQ, dependency, deliverable, dan acceptance criteria.
 - Jangan memulai phase yang dependency-nya belum selesai, kecuali untuk pekerjaan persiapan yang tidak mengubah data produksi.
 
@@ -928,6 +931,7 @@ Sebuah phase dinyatakan selesai jika seluruh poin berikut terpenuhi:
 - [ ] Tidak ada data master/transaksi yang dihapus secara permanen.
 - [ ] UI konsisten dengan design token dan komponen yang ada.
 - [ ] `02-PHASE.md` diperbarui: status, checklist, evidence, changelog.
+- [ ] Acceptance criteria yang belum dapat diverifikasi sebelum deployment dicatat di backlog dengan pemicu, kriteria selesai, dan bukti yang diperlukan; tidak diklaim selesai.
 - [ ] Catatan keputusan/TBD baru dicatat.
 
 ---
