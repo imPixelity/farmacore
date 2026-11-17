@@ -55,11 +55,21 @@ Target ini menggunakan proses development yang sudah dikonfigurasi Composer, ter
 
 ## Data demo lokal
 
-Untuk mengisi database dengan akun dan transaksi fiktif, tambahkan password lokal minimal 12 karakter ke `.env`:
+Untuk mengisi database dengan akun dan transaksi fiktif, tambahkan sendiri baris `FARMACORE_DEMO_PASSWORD` ke `.env`. Baris ini memang tidak otomatis ada di `.env` maupun `.env.example`. Ganti nilai contoh di bawah dengan password lokal minimal 12 karakter:
 
 ```dotenv
 FARMACORE_DEMO_PASSWORD=choose-a-local-demo-password
 ```
+
+Seluruh akun demo memakai password yang sama, yaitu nilai `FARMACORE_DEMO_PASSWORD` di `.env` lokal. Password tidak disimpan di repository; gunakan nilai yang Anda atur sendiri (minimal 12 karakter).
+
+| Peran | Username | Password |
+| --- | --- | --- |
+| Apoteker (akses penuh) | `demo.apoteker` | Nilai `FARMACORE_DEMO_PASSWORD` di `.env` |
+| Kasir | `demo.kasir` | Nilai `FARMACORE_DEMO_PASSWORD` di `.env` |
+| Gudang | `demo.gudang` | Nilai `FARMACORE_DEMO_PASSWORD` di `.env` |
+| Tenaga farmasi | `demo.farmasi` | Nilai `FARMACORE_DEMO_PASSWORD` di `.env` |
+| Keuangan | `demo.keuangan` | Nilai `FARMACORE_DEMO_PASSWORD` di `.env` |
 
 Lalu jalankan:
 
@@ -67,7 +77,7 @@ Lalu jalankan:
 make demo
 ```
 
-Seeder demo berjalan terpisah dari `make seed`, tidak menghapus data, dan hanya boleh digunakan di environment non-production. Akun demo menggunakan password tersebut. Seluruh data pasien, barang, harga, dan tarif pajaknya adalah data latihan, bukan data operasional.
+Jika `make demo` sudah pernah dijalankan, jalankan lagi setelah mengganti password agar password akun demo ikut diperbarui. Seeder demo berjalan terpisah dari `make seed`, tidak menghapus data, dan hanya boleh digunakan di environment non-production. Seluruh data pasien, barang, harga, dan tarif pajaknya adalah data latihan, bukan data operasional.
 
 ## Perintah developer
 

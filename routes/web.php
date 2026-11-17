@@ -43,6 +43,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void {
     Route::get('/', [DashboardController::class, 'index'])->name('home');
+    Route::view('/modules', 'modules.index')->name('modules.index');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::post('/reports/{report}/exports', [ReportController::class, 'storeExport'])->name('reports.exports.store');
