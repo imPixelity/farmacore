@@ -60,6 +60,36 @@ it('adds items, rejects insufficient stock, and recalculates the cart total', fu
         ->assertSet('cart.item-'.$item->id.'.quantity', '1.000');
 });
 
+it('flashes a missing price and keeps the item out of the cart', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('kasir');
+    $this->actingAs($cashier);
+    $item = Item::factory()->create();
+    $batch = ItemBatch::factory()->for($item)->create();
+    app(StockService::class)->increase($batch, '10.000', 'receipt', 'Stok awal test');
+
+    Livewire::test(PosScreen::class)
+        ->call('addItem', $item->id)
+        ->assertSet('cart', [])
+        ->assertSee("Harga {$item->name} untuk jenis penjualan ini belum tersedia.")
+        ->assertDontSee('ViewException');
+});
+
+it('flashes a missing price and restores the previous sales type', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('kasir');
+    $this->actingAs($cashier);
+    $item = preparePosItem();
+
+    Livewire::test(PosScreen::class)
+        ->call('addItem', $item->id)
+        ->set('salesType', 'resep')
+        ->assertSet('salesType', 'obat_bebas')
+        ->assertSet('cart.item-'.$item->id.'.quantity', '1.000')
+        ->assertSee("Harga {$item->name} untuk jenis penjualan ini belum tersedia.")
+        ->assertDontSee('ViewException');
+});
+
 it('applies the active discount rule to the displayed cart total', function () {
     $cashier = User::factory()->create();
     $cashier->assignRole('kasir');

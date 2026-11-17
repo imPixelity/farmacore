@@ -43,6 +43,9 @@
                 @error('barcode') <p class="mt-2 text-sm text-rose-700">{{ $message }}</p> @enderror
                 @error('prescription') <p class="mt-2 text-sm text-rose-700">{{ $message }}</p> @enderror
                 @error('cart') <p class="mt-2 text-sm text-rose-700">{{ $message }}</p> @enderror
+                @if (session('pos_error'))
+                    <p class="mt-2 rounded-xl bg-rose-50 px-3 py-2 text-sm text-rose-700" role="alert">{{ session('pos_error') }}</p>
+                @endif
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/2">

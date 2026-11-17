@@ -49,6 +49,8 @@ class PosScreen extends Component
 
     private PosCartService $posCartService;
 
+    private ?string $salesTypeBeforeUpdate = null;
+
     public function boot(PosCartService $service): void
     {
         $this->posCartService = $service;
@@ -230,6 +232,11 @@ class PosScreen extends Component
         }
     }
 
+    public function updatingSalesType(string $value): void
+    {
+        $this->salesTypeBeforeUpdate = $this->salesType;
+    }
+
     public function updatedSalesType(string $value): void
     {
         if (! in_array($value, PosCartService::SALES_TYPES, true)) {
@@ -238,6 +245,18 @@ class PosScreen extends Component
 
             return;
         }
+
+        try {
+            $this->posCartService->summary($this->cart, $value);
+        } catch (ValidationException $exception) {
+            $this->salesType = $this->salesTypeBeforeUpdate ?? 'obat_bebas';
+            $this->flashValidationMessage($exception);
+
+            return;
+        }
+
+        $this->salesTypeBeforeUpdate = $value;
+        $this->resetErrorBag();
 
         if ($value !== 'resep') {
             $this->prescriptionId = '';
@@ -261,16 +280,53 @@ class PosScreen extends Component
     private function runCartAction(callable $callback): void
     {
         $this->clearCheckoutFeedback();
+        $previousCart = $this->cart;
+        $previousSalesType = $this->salesType;
+        $previousPrescriptionId = $this->prescriptionId;
+        $previousPatientId = $this->patientId;
+        $previousPaymentAmount = $this->paymentAmount;
 
         try {
             $callback();
-            $this->resetErrorBag();
         } catch (ValidationException $exception) {
+            $this->cart = $previousCart;
+            $this->salesType = $previousSalesType;
+            $this->prescriptionId = $previousPrescriptionId;
+            $this->patientId = $previousPatientId;
+            $this->paymentAmount = $previousPaymentAmount;
+
             foreach ($exception->errors() as $field => $messages) {
                 foreach ($messages as $message) {
                     $this->addError($field, $message);
                 }
             }
+
+            return;
+        }
+
+        try {
+            $this->posCartService->summary($this->cart, $this->salesType);
+        } catch (ValidationException $exception) {
+            $this->cart = $previousCart;
+            $this->salesType = $previousSalesType;
+            $this->prescriptionId = $previousPrescriptionId;
+            $this->patientId = $previousPatientId;
+            $this->paymentAmount = $previousPaymentAmount;
+            $this->resetErrorBag();
+            $this->flashValidationMessage($exception);
+
+            return;
+        }
+
+        $this->resetErrorBag();
+    }
+
+    private function flashValidationMessage(ValidationException $exception): void
+    {
+        $message = collect($exception->errors())->flatten()->first();
+
+        if (is_string($message)) {
+            session()->flash('pos_error', $message);
         }
     }
 
