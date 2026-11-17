@@ -9,6 +9,7 @@ use App\Http\Controllers\Core\InitialDataImportController;
 use App\Http\Controllers\Core\NotificationController;
 use App\Http\Controllers\Core\SettingsController;
 use App\Http\Controllers\Core\UserController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Inventory\ExpiryMonitorController;
 use App\Http\Controllers\Inventory\GoodsReceiptController;
 use App\Http\Controllers\Inventory\PurchaseReturnController;
@@ -41,7 +42,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->name('login.store');
 
 Route::middleware(['auth', EnsureActiveSession::class])->group(function (): void {
-    Route::get('/', fn () => view('welcome'))->name('home');
+    Route::get('/', [DashboardController::class, 'index'])->name('home');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}', [ReportController::class, 'show'])->name('reports.show');
     Route::post('/reports/{report}/exports', [ReportController::class, 'storeExport'])->name('reports.exports.store');

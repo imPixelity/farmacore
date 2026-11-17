@@ -123,6 +123,11 @@ it('confirms a credit receipt atomically with stock, cost, pricing, payable, tax
     $this->actingAs($user)->post(route('inventory.receipts.confirm', $receipt))
         ->assertRedirect(route('inventory.receipts.show', $receipt));
 
+    $this->actingAs($user)->get(route('inventory.receipts.show', $receipt))
+        ->assertOk()
+        ->assertDontSee('Utang supplier terbentuk')
+        ->assertDontSee('Lihat detail utang');
+
     $batch = ItemBatch::query()->firstOrFail();
     $payable = Payable::query()->firstOrFail();
     $tax = TaxRecord::query()->where('source_type', GoodsReceipt::class)->firstOrFail();

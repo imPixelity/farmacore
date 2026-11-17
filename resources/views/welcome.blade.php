@@ -2,88 +2,95 @@
 
 @section('title', 'Ringkasan')
 @section('breadcrumb', 'Beranda')
-@section('page-heading', 'Selamat datang di FarmaCore')
+@section('page-heading', 'Ringkasan operasional')
 
 @section('content')
-    <section class="relative overflow-hidden rounded-3xl bg-emerald-900 px-6 py-8 text-white sm:px-9 sm:py-10">
+    <section class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-950 via-emerald-900 to-teal-800 px-6 py-8 text-white shadow-lg shadow-emerald-950/10 sm:px-9 sm:py-10">
         <div class="relative z-10 max-w-2xl">
-            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">Fondasi sistem siap</p>
-            <h2 class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Operasional apotek, lebih terstruktur.</h2>
+            <p class="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">FarmaCore · Operasional apotek</p>
+            <h2 class="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Selamat datang, {{ $user->name }}</h2>
             <p class="mt-3 max-w-xl text-sm leading-6 text-emerald-100 sm:text-base">
-                FarmaCore sedang disiapkan. Modul data, persediaan, pembelian, penjualan, resep, dan laporan akan dibangun bertahap mengikuti roadmap proyek.
+                Pantau aktivitas dan lanjutkan pekerjaan dari modul yang tersedia untuk akun Anda.
             </p>
         </div>
-        <div class="pointer-events-none absolute -right-12 -top-24 size-72 rounded-full border-[36px] border-emerald-800/70"></div>
-        <div class="pointer-events-none absolute -bottom-24 right-36 size-48 rounded-full bg-emerald-800/70"></div>
+        <div class="relative z-10 mt-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-xs font-medium text-emerald-50 backdrop-blur-sm">
+            <span class="size-2 rounded-full bg-emerald-300"></span>
+            Ringkasan diperbarui {{ now()->format('d/m/Y H:i') }}
+        </div>
+        <div class="pointer-events-none absolute -right-12 -top-24 size-72 rounded-full border-[36px] border-white/5"></div>
+        <div class="pointer-events-none absolute -bottom-24 right-36 size-48 rounded-full bg-emerald-700/40"></div>
     </section>
 
-    <section aria-labelledby="status-heading">
+    <section aria-labelledby="metrics-heading">
         <div class="flex flex-wrap items-end justify-between gap-3">
             <div>
-                <p class="text-sm font-medium text-emerald-700">Gambaran umum</p>
-                <h2 id="status-heading" class="mt-1 text-xl font-bold tracking-tight text-slate-950">Status modul</h2>
+                <p class="text-sm font-medium text-emerald-700">Hari ini</p>
+                <h2 id="metrics-heading" class="mt-1 text-xl font-bold tracking-tight text-slate-950">Gambaran operasional</h2>
             </div>
-            <span class="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">Tahap fondasi</span>
+            <p class="text-sm text-slate-500">Ringkasan disesuaikan dengan hak akses Anda.</p>
         </div>
 
-        <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            @foreach ([['Data master', 'MD', 'Fondasi data barang dan mitra'], ['Persediaan', 'INV', 'Stok batch dan pergerakan'], ['Pembelian', 'PUR', 'Pemesanan ke supplier'], ['Penjualan', 'POS', 'Kasir dan transaksi']] as [$module, $code, $description])
-                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.02]">
-                    <div class="flex items-center justify-between gap-3">
-                        <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-xs font-bold text-emerald-800">{{ $code }}</span>
-                        <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-medium text-slate-500">Direncanakan</span>
-                    </div>
-                    <h3 class="mt-5 font-semibold text-slate-900">{{ $module }}</h3>
-                    <p class="mt-1 text-sm leading-5 text-slate-500">{{ $description }}</p>
-                </article>
-            @endforeach
-        </div>
+        @if ($metrics !== [])
+            <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                @foreach ($metrics as $metric)
+                    <a href="{{ $metric['url'] }}" class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.02] transition hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-emerald-100">
+                        <div class="flex items-start justify-between gap-3">
+                            <span class="grid size-10 place-items-center rounded-xl bg-emerald-50 text-xs font-bold text-emerald-800">{{ $metric['symbol'] }}</span>
+                            <span class="text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-emerald-700" aria-hidden="true">→</span>
+                        </div>
+                        <p class="mt-5 text-sm font-medium text-slate-500">{{ $metric['label'] }}</p>
+                        <p class="mt-1 text-3xl font-bold tracking-tight text-slate-950">{{ $metric['value'] }}</p>
+                        <p class="mt-2 text-sm text-slate-500">{{ $metric['description'] }}</p>
+                    </a>
+                @endforeach
+            </div>
+        @else
+            <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
+                Belum ada ringkasan operasional yang tersedia untuk akun ini.
+            </div>
+        @endif
     </section>
 
-    <section class="grid gap-4 lg:grid-cols-[1.3fr_0.7fr]">
-        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm shadow-slate-900/[0.02]">
-            <div class="flex items-center justify-between gap-4">
+    @if ($canViewSales)
+        <section class="rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-900/[0.02]" aria-labelledby="sales-heading">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-5 sm:px-6">
                 <div>
-                    <p class="text-sm font-medium text-emerald-700">Langkah berikutnya</p>
-                    <h2 class="mt-1 text-lg font-bold tracking-tight text-slate-950">Roadmap pengembangan</h2>
+                    <p class="text-sm font-medium text-emerald-700">Penjualan</p>
+                    <h2 id="sales-heading" class="mt-1 text-lg font-bold tracking-tight text-slate-950">Transaksi terbaru</h2>
                 </div>
-                <span class="hidden rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500 sm:inline-flex">Phase 1 / 28</span>
+                <a href="{{ route('pos.sales.index') }}" class="text-sm font-semibold text-emerald-800 hover:text-emerald-950">Lihat semua transaksi <span aria-hidden="true">→</span></a>
             </div>
-            <ol class="mt-5 space-y-4">
-                <li class="flex gap-3">
-                    <span class="grid size-7 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-800">1</span>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-800">Fondasi proyek dan tooling</p>
-                        <p class="mt-1 text-sm text-slate-500">Laravel, struktur modul, aset, dan pengujian dasar.</p>
-                    </div>
-                </li>
-                <li class="flex gap-3">
-                    <span class="grid size-7 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">2</span>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-700">Autentikasi dan hak akses</p>
-                        <p class="mt-1 text-sm text-slate-500">Pengguna, role, permission, dan kebijakan akses.</p>
-                    </div>
-                </li>
-                <li class="flex gap-3">
-                    <span class="grid size-7 shrink-0 place-items-center rounded-full bg-slate-100 text-xs font-bold text-slate-500">3</span>
-                    <div>
-                        <p class="text-sm font-semibold text-slate-700">Audit dan pengaturan</p>
-                        <p class="mt-1 text-sm text-slate-500">Pencatatan aktivitas dan konfigurasi aplikasi.</p>
-                    </div>
-                </li>
-            </ol>
-        </article>
 
-        <aside class="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-6">
-            <span class="grid size-11 place-items-center rounded-xl bg-white text-xl text-emerald-800">✓</span>
-            <h2 class="mt-4 text-lg font-bold tracking-tight text-slate-950">Siap dikembangkan</h2>
-            <p class="mt-2 text-sm leading-6 text-slate-600">
-                Menu modul saat ini merupakan placeholder. Data operasional baru akan ditampilkan setelah fitur dan alur bisnisnya selesai dibangun.
-            </p>
-        </aside>
-    </section>
+            @if ($recentSales->isNotEmpty())
+                <div class="overflow-x-auto">
+                    <table class="w-full min-w-[38rem] text-left text-sm">
+                        <thead class="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                            <tr>
+                                <th scope="col" class="px-5 py-3 font-semibold sm:px-6">Nomor transaksi</th>
+                                <th scope="col" class="px-5 py-3 font-semibold">Waktu</th>
+                                <th scope="col" class="px-5 py-3 font-semibold">Pembayaran</th>
+                                <th scope="col" class="px-5 py-3 text-right font-semibold sm:px-6">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            @foreach ($recentSales as $sale)
+                                <tr class="text-slate-700">
+                                    <td class="px-5 py-4 font-semibold text-slate-900 sm:px-6">{{ $sale->invoice_no }}</td>
+                                    <td class="px-5 py-4 text-slate-500">{{ $sale->sale_date->format('d/m/Y H:i') }}</td>
+                                    <td class="px-5 py-4"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-800">{{ str_replace('_', ' ', $sale->payment_status) }}</span></td>
+                                    <td class="px-5 py-4 text-right font-semibold text-slate-900 sm:px-6">Rp {{ number_format((float) $sale->grand_total, 2, ',', '.') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="px-5 py-8 text-center text-sm text-slate-500 sm:px-6">Belum ada transaksi penjualan.</p>
+            @endif
+        </section>
+    @endif
 
-    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6" aria-labelledby="notifications-heading">
+    <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.02] sm:p-6" aria-labelledby="notifications-heading">
         <div class="flex flex-wrap items-center justify-between gap-3">
             <div>
                 <p class="text-sm font-medium text-emerald-700">Pusat notifikasi</p>

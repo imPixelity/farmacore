@@ -153,13 +153,6 @@
                         <a href="{{ route('reports.index') }}" class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-950"><span class="grid size-8 place-items-center rounded-lg bg-slate-50 text-slate-500">L</span>Laporan</a>
                     @endcanany
                 </nav>
-
-                <div class="border-t border-slate-100 p-5">
-                    <div class="rounded-2xl bg-slate-50 p-4">
-                        <p class="text-xs font-semibold text-slate-700">Fondasi aplikasi</p>
-                        <p class="mt-1 text-xs leading-5 text-slate-500">Modul operasional akan tersedia bertahap sesuai roadmap.</p>
-                    </div>
-                </div>
             </aside>
 
             <div class="min-w-0 flex-1">

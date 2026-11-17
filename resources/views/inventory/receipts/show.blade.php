@@ -86,13 +86,17 @@
             </div>
         </section>
 
-        @if ($receipt->payable)
-            <section class="rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
-                <h2 class="font-bold text-amber-950">Utang supplier terbentuk</h2>
-                <p class="mt-1 text-sm text-amber-900">{{ $receipt->payable->invoice_no }} · jatuh tempo {{ $receipt->payable->due_date->format('d-m-Y') }} · {{ $receipt->payable->total_amount }} · {{ str_replace('_', ' ', $receipt->payable->status) }}</p>
-                <p class="mt-1 text-xs text-amber-800">Pencatatan pembayaran utang tersedia pada phase berikutnya.</p>
-            </section>
-        @endif
+        @can('purchasing.payable.view')
+            @if ($receipt->payable)
+                <section class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">
+                    <div>
+                        <h2 class="font-bold text-amber-950">Utang supplier terbentuk</h2>
+                        <p class="mt-1 text-sm text-amber-900">{{ $receipt->payable->invoice_no }} · jatuh tempo {{ $receipt->payable->due_date->format('d-m-Y') }} · {{ $receipt->payable->total_amount }} · {{ str_replace('_', ' ', $receipt->payable->status) }}</p>
+                    </div>
+                    <a href="{{ route('purchasing.payables.show', $receipt->payable) }}" class="rounded-xl border border-amber-300 bg-white px-4 py-2.5 text-sm font-semibold text-amber-900 hover:bg-amber-100">Lihat detail utang</a>
+                </section>
+            @endif
+        @endcan
 
         <div class="flex flex-wrap items-center justify-end gap-3">
             @if ($receipt->status === 'draft')

@@ -67,16 +67,21 @@ class GoodsReceiptController extends Controller
     {
         Gate::authorize('inventory.receipt.view');
 
-        $goodsReceipt->load([
+        $relations = [
             'supplier:id,name',
             'items.item:id,code,name,base_unit_id',
             'items.item.baseUnit:id,name',
             'items.unit:id,name',
             'items.approver:id,name',
             'items.batch',
-            'payable',
             'confirmer:id,name',
-        ]);
+        ];
+
+        if (Gate::allows('purchasing.payable.view')) {
+            $relations[] = 'payable';
+        }
+
+        $goodsReceipt->load($relations);
         $matching = $goodsReceipt->status === 'draft'
             ? $matchingService->preview($goodsReceipt)
             : ['warnings' => [], 'status' => $goodsReceipt->matching_status, 'lines' => []];
