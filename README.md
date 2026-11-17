@@ -9,44 +9,79 @@ Aplikasi manajemen apotek berbasis Laravel 13 dengan Blade, Livewire 4, Alpine.j
 - Node.js dan npm
 - MySQL 8 atau MariaDB 10.6+
 
-## Menjalankan aplikasi
+## Setup clone baru
 
-1. Pasang dependensi PHP:
-
-   ```sh
-   composer install
-   ```
-
-2. Siapkan konfigurasi lokal dan kunci aplikasi:
-
-   ```sh
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-3. Atur `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` di `.env` sesuai MySQL/MariaDB lokal.
-4. Jalankan migrasi dan pasang dependensi aset:
-
-   ```sh
-   php artisan migrate
-   npm install
-   ```
-
-5. Jalankan aplikasi dan Vite pada terminal terpisah:
-
-   ```sh
-   php artisan serve
-   npm run dev
-   ```
-
-Buka alamat lokal yang ditampilkan oleh `php artisan serve`.
-
-## Pengujian dan build aset
+Pastikan PHP, Composer, Node.js/npm, dan MySQL 8 atau MariaDB 10.6+ tersedia. Dari root repository jalankan:
 
 ```sh
-php artisan test
-npm run build
+make setup
 ```
+
+Target ini memasang dependency Composer/npm, membuat `.env` hanya jika belum ada, dan membuat `APP_KEY` hanya jika belum diatur. Target ini **tidak menjalankan migrasi atau menghapus database**.
+
+Atur koneksi MariaDB di `.env` lokal, minimal:
+
+```dotenv
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=farmacore
+DB_USERNAME=your_local_user
+DB_PASSWORD=your_local_password
+```
+
+Lalu jalankan migrasi dan data dasar:
+
+```sh
+make migrate
+make seed
+```
+
+Untuk membuat akun apoteker pertama secara interaktif:
+
+```sh
+php artisan app:create-initial-apothecary
+```
+
+Command ini meminta kredensial saat dijalankan dan tidak memakai password bawaan.
+
+## Menjalankan aplikasi
+
+```sh
+make dev
+```
+
+Target ini menggunakan proses development yang sudah dikonfigurasi Composer, termasuk server dan Vite. Alternatifnya, jalankan `make serve` untuk server Laravel saja. Buka alamat lokal yang ditampilkan oleh server.
+
+## Data demo lokal
+
+Untuk mengisi database dengan akun dan transaksi fiktif, tambahkan password lokal minimal 12 karakter ke `.env`:
+
+```dotenv
+FARMACORE_DEMO_PASSWORD=choose-a-local-demo-password
+```
+
+Lalu jalankan:
+
+```sh
+make demo
+```
+
+Seeder demo berjalan terpisah dari `make seed`, tidak menghapus data, dan hanya boleh digunakan di environment non-production. Akun demo menggunakan password tersebut. Seluruh data pasien, barang, harga, dan tarif pajaknya adalah data latihan, bukan data operasional.
+
+## Perintah developer
+
+```sh
+make test                       # seluruh Pest test
+make test FILTER=DemoDataSeeder # test terfokus
+make format                     # format file PHP yang berubah
+make build                      # build frontend
+make check                      # test + format + frontend build
+make routes                     # daftar route
+make queue                      # worker untuk job queue, misalnya ekspor laporan
+```
+
+`make migrate` hanya menjalankan migrasi yang belum diterapkan. Tidak ada target reset database karena reset dapat menghapus data lokal.
 
 ## Struktur modul
 
