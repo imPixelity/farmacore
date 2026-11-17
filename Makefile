@@ -1,7 +1,7 @@
 SHELL := /bin/sh
 .DEFAULT_GOAL := help
 
-.PHONY: help setup migrate migrate-status seed demo dev serve queue test test-full test-browser-headless test-browser-headed format build check routes
+.PHONY: help setup migrate migrate-status seed demo dev serve queue test test-full test-browser-headless test-browser-headed browser-install format build check routes
 
 help:
 	@printf '%s\n' \
@@ -17,6 +17,7 @@ help:
 	  '  make test-full              Run all tests, including browser tests headless' \
 	  '  make test-browser-headless  Run browser tests headless' \
 	  '  make test-browser-headed    Run browser tests with a visible browser' \
+	  '  make browser-install       Install Chromium for browser tests' \
 	  '  make format                 Format changed PHP files with Pint' \
 	  '  make build          Build frontend assets' \
 	  '  make check          Run tests, formatting, and frontend build' \
@@ -77,6 +78,9 @@ test-browser-headed:
 	else \
 		printf '%s\n' 'No browser tests found; skipping the browser suite for now.'; \
 	fi
+
+browser-install:
+	npx playwright install chromium
 
 format:
 	vendor/bin/pint --dirty --format agent

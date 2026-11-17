@@ -15,8 +15,15 @@ use Tests\TestCase;
 */
 
 pest()->extend(TestCase::class)
- // ->use(RefreshDatabase::class)
     ->in('Feature');
+
+pest()->extend(TestCase::class)
+    ->use(RefreshDatabase::class)
+    ->in('Browser');
+
+if (env('BROWSER_TEST_MODE') === 'headed') {
+    pest()->browser()->headed();
+}
 
 /*
 |--------------------------------------------------------------------------
