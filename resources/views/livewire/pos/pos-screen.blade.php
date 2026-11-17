@@ -1,3 +1,5 @@
+@inject('quantityFormatter', \App\Modules\Core\Services\QuantityFormatter::class)
+
 <div class="space-y-6" wire:keydown.escape="clearCart">
     <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_28rem]">
         <section class="space-y-6">
@@ -53,20 +55,27 @@
                     <div class="flex items-center justify-between gap-3">
                         <div>
                             <h3 class="font-bold text-slate-900">Barang tersedia</h3>
-                            <p class="mt-1 text-sm text-slate-500">Maksimal 20 hasil paling relevan.</p>
+                            <p class="mt-1 text-sm text-slate-500">Stok memakai satuan dasar. Titik untuk ribuan, koma untuk pecahan (1.000 = seribu; 1,5 = satu setengah).</p>
                         </div>
                         <span class="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">{{ $this->itemResults->count() }} hasil</span>
                     </div>
                 </div>
                 <div class="divide-y divide-slate-100">
                     @forelse ($this->itemResults as $item)
+                        @php
+                            $availableStock = (string) ($item->available_stock ?? '0');
+                            $hasAvailableStock = bccomp($availableStock, '0', 3) > 0;
+                        @endphp
                         <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                             <div class="min-w-0">
                                 <p class="font-semibold text-slate-900">{{ $item->name }}</p>
-                                <p class="mt-1 text-xs text-slate-500">{{ $item->code }} · {{ $item->category?->name ?? 'Tanpa kategori' }} · {{ $item->baseUnit->name }}</p>
-                                <p class="mt-1 text-xs font-semibold {{ bccomp((string) ($item->available_stock ?? '0'), '0', 3) > 0 ? 'text-emerald-700' : 'text-rose-700' }}">Tersedia {{ number_format((float) ($item->available_stock ?? 0), 3, ',', '.') }}</p>
+                                <p class="mt-1 text-xs text-slate-500">{{ $item->code }} · {{ $item->category?->name ?? 'Tanpa kategori' }}</p>
+                                <p class="mt-2 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold {{ $hasAvailableStock ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-700' }}">
+                                    <span>{{ $hasAvailableStock ? 'Stok tersedia' : 'Stok habis' }}</span>
+                                    <strong>{{ $quantityFormatter->format($availableStock) }} {{ $item->baseUnit->name }}</strong>
+                                </p>
                             </div>
-                            <button type="button" wire:click="addItem({{ $item->id }})" class="shrink-0 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50" @disabled(bccomp((string) ($item->available_stock ?? '0'), '0', 3) <= 0)>Tambah</button>
+                            <button type="button" wire:click="addItem({{ $item->id }})" class="shrink-0 rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50" @disabled(! $hasAvailableStock)>{{ $hasAvailableStock ? 'Tambah' : 'Stok habis' }}</button>
                         </div>
                     @empty
                         <p class="px-6 py-10 text-center text-sm text-slate-500">Belum ada barang yang cocok dengan pencarian.</p>
@@ -107,6 +116,7 @@
             </div>
             <div class="max-h-[32rem] divide-y divide-slate-100 overflow-y-auto">
                 @forelse ($this->cartSummary['lines'] as $line)
+
                     <div wire:key="cart-{{ $line['key'] }}" class="space-y-3 px-5 py-4 sm:px-6">
                         <div class="flex items-start justify-between gap-3">
                             <div class="min-w-0">
@@ -118,10 +128,17 @@
                             </div>
                             <button type="button" wire:click="removeItem('{{ $line['key'] }}')" class="text-xs font-semibold text-rose-700 hover:text-rose-900">Hapus</button>
                         </div>
-                        <div class="flex items-center justify-between gap-3">
-                            <input type="number" min="0.001" step="0.001" wire:change="updateQuantity('{{ $line['key'] }}', $event.target.value)" value="{{ $line['quantity'] }}" class="w-28 rounded-lg border border-slate-300 px-2.5 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                        <div class="flex flex-wrap items-end justify-between gap-3">
+                            <label class="grid gap-1">
+                                <span class="text-xs font-semibold text-slate-600">Jumlah</span>
+                                <span class="flex items-center gap-2">
+                                    <input type="number" min="0.001" step="0.001" wire:change="updateQuantity('{{ $line['key'] }}', $event.target.value)" value="{{ $quantityFormatter->formatInput($line['quantity']) }}" aria-label="Jumlah {{ $line['name'] }} dalam {{ $line['unit_name'] }}" class="w-28 rounded-lg border border-slate-300 px-2.5 py-2 text-sm outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-100">
+                                    <span class="text-sm text-slate-600">{{ $line['unit_name'] }}</span>
+                                </span>
+                                <span class="text-xs text-slate-500">Stok tersedia: {{ $quantityFormatter->format($line['available_stock']) }} {{ $line['unit_name'] }}</span>
+                            </label>
                             <div class="text-right">
-                                <p class="text-xs text-slate-500">{{ number_format((float) $line['quantity'], 3, ',', '.') }} × Rp {{ number_format((float) $line['unit_price'], 2, ',', '.') }}</p>
+                                <p class="text-xs text-slate-500">{{ $quantityFormatter->format($line['quantity']) }} × Rp {{ number_format((float) $line['unit_price'], 2, ',', '.') }}</p>
                                 <p class="font-bold text-slate-900">Rp {{ number_format((float) $line['total'], 2, ',', '.') }}</p>
                                 @if (bccomp($line['discount_amount'], '0.00', 2) > 0)
                                     <p class="text-xs font-semibold text-emerald-700">Diskon Rp {{ number_format((float) $line['discount_amount'], 2, ',', '.') }}</p>

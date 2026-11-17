@@ -22,7 +22,7 @@
     <div class="line"></div>
     @foreach ($sale->items as $item)
         <div>{{ $item->item->name }}</div>
-        <div class="row"><span>{{ $item->qty_base }} x {{ number_format((float) $item->unit_price_base, 2, ',', '.') }}</span><span>{{ number_format((float) $item->line_total, 2, ',', '.') }}</span></div>
+        <div class="row"><span><x-quantity :value="$item->qty_base" /> x {{ number_format((float) $item->unit_price_base, 2, ',', '.') }}</span><span>{{ number_format((float) $item->line_total, 2, ',', '.') }}</span></div>
     @endforeach
     @foreach ($sale->services as $service)
         <div class="row"><span>{{ $service->service_name }}</span><span>{{ number_format((float) $service->fee, 2, ',', '.') }}</span></div>

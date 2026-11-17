@@ -30,7 +30,7 @@ it('shows items at or below reorder point with a rounded purchase recommendation
     $this->actingAs($user)->get(route('purchasing.purchase-orders.index'))
         ->assertOk()
         ->assertSee('Item ROP')
-        ->assertSee('12.000');
+        ->assertSee('12');
 });
 
 it('creates a draft purchase order and calculates its total', function () {

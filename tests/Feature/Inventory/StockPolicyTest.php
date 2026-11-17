@@ -96,7 +96,7 @@ it('renders the policy editor and per-item stock metrics for an apothecary', fun
     $this->actingAs($user)->get(route('inventory.stock.show', $item))
         ->assertOk()
         ->assertSee('Kebijakan dan rekomendasi stok')
-        ->assertSee('4.000');
+        ->assertSee('4');
 });
 
 it('stores movement-class policy configuration and queues recalculation', function () {

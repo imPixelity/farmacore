@@ -4,6 +4,7 @@ namespace App\Modules\Inventory\Services;
 
 use App\Models\User;
 use App\Modules\Core\Services\NotificationService;
+use App\Modules\Core\Services\QuantityFormatter;
 use App\Modules\Core\Services\SettingsService;
 use App\Modules\Inventory\Models\GoodsReceiptItem;
 use App\Modules\Inventory\Models\ItemBatch;
@@ -24,6 +25,7 @@ class StockPolicyService
         private SettingsService $settings,
         private StockService $stock,
         private NotificationService $notifications,
+        private QuantityFormatter $quantityFormatter,
     ) {}
 
     /** @return array<string, StockPolicy> */
@@ -189,7 +191,7 @@ class StockPolicyService
                 [
                     'item_id' => $item->getKey(),
                     'item_name' => $item->name,
-                    'message' => "Stok tersedia {$available} untuk {$item->name}, sudah mencapai ROP {$item->reorder_point}.",
+                    'message' => 'Stok tersedia '.$this->quantityFormatter->format($available).' untuk '.$item->name.', sudah mencapai ROP '.$this->quantityFormatter->format($item->reorder_point).'.',
                     'available_stock' => $available,
                     'reorder_point' => $item->reorder_point,
                     'url' => $url,
@@ -238,7 +240,7 @@ class StockPolicyService
                             [
                                 'item_id' => $batch->item_id,
                                 'item_name' => $batch->item->name,
-                                'message' => "Batch {$batch->batch_no} untuk {$batch->item->name} memiliki stok {$batch->qty_on_hand} dan ED {$batch->expiry_date->format('d-m-Y')}.",
+                                'message' => 'Batch '.$batch->batch_no.' untuk '.$batch->item->name.' memiliki stok '.$this->quantityFormatter->format($batch->qty_on_hand).' dan ED '.$batch->expiry_date->format('d-m-Y').'.',
                                 'batch_no' => $batch->batch_no,
                                 'qty_on_hand' => $batch->qty_on_hand,
                                 'expiry_date' => $batch->expiry_date->toDateString(),

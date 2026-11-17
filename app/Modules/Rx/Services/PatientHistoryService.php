@@ -3,6 +3,7 @@
 namespace App\Modules\Rx\Services;
 
 use App\Models\AuditLog;
+use App\Modules\Core\Services\QuantityFormatter;
 use App\Modules\Md\Models\Patient;
 use App\Modules\Md\Models\PharmacyStaff;
 use App\Modules\Pos\Models\Sale;
@@ -17,6 +18,8 @@ use Illuminate\Support\Facades\Request;
 
 class PatientHistoryService
 {
+    public function __construct(private QuantityFormatter $quantityFormatter) {}
+
     /** @return array{patient: Patient, timeline: array<int, array{date: CarbonImmutable|string, type: string, title: string, description: string}>} */
     public function forPatient(Patient $patient): array
     {
@@ -67,7 +70,7 @@ class PatientHistoryService
                     'date' => $prescription->rx_date,
                     'type' => 'obat',
                     'title' => $item->item->name,
-                    'description' => 'Jumlah '.$item->qty_prescribed.' · '.$item->dosage_instruction,
+                    'description' => 'Jumlah '.$this->quantityFormatter->format($item->qty_prescribed).' · '.$item->dosage_instruction,
                 ];
             }
 

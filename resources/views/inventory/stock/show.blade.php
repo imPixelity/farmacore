@@ -18,11 +18,11 @@
             <dl class="mt-6 grid gap-3 sm:grid-cols-2">
                 <div class="rounded-xl bg-slate-50 p-4">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total stok semua batch</dt>
-                    <dd class="mt-1 text-lg font-bold text-slate-900">{{ $stockTotal }} {{ $item->baseUnit->name }}</dd>
+                    <dd class="mt-1 text-lg font-bold text-slate-900"><x-quantity :value="$stockTotal" :unit="$item->baseUnit->name" /></dd>
                 </div>
                 <div class="rounded-xl bg-emerald-50 p-4">
                     <dt class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Stok tersedia (belum kedaluwarsa)</dt>
-                    <dd class="mt-1 text-lg font-bold text-emerald-900">{{ $availableTotal }} {{ $item->baseUnit->name }}</dd>
+                    <dd class="mt-1 text-lg font-bold text-emerald-900"><x-quantity :value="$availableTotal" :unit="$item->baseUnit->name" /></dd>
                 </div>
             </dl>
         </section>
@@ -38,10 +38,10 @@
                 @endcan
             </div>
             <dl class="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Rata-rata pemakaian / bulan</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['average_monthly_usage'] ?? '—' }}</dd></div>
-                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Stok minimum / ROP</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['min_stock'] ?? '—' }} {{ $item->baseUnit->name }}</dd></div>
-                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Buffer stock</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['buffer_stock'] ?? '—' }} {{ $item->baseUnit->name }}</dd></div>
-                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kekurangan buffer</dt><dd class="mt-1 font-bold text-slate-900">{{ $stockPolicy['kurang_buffer'] ?? '—' }} {{ $item->baseUnit->name }}</dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Rata-rata pemakaian / bulan</dt><dd class="mt-1 font-bold text-slate-900"><x-quantity :value="$stockPolicy['average_monthly_usage']" /></dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Stok minimum / ROP</dt><dd class="mt-1 font-bold text-slate-900"><x-quantity :value="$stockPolicy['min_stock']" :unit="$item->baseUnit->name" /></dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Buffer stock</dt><dd class="mt-1 font-bold text-slate-900"><x-quantity :value="$stockPolicy['buffer_stock']" :unit="$item->baseUnit->name" /></dd></div>
+                <div class="rounded-xl bg-slate-50 p-4"><dt class="text-xs font-semibold uppercase tracking-wide text-slate-500">Kekurangan buffer</dt><dd class="mt-1 font-bold text-slate-900"><x-quantity :value="$stockPolicy['kurang_buffer']" :unit="$item->baseUnit->name" /></dd></div>
             </dl>
             @if ($stockPolicy['average_monthly_usage'] === null)
                 <p class="mt-4 text-sm text-amber-800">Belum ada riwayat pemakaian. Tetapkan stok minimum manual atau tunggu transaksi pemakaian tercatat.</p>
@@ -91,7 +91,7 @@
                             <tr>
                                 <td class="px-6 py-4 font-semibold text-slate-900">{{ $batch->batch_no }}</td>
                                 <td class="px-6 py-4 text-slate-600">{{ $batch->expiry_date->format('d-m-Y') }}</td>
-                                <td class="px-6 py-4 text-right font-semibold text-slate-900">{{ $batch->qty_on_hand }}</td>
+                                <td class="px-6 py-4 text-right font-semibold text-slate-900"><x-quantity :value="$batch->qty_on_hand" /></td>
                                 <td class="px-6 py-4"><span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $expired ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700' }}">{{ $expired ? 'Kedaluwarsa' : 'Belum kedaluwarsa' }}</span></td>
                             </tr>
                         @empty

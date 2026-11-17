@@ -2,10 +2,13 @@
 
 namespace App\Modules\Reporting\Services;
 
+use App\Modules\Core\Services\QuantityFormatter;
 use Carbon\CarbonImmutable;
 
 class ReportValueFormatter
 {
+    public function __construct(private QuantityFormatter $quantityFormatter) {}
+
     public function display(mixed $value, string $format): string
     {
         if ($value === null || $value === '') {
@@ -14,7 +17,7 @@ class ReportValueFormatter
 
         return match ($format) {
             'money' => 'Rp '.number_format((float) $value, 2, ',', '.'),
-            'quantity' => number_format((float) $value, 3, ',', '.'),
+            'quantity' => $this->quantityFormatter->format($value),
             'decimal' => number_format((float) $value, 1, ',', '.'),
             'integer' => number_format((float) $value, 0, ',', '.'),
             'percent' => number_format((float) $value, 2, ',', '.').'%',

@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@inject('quantityFormatter', \App\Modules\Core\Services\QuantityFormatter::class)
+
 @section('title', 'Aturan diskon')
 @section('breadcrumb', 'Data master / Harga / Diskon')
 @section('page-heading', 'Aturan diskon')
@@ -16,7 +18,7 @@
                 @forelse ($discountRules as $rule)
                     <tr>
                         <td class="px-5 py-4 font-medium text-slate-900">{{ $rule->name }}<span class="mt-1 block text-xs font-normal text-slate-500">{{ $rule->sales_type ? ['resep' => 'Resep', 'obat_bebas' => 'Obat bebas', 'produk_lain' => 'Produk lainnya'][$rule->sales_type] : 'Semua jenis' }}</span></td>
-                        <td class="px-5 py-4">{{ $rule->rule_type === 'qty' ? 'Jumlah ≥ '.$rule->min_qty : 'Subtotal ≥ Rp '.number_format((float) $rule->min_amount, 2, ',', '.') }}</td>
+                        <td class="px-5 py-4">{{ $rule->rule_type === 'qty' ? 'Jumlah ≥ '.$quantityFormatter->format($rule->min_qty) : 'Subtotal ≥ Rp '.number_format((float) $rule->min_amount, 2, ',', '.') }}</td>
                         <td class="px-5 py-4">{{ $rule->item?->name ?? $rule->category?->name ?? 'Semua barang' }}</td>
                         <td class="px-5 py-4">{{ $rule->discount_type === 'percent' ? $rule->discount_value.'%' : 'Rp '.number_format((float) $rule->discount_value, 2, ',', '.') }}</td>
                         <td class="px-5 py-4 text-slate-600">{{ $rule->effective_from?->format('d-m-Y') ?? '—' }} – {{ $rule->effective_until?->format('d-m-Y') ?? '—' }}</td>

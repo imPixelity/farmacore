@@ -61,7 +61,7 @@
                                 <span class="mt-1 block text-xs font-normal text-slate-500">{{ $batch->item->code }}</span>
                             </td>
                             <td class="px-6 py-4 text-slate-700">{{ $batch->batch_no }}</td>
-                            <td class="px-6 py-4 text-right font-semibold text-slate-900">{{ $batch->qty_on_hand }}</td>
+                            <td class="px-6 py-4 text-right font-semibold text-slate-900"><x-quantity :value="$batch->qty_on_hand" /></td>
                             <td class="px-6 py-4 text-slate-700">{{ $batch->expiry_date->format('d-m-Y') }}</td>
                             <td class="px-6 py-4">
                                 <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $expired ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700' }}">{{ $expired ? 'Kedaluwarsa · tidak dapat dijual' : 'Belum kedaluwarsa' }}</span>

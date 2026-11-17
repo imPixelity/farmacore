@@ -13,7 +13,7 @@
             <option value="">Pilih satuan</option>
             @foreach ($items as $item)
                 @foreach ($item->itemUnits as $itemUnit)
-                    <option value="{{ $itemUnit->id }}" data-item-id="{{ $item->id }}" @selected((string) ($line['item_unit_id'] ?? '') === (string) $itemUnit->id)>{{ $item->name }} · {{ $itemUnit->unit->name }} (×{{ $itemUnit->factor_to_base }})</option>
+                    <option value="{{ $itemUnit->id }}" data-item-id="{{ $item->id }}" @selected((string) ($line['item_unit_id'] ?? '') === (string) $itemUnit->id)>{{ $item->name }} · {{ $itemUnit->unit->name }} (×<x-quantity :value="$itemUnit->factor_to_base" />)</option>
                 @endforeach
             @endforeach
         </select>

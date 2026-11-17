@@ -158,14 +158,14 @@ it('shows stock totals in configured units and links to paginated batch details'
     $this->actingAs($warehouseStaff)
         ->get(route('inventory.stock.index'))
         ->assertOk()
-        ->assertSee('8.000 tablet')
-        ->assertSee('0.800 strip')
+        ->assertSee('8 tablet')
+        ->assertSee('0,8 strip')
         ->assertSee('1 batch · Rincian');
 
     $this->get(route('inventory.stock.show', $item))
         ->assertOk()
         ->assertSee('LOT-STOCK-01')
-        ->assertSee('8.000')
+        ->assertSee('8')
         ->assertSee('Belum kedaluwarsa');
 });
 

@@ -70,7 +70,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-slate-600">{{ $line->expiry_date->format('d-m-Y') }}</td>
-                                <td class="px-6 py-4 text-right text-slate-700">{{ $line->qty_received }} {{ $line->unit->name }}<span class="mt-1 block text-xs text-slate-500">{{ $line->qty_base }} {{ $line->item->baseUnit->name }}</span></td>
+                                <td class="px-6 py-4 text-right text-slate-700"><x-quantity :value="$line->qty_received" :unit="$line->unit->name" /><span class="mt-1 block text-xs text-slate-500"><x-quantity :value="$line->qty_base" :unit="$line->item->baseUnit->name" /></span></td>
                                 <td class="px-6 py-4 text-right text-slate-700">{{ $line->unit_price }}<span class="mt-1 block text-xs text-slate-500">Diskon {{ $line->discount_amount }}</span></td>
                                 <td class="px-6 py-4 text-right font-semibold text-slate-900">{{ $line->line_total }}</td>
                             </tr>

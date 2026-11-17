@@ -55,9 +55,37 @@ it('adds items, rejects insufficient stock, and recalculates the cart total', fu
         ->call('addItem', $item->id)
         ->assertSet('cart.item-'.$item->id.'.quantity', '1.000')
         ->assertSee('Rp 1.200,00')
+        ->assertSee('1 × Rp 1.200,00')
         ->call('updateQuantity', 'item-'.$item->id, '3.000')
         ->assertHasErrors('cart')
         ->assertSet('cart.item-'.$item->id.'.quantity', '1.000');
+});
+
+it('shows stock as whole base units without trailing decimals', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('kasir');
+    $this->actingAs($cashier);
+    $item = preparePosItem('1200.00', '100.000');
+
+    Livewire::test(PosScreen::class)
+        ->assertSee('Stok tersedia')
+        ->assertSee('100 '.$item->baseUnit->name)
+        ->assertDontSee('100,000');
+});
+
+it('formats large and fractional quantities in the cart while keeping numeric inputs valid', function () {
+    $cashier = User::factory()->create();
+    $cashier->assignRole('kasir');
+    $this->actingAs($cashier);
+    $item = preparePosItem('1200.00', '1000.500');
+
+    Livewire::test(PosScreen::class)
+        ->assertSee('1.000,5 '.$item->baseUnit->name)
+        ->call('addItem', $item->id)
+        ->call('updateQuantity', 'item-'.$item->id, '1.500')
+        ->assertSee('value="1.5"', false)
+        ->assertSee('1,5 × Rp 1.200,00')
+        ->assertDontSee('1000,500');
 });
 
 it('flashes a missing price and keeps the item out of the cart', function () {

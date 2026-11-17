@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Core\Services\QuantityFormatter;
 use App\Modules\Inventory\Models\ItemBatch;
 use App\Modules\Inventory\Services\StockPolicyService;
 use App\Modules\Inventory\Services\StockService;
@@ -17,7 +18,7 @@ use Illuminate\View\View;
 
 class StockController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, QuantityFormatter $formatter): View
     {
         Gate::authorize('inventory.stock.view');
 
@@ -39,20 +40,20 @@ class StockController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $items->getCollection()->transform(function (Item $item): Item {
+        $items->getCollection()->transform(function (Item $item) use ($formatter): Item {
             $stockTotal = bcadd((string) ($item->stock_total ?? '0'), '0', 3);
             $stockByUnit = $item->itemUnits
                 ->filter(fn (ItemUnit $itemUnit): bool => bccomp((string) $itemUnit->factor_to_base, '0', 3) > 0)
                 ->map(fn (ItemUnit $itemUnit): array => [
                     'name' => $itemUnit->unit->name,
-                    'quantity' => $this->formatQuantity(bcdiv($stockTotal, (string) $itemUnit->factor_to_base, 3)),
+                    'quantity' => $formatter->format(bcdiv($stockTotal, (string) $itemUnit->factor_to_base, 3)),
                 ])
                 ->values();
 
             if ($stockByUnit->isEmpty()) {
                 $stockByUnit->push([
                     'name' => $item->baseUnit->name,
-                    'quantity' => $this->formatQuantity($stockTotal),
+                    'quantity' => $formatter->format($stockTotal),
                 ]);
             }
 
@@ -102,12 +103,5 @@ class StockController extends Controller
 
         return redirect()->route('inventory.stock.show', $item)
             ->with('success', 'Kebijakan stok barang berhasil diperbarui.');
-    }
-
-    private function formatQuantity(string $quantity): string
-    {
-        [$whole, $fraction] = explode('.', bcadd($quantity, '0', 3));
-
-        return number_format((int) $whole).'.'.$fraction;
     }
 }
