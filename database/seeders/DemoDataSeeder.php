@@ -39,7 +39,9 @@ class DemoDataSeeder extends Seeder
         ['username' => 'demo.keuangan', 'name' => 'Staf Keuangan Demo', 'role' => 'keuangan'],
     ];
 
-    private const DEMO_RX_NOTES = 'DATA DEMO FARMA CORE - resep menunggu screening';
+    private const DEMO_RX_NOTES = 'DATA DEMO FARMA CORE - resep demo terverifikasi';
+
+    private const LEGACY_DEMO_RX_NOTES = 'DATA DEMO FARMA CORE - resep menunggu screening';
 
     public function run(): void
     {
@@ -223,7 +225,7 @@ class DemoDataSeeder extends Seeder
                 category: $medicineCategory,
                 unit: $tablet,
                 taxable: true,
-                dosageForm: 'kapsul',
+                dosageForm: 'tablet',
                 strengthVolume: '500 mg',
             ),
             'mask' => $this->createDemoItem(
@@ -240,16 +242,18 @@ class DemoDataSeeder extends Seeder
         ];
 
         foreach ([
-            [$items['paracetamol'], 'obat_bebas'],
-            [$items['amoxicillin'], 'resep'],
-            [$items['mask'], 'produk_lain'],
-        ] as [$item, $salesType]) {
-            app(PricingService::class)->saveMarginSetting([
-                'scope_type' => 'item',
-                'scope_id' => $item->id,
-                'sales_type' => $salesType,
-                'margin_percent' => '25.00',
-            ]);
+            [$items['paracetamol'], ['resep', 'obat_bebas']],
+            [$items['amoxicillin'], ['resep']],
+            [$items['mask'], ['produk_lain']],
+        ] as [$item, $salesTypes]) {
+            foreach ($salesTypes as $salesType) {
+                app(PricingService::class)->saveMarginSetting([
+                    'scope_type' => 'item',
+                    'scope_id' => $item->id,
+                    'sales_type' => $salesType,
+                    'margin_percent' => '25.00',
+                ]);
+            }
         }
 
         $healthService = HealthService::query()->firstOrCreate(
@@ -283,29 +287,32 @@ class DemoDataSeeder extends Seeder
         ?string $dosageForm,
         ?string $strengthVolume,
     ): Item {
-        $item = Item::query()->firstOrCreate(
-            ['code' => $code],
-            [
-                'item_type' => $itemType,
-                'name' => $name,
-                'dosage_form' => $dosageForm,
-                'strength_volume' => $strengthVolume,
-                'category_id' => $category->id,
-                'base_unit_id' => $unit->id,
-                'order_unit_id' => $unit->id,
-                'barcode' => $barcode,
-                'is_taxable' => $taxable,
-                'movement_class' => 'medium',
-                'min_stock_override' => '10.000',
-                'is_active' => true,
-                'created_by' => Auth::id(),
-            ],
-        );
+        $item = Item::query()->firstOrNew(['code' => $code]);
+        $isNewItem = ! $item->exists;
+        $item->forceFill([
+            'item_type' => $itemType,
+            'name' => $name,
+            'dosage_form' => $dosageForm,
+            'strength_volume' => $strengthVolume,
+            'category_id' => $category->id,
+            'base_unit_id' => $unit->id,
+            'order_unit_id' => $unit->id,
+            'barcode' => $barcode,
+            'is_taxable' => $taxable,
+            'movement_class' => 'medium',
+            'min_stock_override' => '10.000',
+            'is_active' => true,
+            'created_by' => $isNewItem ? Auth::id() : $item->created_by,
+            'updated_by' => Auth::id(),
+        ])->save();
 
-        ItemUnit::query()->firstOrCreate(
-            ['item_id' => $item->id, 'unit_id' => $unit->id],
-            ['factor_to_base' => '1.000', 'created_by' => Auth::id()],
-        );
+        $itemUnit = ItemUnit::query()->firstOrNew(['item_id' => $item->id, 'unit_id' => $unit->id]);
+        $isNewItemUnit = ! $itemUnit->exists;
+        $itemUnit->forceFill([
+            'factor_to_base' => '1.000',
+            'created_by' => $isNewItemUnit ? Auth::id() : $itemUnit->created_by,
+            'updated_by' => Auth::id(),
+        ])->save();
 
         return $item;
     }
@@ -430,13 +437,32 @@ class DemoDataSeeder extends Seeder
     /** @param array{patients: array{cash: Patient, credit: Patient}, doctor: Doctor, pharmacist_staff: PharmacyStaff, items: array{paracetamol: Item, amoxicillin: Item, mask: Item}} $demoData */
     private function seedPrescription(array $demoData): void
     {
-        if (Prescription::query()->where('notes', self::DEMO_RX_NOTES)->exists()) {
+        $item = $demoData['items']['amoxicillin'];
+        $prescription = Prescription::query()
+            ->whereIn('notes', [self::DEMO_RX_NOTES, self::LEGACY_DEMO_RX_NOTES])
+            ->first();
+
+        if ($prescription) {
+            if ($prescription->status === 'received') {
+                $prescriptionItem = $prescription->items()->where('item_id', $item->id)->first();
+                $dosageInstruction = '1 tablet, 3 kali sehari (contoh demo)';
+
+                if ($prescriptionItem && ($prescriptionItem->unit_id !== $item->base_unit_id || $prescriptionItem->dosage_instruction !== $dosageInstruction)) {
+                    $prescriptionItem->forceFill([
+                        'unit_id' => $item->base_unit_id,
+                        'dosage_instruction' => $dosageInstruction,
+                    ])->save();
+                }
+
+                $prescription->forceFill(['notes' => self::DEMO_RX_NOTES])->save();
+                $this->verifyDemoPrescription($prescription, $demoData);
+            }
+
             return;
         }
 
-        $item = $demoData['items']['amoxicillin'];
         Auth::login($demoData['pharmacist_staff']->user()->firstOrFail());
-        app(PrescriptionWorkflowService::class)->create([
+        $prescription = app(PrescriptionWorkflowService::class)->create([
             'patient_id' => $demoData['patients']['cash']->id,
             'doctor_id' => $demoData['doctor']->id,
             'rx_date' => today()->toDateString(),
@@ -446,8 +472,19 @@ class DemoDataSeeder extends Seeder
                 'item_id' => $item->id,
                 'unit_id' => $item->base_unit_id,
                 'qty_prescribed' => '10.000',
-                'dosage_instruction' => '1 kapsul, 3 kali sehari (contoh demo)',
+                'dosage_instruction' => '1 tablet, 3 kali sehari (contoh demo)',
             ]],
+        ]);
+        $this->verifyDemoPrescription($prescription, $demoData);
+    }
+
+    /** @param array{pharmacist_staff: PharmacyStaff} $demoData */
+    private function verifyDemoPrescription(Prescription $prescription, array $demoData): void
+    {
+        Auth::login($demoData['pharmacist_staff']->user()->firstOrFail());
+        app(PrescriptionWorkflowService::class)->transition($prescription, 'verified', [
+            'checklist' => array_fill_keys(PrescriptionWorkflowService::CHECKLIST_KEYS, true),
+            'notes' => 'Screening untuk data demo.',
         ]);
     }
 }
