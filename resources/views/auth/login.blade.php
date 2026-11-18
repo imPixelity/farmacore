@@ -9,12 +9,9 @@
     </head>
     <body class="grid min-h-screen place-items-center bg-slate-50 px-4 py-10 font-sans text-slate-900 antialiased">
         <main class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 shadow-xl shadow-slate-900/4 sm:p-9">
-            <a href="{{ route('login') }}" class="flex items-center gap-3">
-                <span class="grid size-11 place-items-center rounded-xl bg-emerald-700 text-lg font-bold text-white">F</span>
-                <span>
-                    <span class="block text-lg font-bold tracking-tight">FarmaCore</span>
-                    <span class="block text-xs text-slate-500">Sistem Informasi Apotek</span>
-                </span>
+            <a href="{{ route('login') }}" class="block">
+                <img src="{{ asset('images/logo-with-title.jpeg') }}" alt="FarmaCore" width="1536" height="1024" class="h-28 w-full rounded-lg object-cover">
+                <span class="mt-2 block text-xs text-slate-500">Sistem Informasi Apotek</span>
             </a>
 
             <div class="mt-8">

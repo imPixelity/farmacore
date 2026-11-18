@@ -25,7 +25,7 @@
                 aria-label="Navigasi utama"
             >
                 <a href="{{ route('home') }}" class="flex h-20 items-center gap-3 border-b border-slate-100 px-6">
-                    <span class="grid size-10 place-items-center rounded-xl bg-emerald-700 text-lg font-bold text-white">F</span>
+                    <img src="{{ asset('images/logo-only.jpeg') }}" alt="" width="1280" height="1280" class="size-10 rounded-xl object-cover">
                     <span>
                         <span class="block text-base font-bold tracking-tight text-slate-950">FarmaCore</span>
                         <span class="block text-xs text-slate-500">Sistem Informasi Apotek</span>
